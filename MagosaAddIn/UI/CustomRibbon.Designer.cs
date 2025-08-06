@@ -50,9 +50,9 @@
             this.group4 = this.Factory.CreateRibbonGroup();
             this.btnAlignAndDistributeHorizontal = this.Factory.CreateRibbonButton();
             this.btnAlignAndDistributeVertical = this.Factory.CreateRibbonButton();
+            this.btnArrangeInGrid = this.Factory.CreateRibbonButton();
             this.btnArrangeHorizontalWithMargin = this.Factory.CreateRibbonButton();
             this.btnArrangeVerticalWithMargin = this.Factory.CreateRibbonButton();
-            this.btnArrangeInGrid = this.Factory.CreateRibbonButton();
             this.btnArrangeInCircle = this.Factory.CreateRibbonButton();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
@@ -205,6 +205,15 @@
             this.btnAlignAndDistributeVertical.SuperTip = "基準図形の垂直中央に揃えて等間隔で配置します。2つの図形の場合は中央揃えのみ実行されます。";
             this.btnAlignAndDistributeVertical.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignAndDistributeVertical_Click);
             // 
+            // btnArrangeInGrid
+            // 
+            this.btnArrangeInGrid.Label = "グリッド配置";
+            this.btnArrangeInGrid.Name = "btnArrangeInGrid";
+            this.btnArrangeInGrid.OfficeImageId = "ViewGridlines";
+            this.btnArrangeInGrid.ShowImage = true;
+            this.btnArrangeInGrid.SuperTip = "選択した図形を指定した列数のグリッド状に配置します。水平・垂直間隔を個別に設定できます。";
+            this.btnArrangeInGrid.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnArrangeInGrid_Click);
+            // 
             // btnArrangeHorizontalWithMargin
             // 
             this.btnArrangeHorizontalWithMargin.Label = "水平マージン";
@@ -222,15 +231,6 @@
             this.btnArrangeVerticalWithMargin.ShowImage = true;
             this.btnArrangeVerticalWithMargin.SuperTip = "基準図形を中心に任意のマージンで垂直方向に配置します。元の位置関係を保持します。";
             this.btnArrangeVerticalWithMargin.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnArrangeVerticalWithMargin_Click);
-            // 
-            // btnArrangeInGrid
-            // 
-            this.btnArrangeInGrid.Label = "グリッド配置";
-            this.btnArrangeInGrid.Name = "btnArrangeInGrid";
-            this.btnArrangeInGrid.OfficeImageId = "ViewGridlines";
-            this.btnArrangeInGrid.ShowImage = true;
-            this.btnArrangeInGrid.SuperTip = "選択した図形を指定した列数のグリッド状に配置します。水平・垂直間隔を個別に設定できます。";
-            this.btnArrangeInGrid.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnArrangeInGrid_Click);
             // 
             // btnArrangeInCircle
             // 
