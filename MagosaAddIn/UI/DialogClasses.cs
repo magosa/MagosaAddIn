@@ -44,7 +44,7 @@ namespace MagosaAddIn.UI
             this.SuspendLayout();
 
             // フォームの基本設定
-            this.Text = "図形分割設定";
+            this.Text = "グリッド分割設定";
             this.Size = new Size(350, 280);
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -102,7 +102,7 @@ namespace MagosaAddIn.UI
                 Size = new Size(80, 20),
                 Minimum = 0,
                 Maximum = 100,
-                Value = 2,
+                Value = 10,
                 DecimalPlaces = 1,
                 Increment = 0.5m
             };
@@ -130,7 +130,7 @@ namespace MagosaAddIn.UI
                 Size = new Size(80, 20),
                 Minimum = 0,
                 Maximum = 100,
-                Value = 2,
+                Value = 10,
                 DecimalPlaces = 1,
                 Increment = 0.5m
             };

@@ -30,13 +30,13 @@ namespace MagosaAddIn.UI
                 }
                 else
                 {
-                    MessageBox.Show("四角形オブジェクトを1つ選択してください。", "図形分割",
+                    MessageBox.Show("四角形オブジェクトを1つ選択してください。", "グリッド分割",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"図形分割エラー: {ex.Message}", "エラー",
+                MessageBox.Show($"グリッド分割エラー: {ex.Message}", "エラー",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }

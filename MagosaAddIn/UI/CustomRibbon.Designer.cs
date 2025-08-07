@@ -74,14 +74,14 @@
             // group1
             // 
             this.group1.Items.Add(this.btnDivideShape);
-            this.group1.Label = "図形分割";
+            this.group1.Label = "図形操作";
             this.group1.Name = "group1";
             // 
             // btnDivideShape
             // 
-            this.btnDivideShape.Label = "図形分割";
+            this.btnDivideShape.Label = "グリッド分割";
             this.btnDivideShape.Name = "btnDivideShape";
-            this.btnDivideShape.OfficeImageId = "TableInsertGallery";
+            this.btnDivideShape.OfficeImageId = "AppointmentColorDialog";
             this.btnDivideShape.ShowImage = true;
             this.btnDivideShape.SuperTip = "選択した四角形を指定した行・列数で分割します。水平・垂直マージンを個別に設定できます。";
             this.btnDivideShape.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnDivideShape_Click);
@@ -99,7 +99,7 @@
             // 
             this.btnAlignToLeft.Label = "左端揃え";
             this.btnAlignToLeft.Name = "btnAlignToLeft";
-            this.btnAlignToLeft.OfficeImageId = "ObjectAlignLeft";
+            this.btnAlignToLeft.OfficeImageId = "ObjectsAlignLeftSmart";
             this.btnAlignToLeft.ShowImage = true;
             this.btnAlignToLeft.SuperTip = "基準図形の左端に、その他の図形の左端を揃えます。";
             this.btnAlignToLeft.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignToLeft_Click);
@@ -108,7 +108,7 @@
             // 
             this.btnAlignToRight.Label = "右端揃え";
             this.btnAlignToRight.Name = "btnAlignToRight";
-            this.btnAlignToRight.OfficeImageId = "ObjectAlignRight";
+            this.btnAlignToRight.OfficeImageId = "ObjectsAlignRightSmart";
             this.btnAlignToRight.ShowImage = true;
             this.btnAlignToRight.SuperTip = "基準図形の右端に、その他の図形の右端を揃えます。";
             this.btnAlignToRight.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignToRight_Click);
@@ -117,7 +117,7 @@
             // 
             this.btnAlignToTop.Label = "上端揃え";
             this.btnAlignToTop.Name = "btnAlignToTop";
-            this.btnAlignToTop.OfficeImageId = "ObjectAlignTop";
+            this.btnAlignToTop.OfficeImageId = "ObjectsAlignTopSmart";
             this.btnAlignToTop.ShowImage = true;
             this.btnAlignToTop.SuperTip = "基準図形の上端に、その他の図形の上端を揃えます。";
             this.btnAlignToTop.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignToTop_Click);
@@ -126,7 +126,7 @@
             // 
             this.btnAlignToBottom.Label = "下端揃え";
             this.btnAlignToBottom.Name = "btnAlignToBottom";
-            this.btnAlignToBottom.OfficeImageId = "ObjectAlignBottom";
+            this.btnAlignToBottom.OfficeImageId = "ObjectsAlignBottomSmart";
             this.btnAlignToBottom.ShowImage = true;
             this.btnAlignToBottom.SuperTip = "基準図形の下端に、その他の図形の下端を揃えます。";
             this.btnAlignToBottom.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignToBottom_Click);
@@ -144,7 +144,7 @@
             // 
             this.btnAlignLeftToRight.Label = "左端に右端を隣接";
             this.btnAlignLeftToRight.Name = "btnAlignLeftToRight";
-            this.btnAlignLeftToRight.OfficeImageId = "AlignLeft";
+            this.btnAlignLeftToRight.OfficeImageId = "SnapToAlignmentBox";
             this.btnAlignLeftToRight.ShowImage = true;
             this.btnAlignLeftToRight.SuperTip = "基準図形の左端に、その他の図形の右端を隣接させます。";
             this.btnAlignLeftToRight.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignLeftToRight_Click);
@@ -153,7 +153,7 @@
             // 
             this.btnAlignRightToLeft.Label = "右端に左端を隣接";
             this.btnAlignRightToLeft.Name = "btnAlignRightToLeft";
-            this.btnAlignRightToLeft.OfficeImageId = "AlignRight";
+            this.btnAlignRightToLeft.OfficeImageId = "SnapToAlignmentBox";
             this.btnAlignRightToLeft.ShowImage = true;
             this.btnAlignRightToLeft.SuperTip = "基準図形の右端に、その他の図形の左端を隣接させます。";
             this.btnAlignRightToLeft.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignRightToLeft_Click);
@@ -162,7 +162,7 @@
             // 
             this.btnAlignTopToBottom.Label = "上端に下端を隣接";
             this.btnAlignTopToBottom.Name = "btnAlignTopToBottom";
-            this.btnAlignTopToBottom.OfficeImageId = "AlignTop";
+            this.btnAlignTopToBottom.OfficeImageId = "SnapToAlignmentBox";
             this.btnAlignTopToBottom.ShowImage = true;
             this.btnAlignTopToBottom.SuperTip = "基準図形の上端に、その他の図形の下端を隣接させます。";
             this.btnAlignTopToBottom.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignTopToBottom_Click);
@@ -171,7 +171,7 @@
             // 
             this.btnAlignBottomToTop.Label = "下端に上端を隣接";
             this.btnAlignBottomToTop.Name = "btnAlignBottomToTop";
-            this.btnAlignBottomToTop.OfficeImageId = "AlignBottom";
+            this.btnAlignBottomToTop.OfficeImageId = "SnapToAlignmentBox";
             this.btnAlignBottomToTop.ShowImage = true;
             this.btnAlignBottomToTop.SuperTip = "基準図形の下端に、その他の図形の上端を隣接させます。";
             this.btnAlignBottomToTop.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignBottomToTop_Click);
@@ -191,7 +191,7 @@
             // 
             this.btnAlignAndDistributeHorizontal.Label = "水平中央・等間隔";
             this.btnAlignAndDistributeHorizontal.Name = "btnAlignAndDistributeHorizontal";
-            this.btnAlignAndDistributeHorizontal.OfficeImageId = "ObjectAlignCenterHorizontal";
+            this.btnAlignAndDistributeHorizontal.OfficeImageId = "AlignDistributeHorizontally";
             this.btnAlignAndDistributeHorizontal.ShowImage = true;
             this.btnAlignAndDistributeHorizontal.SuperTip = "基準図形の水平中央に揃えて等間隔で配置します。2つの図形の場合は中央揃えのみ実行されます。";
             this.btnAlignAndDistributeHorizontal.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignAndDistributeHorizontal_Click);
@@ -200,7 +200,7 @@
             // 
             this.btnAlignAndDistributeVertical.Label = "垂直中央・等間隔";
             this.btnAlignAndDistributeVertical.Name = "btnAlignAndDistributeVertical";
-            this.btnAlignAndDistributeVertical.OfficeImageId = "ObjectAlignCenterVertical";
+            this.btnAlignAndDistributeVertical.OfficeImageId = "AlignDistributeHorizontally";
             this.btnAlignAndDistributeVertical.ShowImage = true;
             this.btnAlignAndDistributeVertical.SuperTip = "基準図形の垂直中央に揃えて等間隔で配置します。2つの図形の場合は中央揃えのみ実行されます。";
             this.btnAlignAndDistributeVertical.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignAndDistributeVertical_Click);
@@ -209,7 +209,7 @@
             // 
             this.btnArrangeInGrid.Label = "グリッド配置";
             this.btnArrangeInGrid.Name = "btnArrangeInGrid";
-            this.btnArrangeInGrid.OfficeImageId = "ViewGridlines";
+            this.btnArrangeInGrid.OfficeImageId = "SmartAlign";
             this.btnArrangeInGrid.ShowImage = true;
             this.btnArrangeInGrid.SuperTip = "選択した図形を指定した列数のグリッド状に配置します。水平・垂直間隔を個別に設定できます。";
             this.btnArrangeInGrid.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnArrangeInGrid_Click);
@@ -218,7 +218,7 @@
             // 
             this.btnArrangeHorizontalWithMargin.Label = "水平マージン";
             this.btnArrangeHorizontalWithMargin.Name = "btnArrangeHorizontalWithMargin";
-            this.btnArrangeHorizontalWithMargin.OfficeImageId = "ObjectsDistributeHorizontally";
+            this.btnArrangeHorizontalWithMargin.OfficeImageId = "ObjectsAlignDistributeHorizontallyRemove";
             this.btnArrangeHorizontalWithMargin.ShowImage = true;
             this.btnArrangeHorizontalWithMargin.SuperTip = "基準図形を中心に任意のマージンで水平方向に配置します。元の位置関係を保持します。";
             this.btnArrangeHorizontalWithMargin.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnArrangeHorizontalWithMargin_Click);
@@ -227,7 +227,7 @@
             // 
             this.btnArrangeVerticalWithMargin.Label = "垂直マージン";
             this.btnArrangeVerticalWithMargin.Name = "btnArrangeVerticalWithMargin";
-            this.btnArrangeVerticalWithMargin.OfficeImageId = "ObjectsDistributeVertically";
+            this.btnArrangeVerticalWithMargin.OfficeImageId = "ObjectsAlignDistributeVerticallyRemove";
             this.btnArrangeVerticalWithMargin.ShowImage = true;
             this.btnArrangeVerticalWithMargin.SuperTip = "基準図形を中心に任意のマージンで垂直方向に配置します。元の位置関係を保持します。";
             this.btnArrangeVerticalWithMargin.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnArrangeVerticalWithMargin_Click);
@@ -236,7 +236,7 @@
             // 
             this.btnArrangeInCircle.Label = "円形配置";
             this.btnArrangeInCircle.Name = "btnArrangeInCircle";
-            this.btnArrangeInCircle.OfficeImageId = "ShapeOval";
+            this.btnArrangeInCircle.OfficeImageId = "DiagramRadialInsertClassic";
             this.btnArrangeInCircle.ShowImage = true;
             this.btnArrangeInCircle.SuperTip = "選択した図形を指定した中心と半径で円形に配置します。選択図形の中心を自動取得することも可能です。";
             this.btnArrangeInCircle.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnArrangeInCircle_Click);
