@@ -23,21 +23,115 @@ namespace MagosaAddIn.UI
         {
             try
             {
-                var selectedShape = RibbonHelper.GetSingleSelectedShape();
-                if (selectedShape != null)
+                var selectedShapes = GetSelectedShapesForDivision();
+                if (selectedShapes != null)
                 {
-                    ShowDivisionDialog(selectedShape);
+                    if (selectedShapes.Count == 1)
+                    {
+                        // 単一図形の場合（既存機能）
+                        ShowDivisionDialog(selectedShapes[0]);
+                    }
+                    else
+                    {
+                        // 複数図形の場合（新機能）
+                        ShowGridDivisionDialog(selectedShapes);
+                    }
                 }
                 else
                 {
-                    MessageBox.Show("四角形オブジェクトを1つ選択してください。", "グリッド分割",
+                    MessageBox.Show("四角形オブジェクトを1つ以上選択してください。", "図形分割",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"グリッド分割エラー: {ex.Message}", "エラー",
+                MessageBox.Show($"図形分割エラー: {ex.Message}", "エラー",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private List<PowerPoint.Shape> GetSelectedShapesForDivision()
+        {
+            try
+            {
+                var app = Globals.ThisAddIn.Application;
+                if (app?.ActiveWindow?.Selection == null)
+                    return null;
+
+                var selection = app.ActiveWindow.Selection;
+
+                if (selection.Type == PowerPoint.PpSelectionType.ppSelectionShapes &&
+                    selection.ShapeRange.Count >= 1)
+                {
+                    var shapes = new List<PowerPoint.Shape>();
+                    var nonRectangleShapes = new List<string>();
+
+                    for (int i = 1; i <= selection.ShapeRange.Count; i++)
+                    {
+                        var shape = selection.ShapeRange[i];
+
+                        // 四角形かどうかをチェック
+                        if (shape.AutoShapeType == Microsoft.Office.Core.MsoAutoShapeType.msoShapeRectangle ||
+                            shape.AutoShapeType == Microsoft.Office.Core.MsoAutoShapeType.msoShapeRoundedRectangle)
+                        {
+                            shapes.Add(shape);
+                        }
+                        else
+                        {
+                            nonRectangleShapes.Add($"図形{i}: {GetShapeTypeName(shape)}");
+                        }
+                    }
+
+                    // 四角形以外の図形が含まれている場合の警告
+                    if (nonRectangleShapes.Count > 0)
+                    {
+                        var message = "選択中に四角形以外の図形が含まれています：\n\n" +
+                                     string.Join("\n", nonRectangleShapes) +
+                                     "\n\n四角形のみを対象として処理を続行しますか？";
+
+                        var result = MessageBox.Show(message, "図形分割 - 確認",
+                            MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                        if (result == DialogResult.No)
+                        {
+                            return null;
+                        }
+                    }
+
+                    return shapes.Count > 0 ? shapes : null;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"図形の取得中にエラーが発生しました: {ex.Message}");
+            }
+
+            return null;
+        }
+
+        private string GetShapeTypeName(PowerPoint.Shape shape)
+        {
+            try
+            {
+                switch (shape.Type)
+                {
+                    case Microsoft.Office.Core.MsoShapeType.msoAutoShape:
+                        return $"オートシェイプ({shape.AutoShapeType})";
+                    case Microsoft.Office.Core.MsoShapeType.msoTextBox:
+                        return "テキストボックス";
+                    case Microsoft.Office.Core.MsoShapeType.msoPicture:
+                        return "画像";
+                    case Microsoft.Office.Core.MsoShapeType.msoLine:
+                        return "線";
+                    case Microsoft.Office.Core.MsoShapeType.msoFreeform:
+                        return "フリーフォーム";
+                    default:
+                        return shape.Type.ToString();
+                }
+            }
+            catch
+            {
+                return "不明な図形";
             }
         }
 
@@ -50,6 +144,21 @@ namespace MagosaAddIn.UI
                     var divider = new ShapeDivider();
                     divider.DivideShape(shape, dialog.Rows, dialog.Columns,
                         dialog.HorizontalMargin, dialog.VerticalMargin);
+                }
+            }
+        }
+
+        private void ShowGridDivisionDialog(List<PowerPoint.Shape> shapes)
+        {
+            using (var dialog = new MagosaAddIn.UI.GridDivisionDialog(shapes))
+            {
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    var divider = new ShapeDivider();
+
+                    // 修正: deleteOriginalShapesパラメータを追加
+                    divider.DivideShapeGroup(shapes, dialog.Rows, dialog.Columns,
+                        dialog.HorizontalMargin, dialog.VerticalMargin, dialog.DeleteOriginalShapes);
                 }
             }
         }

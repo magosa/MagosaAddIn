@@ -35,8 +35,8 @@ namespace MagosaAddIn.UI
         {
             Rows = 2;
             Columns = 2;
-            HorizontalMargin = 2.0f;
-            VerticalMargin = 2.0f;
+            HorizontalMargin = 10.0f;
+            VerticalMargin = 10.0f;
         }
 
         private void InitializeComponent()
@@ -252,6 +252,331 @@ namespace MagosaAddIn.UI
             base.Dispose(disposing);
         }
     }
+
+
+    /// <summary>
+    /// 複数図形のグリッド分割設定用ダイアログ
+    /// </summary>
+    public partial class GridDivisionDialog : Form
+    {
+        public int Rows { get; private set; }
+        public int Columns { get; private set; }
+        public float HorizontalMargin { get; private set; }
+        public float VerticalMargin { get; private set; }
+        public bool DeleteOriginalShapes { get; private set; }
+
+        private List<PowerPoint.Shape> targetShapes;
+        private NumericUpDown numRows;
+        private NumericUpDown numColumns;
+        private NumericUpDown numHorizontalMargin;
+        private NumericUpDown numVerticalMargin;
+        private CheckBox chkLinkMargins;
+        private CheckBox chkDeleteOriginal;
+        private Button btnOK;
+        private Button btnCancel;
+        private Label lblInfo;
+
+        public GridDivisionDialog(List<PowerPoint.Shape> shapes)
+        {
+            targetShapes = shapes;
+            InitializeComponent();
+            SetDefaultValues();
+            UpdateInfoLabel();
+        }
+
+        private void SetDefaultValues()
+        {
+            Rows = 2;
+            Columns = 2;
+            HorizontalMargin = 10.0f;
+            VerticalMargin = 10.0f;
+            DeleteOriginalShapes = true;
+        }
+
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+
+            // フォームの基本設定
+            this.Text = "グリッド分割設定（複数図形）";
+            this.Size = new Size(400, 350);
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
+
+            // 情報表示ラベル
+            lblInfo = new Label
+            {
+                Location = new Point(20, 20),
+                Size = new Size(350, 40),
+                Text = "",
+                ForeColor = Color.DarkBlue,
+                Font = new Font(SystemFonts.DefaultFont, FontStyle.Bold)
+            };
+
+            // 行数設定
+            var lblRows = new Label
+            {
+                Text = "行数:",
+                Location = new Point(20, 70),
+                Size = new Size(80, 20),
+                TextAlign = ContentAlignment.MiddleLeft
+            };
+
+            numRows = new NumericUpDown
+            {
+                Location = new Point(120, 68),
+                Size = new Size(80, 20),
+                Minimum = 1,
+                Maximum = 50,
+                Value = 2
+            };
+
+            // 列数設定
+            var lblColumns = new Label
+            {
+                Text = "列数:",
+                Location = new Point(20, 100),
+                Size = new Size(80, 20),
+                TextAlign = ContentAlignment.MiddleLeft
+            };
+
+            numColumns = new NumericUpDown
+            {
+                Location = new Point(120, 98),
+                Size = new Size(80, 20),
+                Minimum = 1,
+                Maximum = 50,
+                Value = 2
+            };
+
+            // 水平マージン設定
+            var lblHorizontalMargin = new Label
+            {
+                Text = "水平マージン:",
+                Location = new Point(20, 130),
+                Size = new Size(90, 20),
+                TextAlign = ContentAlignment.MiddleLeft
+            };
+
+            numHorizontalMargin = new NumericUpDown
+            {
+                Location = new Point(120, 128),
+                Size = new Size(80, 20),
+                Minimum = 0,
+                Maximum = 100,
+                Value = 10,
+                DecimalPlaces = 1,
+                Increment = 0.5m
+            };
+
+            var lblHorizontalUnit = new Label
+            {
+                Text = "pt",
+                Location = new Point(210, 130),
+                Size = new Size(20, 20),
+                TextAlign = ContentAlignment.MiddleLeft
+            };
+
+            // 垂直マージン設定
+            var lblVerticalMargin = new Label
+            {
+                Text = "垂直マージン:",
+                Location = new Point(20, 160),
+                Size = new Size(90, 20),
+                TextAlign = ContentAlignment.MiddleLeft
+            };
+
+            numVerticalMargin = new NumericUpDown
+            {
+                Location = new Point(120, 158),
+                Size = new Size(80, 20),
+                Minimum = 0,
+                Maximum = 100,
+                Value = 10,
+                DecimalPlaces = 1,
+                Increment = 0.5m
+            };
+
+            var lblVerticalUnit = new Label
+            {
+                Text = "pt",
+                Location = new Point(210, 160),
+                Size = new Size(20, 20),
+                TextAlign = ContentAlignment.MiddleLeft
+            };
+
+            //// マージン連動チェックボックス
+            //chkLinkMargins = new CheckBox
+            //{
+            //    Text = "水平・垂直マージンを連動",
+            //    Location = new Point(20, 190),
+            //    Size = new Size(200, 20),
+            //    Checked = true
+            //};
+            //chkLinkMargins.CheckedChanged += ChkLinkMargins_CheckedChanged;
+
+            // 元図形削除チェックボックス
+            chkDeleteOriginal = new CheckBox
+            {
+                Text = "元の図形を削除する",
+                Location = new Point(20, 210),
+                Size = new Size(200, 20),
+                Checked = true,
+                ForeColor = Color.DarkRed,
+                Font = new Font(SystemFonts.DefaultFont, FontStyle.Bold)
+            };
+
+            // プレビューラベル
+            var lblPreview = new Label
+            {
+                Text = "プレビュー: 3×3 グリッド",
+                Location = new Point(20, 240),
+                Size = new Size(200, 20),
+                ForeColor = Color.Gray
+            };
+
+            // 値変更時のプレビュー更新
+            numRows.ValueChanged += (s, e) => UpdatePreview(lblPreview);
+            numColumns.ValueChanged += (s, e) => UpdatePreview(lblPreview);
+
+            // ボタン
+            btnOK = new Button
+            {
+                Text = "OK",
+                Location = new Point(170, 270),
+                Size = new Size(75, 25),
+                DialogResult = DialogResult.OK
+            };
+            btnOK.Click += BtnOK_Click;
+
+            btnCancel = new Button
+            {
+                Text = "キャンセル",
+                Location = new Point(260, 270),
+                Size = new Size(75, 25),
+                DialogResult = DialogResult.Cancel
+            };
+
+            // コントロールをフォームに追加
+            this.Controls.AddRange(new Control[] {
+            lblInfo,
+            lblRows, numRows,
+            lblColumns, numColumns,
+            lblHorizontalMargin, numHorizontalMargin, lblHorizontalUnit,
+            lblVerticalMargin, numVerticalMargin, lblVerticalUnit,
+            chkLinkMargins,
+            chkDeleteOriginal,
+            lblPreview,
+            btnOK, btnCancel
+        });
+
+            this.AcceptButton = btnOK;
+            this.CancelButton = btnCancel;
+
+            this.ResumeLayout(false);
+        }
+
+        private void UpdateInfoLabel()
+        {
+            if (targetShapes != null && targetShapes.Count > 0)
+            {
+                var bounds = GetShapeGroupBounds(targetShapes);
+                lblInfo.Text = $"選択図形: {targetShapes.Count}個\n" +
+                              $"範囲: 幅{bounds.Width:F1}pt × 高さ{bounds.Height:F1}pt";
+            }
+        }
+
+        private ShapeGroupBounds GetShapeGroupBounds(List<PowerPoint.Shape> shapes)
+        {
+            if (shapes == null || shapes.Count == 0)
+                return new ShapeGroupBounds();
+
+            float minLeft = shapes.Min(s => s.Left);
+            float minTop = shapes.Min(s => s.Top);
+            float maxRight = shapes.Max(s => s.Left + s.Width);
+            float maxBottom = shapes.Max(s => s.Top + s.Height);
+
+            return new ShapeGroupBounds
+            {
+                Left = minLeft,
+                Top = minTop,
+                Right = maxRight,
+                Bottom = maxBottom,
+                Width = maxRight - minLeft,
+                Height = maxBottom - minTop
+            };
+        }
+
+        private void ChkLinkMargins_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkLinkMargins.Checked)
+            {
+                numVerticalMargin.Value = numHorizontalMargin.Value;
+                numVerticalMargin.Enabled = false;
+                numHorizontalMargin.ValueChanged += SyncMargins;
+            }
+            else
+            {
+                numVerticalMargin.Enabled = true;
+                numHorizontalMargin.ValueChanged -= SyncMargins;
+            }
+        }
+
+        private void SyncMargins(object sender, EventArgs e)
+        {
+            if (chkLinkMargins.Checked)
+            {
+                numVerticalMargin.Value = numHorizontalMargin.Value;
+            }
+        }
+
+        private void UpdatePreview(Label lblPreview)
+        {
+            lblPreview.Text = $"プレビュー: {numRows.Value}×{numColumns.Value} グリッド";
+        }
+
+        private void BtnOK_Click(object sender, EventArgs e)
+        {
+            Rows = (int)numRows.Value;
+            Columns = (int)numColumns.Value;
+            HorizontalMargin = (float)numHorizontalMargin.Value;
+            VerticalMargin = (float)numVerticalMargin.Value;
+            DeleteOriginalShapes = chkDeleteOriginal.Checked;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                numRows?.Dispose();
+                numColumns?.Dispose();
+                numHorizontalMargin?.Dispose();
+                numVerticalMargin?.Dispose();
+                chkLinkMargins?.Dispose();
+                chkDeleteOriginal?.Dispose();
+                btnOK?.Dispose();
+                btnCancel?.Dispose();
+                lblInfo?.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+    }
+
+    /// <summary>
+    /// 図形グループの境界情報
+    /// </summary>
+    public class ShapeGroupBounds
+    {
+        public float Left { get; set; }
+        public float Top { get; set; }
+        public float Right { get; set; }
+        public float Bottom { get; set; }
+        public float Width { get; set; }
+        public float Height { get; set; }
+    }
+
 
     /// <summary>
     /// マージン設定用ダイアログ
