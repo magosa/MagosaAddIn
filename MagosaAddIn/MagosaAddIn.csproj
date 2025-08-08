@@ -205,6 +205,9 @@
     can be found.
   -->
   <ItemGroup>
+    <Compile Include="Core\ComExceptionHandler.cs" />
+    <Compile Include="Core\Constants.cs" />
+    <Compile Include="Core\DataModels.cs" />
     <Compile Include="Core\ShapeAligner.cs" />
     <Compile Include="Core\ShapeDivider.cs" />
     <Compile Include="Core\ShapeStyle.cs" />

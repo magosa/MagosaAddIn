@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
+using MagosaAddIn.Core;
 
 namespace MagosaAddIn.UI
 {
@@ -33,10 +34,10 @@ namespace MagosaAddIn.UI
 
         private void SetDefaultValues()
         {
-            Rows = 2;
-            Columns = 2;
-            HorizontalMargin = 10.0f;
-            VerticalMargin = 10.0f;
+            Rows = Constants.DEFAULT_ROWS;
+            Columns = Constants.DEFAULT_COLUMNS;
+            HorizontalMargin = Constants.DEFAULT_HORIZONTAL_MARGIN;
+            VerticalMargin = Constants.DEFAULT_VERTICAL_MARGIN;
         }
 
         private void InitializeComponent()
@@ -64,9 +65,9 @@ namespace MagosaAddIn.UI
             {
                 Location = new Point(120, 18),
                 Size = new Size(80, 20),
-                Minimum = 1,
-                Maximum = 50,
-                Value = 2
+                Minimum = Constants.MIN_ROWS,
+                Maximum = Constants.MAX_ROWS,
+                Value = Constants.DEFAULT_ROWS
             };
 
             // 列数設定
@@ -82,9 +83,9 @@ namespace MagosaAddIn.UI
             {
                 Location = new Point(120, 48),
                 Size = new Size(80, 20),
-                Minimum = 1,
-                Maximum = 50,
-                Value = 2
+                Minimum = Constants.MIN_COLUMNS,
+                Maximum = Constants.MAX_COLUMNS,
+                Value = Constants.DEFAULT_COLUMNS
             };
 
             // 水平マージン設定
@@ -100,11 +101,11 @@ namespace MagosaAddIn.UI
             {
                 Location = new Point(120, 78),
                 Size = new Size(80, 20),
-                Minimum = 0,
-                Maximum = 100,
-                Value = 10,
-                DecimalPlaces = 1,
-                Increment = 0.5m
+                Minimum = (decimal)Constants.MIN_MARGIN,
+                Maximum = (decimal)Constants.MAX_MARGIN,
+                Value = (decimal)Constants.DEFAULT_HORIZONTAL_MARGIN,
+                DecimalPlaces = Constants.DECIMAL_PLACES,
+                Increment = Constants.INCREMENT_VALUE
             };
 
             var lblHorizontalUnit = new Label
@@ -128,11 +129,11 @@ namespace MagosaAddIn.UI
             {
                 Location = new Point(120, 108),
                 Size = new Size(80, 20),
-                Minimum = 0,
-                Maximum = 100,
-                Value = 10,
-                DecimalPlaces = 1,
-                Increment = 0.5m
+                Minimum = (decimal)Constants.MIN_MARGIN,
+                Maximum = (decimal)Constants.MAX_MARGIN,
+                Value = (decimal)Constants.DEFAULT_VERTICAL_MARGIN,
+                DecimalPlaces = Constants.DECIMAL_PLACES,
+                Increment = Constants.INCREMENT_VALUE
             };
 
             var lblVerticalUnit = new Label
@@ -286,10 +287,10 @@ namespace MagosaAddIn.UI
 
         private void SetDefaultValues()
         {
-            Rows = 2;
-            Columns = 2;
-            HorizontalMargin = 10.0f;
-            VerticalMargin = 10.0f;
+            Rows = Constants.DEFAULT_ROWS;
+            Columns = Constants.DEFAULT_COLUMNS;
+            HorizontalMargin = Constants.DEFAULT_HORIZONTAL_MARGIN;
+            VerticalMargin = Constants.DEFAULT_VERTICAL_MARGIN;
             DeleteOriginalShapes = true;
         }
 
@@ -328,9 +329,9 @@ namespace MagosaAddIn.UI
             {
                 Location = new Point(120, 68),
                 Size = new Size(80, 20),
-                Minimum = 1,
-                Maximum = 50,
-                Value = 2
+                Minimum = Constants.MIN_ROWS,
+                Maximum = Constants.MAX_ROWS,
+                Value = Constants.DEFAULT_ROWS
             };
 
             // 列数設定
@@ -346,9 +347,9 @@ namespace MagosaAddIn.UI
             {
                 Location = new Point(120, 98),
                 Size = new Size(80, 20),
-                Minimum = 1,
-                Maximum = 50,
-                Value = 2
+                Minimum = Constants.MIN_COLUMNS,
+                Maximum = Constants.MAX_COLUMNS,
+                Value = Constants.DEFAULT_COLUMNS
             };
 
             // 水平マージン設定
@@ -364,11 +365,11 @@ namespace MagosaAddIn.UI
             {
                 Location = new Point(120, 128),
                 Size = new Size(80, 20),
-                Minimum = 0,
-                Maximum = 100,
-                Value = 10,
-                DecimalPlaces = 1,
-                Increment = 0.5m
+                Minimum = (decimal)Constants.MIN_MARGIN,
+                Maximum = (decimal)Constants.MAX_MARGIN,
+                Value = (decimal)Constants.DEFAULT_HORIZONTAL_MARGIN,
+                DecimalPlaces = Constants.DECIMAL_PLACES,
+                Increment = Constants.INCREMENT_VALUE
             };
 
             var lblHorizontalUnit = new Label
@@ -392,11 +393,11 @@ namespace MagosaAddIn.UI
             {
                 Location = new Point(120, 158),
                 Size = new Size(80, 20),
-                Minimum = 0,
-                Maximum = 100,
-                Value = 10,
-                DecimalPlaces = 1,
-                Increment = 0.5m
+                Minimum = (decimal)Constants.MIN_MARGIN,
+                Maximum = (decimal)Constants.MAX_MARGIN,
+                Value = (decimal)Constants.DEFAULT_VERTICAL_MARGIN,
+                DecimalPlaces = Constants.DECIMAL_PLACES,
+                Increment = Constants.INCREMENT_VALUE
             };
 
             var lblVerticalUnit = new Label
@@ -564,18 +565,6 @@ namespace MagosaAddIn.UI
         }
     }
 
-    /// <summary>
-    /// 図形グループの境界情報
-    /// </summary>
-    public class ShapeGroupBounds
-    {
-        public float Left { get; set; }
-        public float Top { get; set; }
-        public float Right { get; set; }
-        public float Bottom { get; set; }
-        public float Width { get; set; }
-        public float Height { get; set; }
-    }
 
 
     /// <summary>
@@ -597,7 +586,7 @@ namespace MagosaAddIn.UI
 
         private void SetDefaultValues()
         {
-            Margin = 10.0f;
+            Margin = Constants.DEFAULT_HORIZONTAL_MARGIN;
         }
 
         private void InitializeComponent(string title)
@@ -623,11 +612,11 @@ namespace MagosaAddIn.UI
             {
                 Location = new Point(90, 18),
                 Size = new Size(80, 20),
-                Minimum = 0,
-                Maximum = 200,
-                Value = 10,
-                DecimalPlaces = 1,
-                Increment = 0.5m
+                Minimum = (decimal)Constants.MIN_MARGIN,
+                Maximum = (decimal)Constants.MAX_MARGIN,
+                Value = (decimal)Constants.DEFAULT_HORIZONTAL_MARGIN,
+                DecimalPlaces = Constants.DECIMAL_PLACES,
+                Increment = Constants.INCREMENT_VALUE
             };
 
             var lblUnit = new Label
@@ -695,9 +684,9 @@ namespace MagosaAddIn.UI
 
         private void SetDefaultValues()
         {
-            Columns = 3;
-            HorizontalSpacing = 10.0f;
-            VerticalSpacing = 10.0f;
+            Columns = Constants.DEFAULT_GRID_COLUMNS;
+            HorizontalSpacing = Constants.DEFAULT_HORIZONTAL_MARGIN;
+            VerticalSpacing = Constants.DEFAULT_VERTICAL_MARGIN;
         }
 
         private void InitializeComponent(int shapeCount)
@@ -723,9 +712,9 @@ namespace MagosaAddIn.UI
             {
                 Location = new Point(120, 18),
                 Size = new Size(80, 20),
-                Minimum = 1,
+                Minimum = Constants.MIN_COLUMNS,
                 Maximum = shapeCount,
-                Value = Math.Min(3, shapeCount)
+                Value = Math.Min(Constants.DEFAULT_GRID_COLUMNS, shapeCount)
             };
 
             // 水平間隔設定
@@ -740,10 +729,10 @@ namespace MagosaAddIn.UI
             {
                 Location = new Point(120, 48),
                 Size = new Size(80, 20),
-                Minimum = 0,
-                Maximum = 200,
-                Value = 10,
-                DecimalPlaces = 1
+                Minimum = (decimal)Constants.MIN_MARGIN,
+                Maximum = (decimal)Constants.MAX_SPACING,
+                Value = (decimal)Constants.DEFAULT_HORIZONTAL_MARGIN,
+                DecimalPlaces = Constants.DECIMAL_PLACES
             };
 
             // 垂直間隔設定
@@ -758,10 +747,10 @@ namespace MagosaAddIn.UI
             {
                 Location = new Point(120, 78),
                 Size = new Size(80, 20),
-                Minimum = 0,
-                Maximum = 200,
-                Value = 10,
-                DecimalPlaces = 1
+                Minimum = (decimal)Constants.MIN_MARGIN,
+                Maximum = (decimal)Constants.MAX_SPACING,
+                Value = (decimal)Constants.DEFAULT_VERTICAL_MARGIN,
+                DecimalPlaces = Constants.DECIMAL_PLACES
             };
 
             // ボタン
@@ -827,9 +816,9 @@ namespace MagosaAddIn.UI
 
         private void SetDefaultValues()
         {
-            CenterX = 400.0f;
-            CenterY = 300.0f;
-            Radius = 100.0f;
+            CenterX = Constants.DEFAULT_CENTER_X;
+            CenterY = Constants.DEFAULT_CENTER_Y;
+            Radius = Constants.DEFAULT_RADIUS;
         }
 
         private void InitializeComponent()
@@ -855,10 +844,10 @@ namespace MagosaAddIn.UI
             {
                 Location = new Point(120, 18),
                 Size = new Size(80, 20),
-                Minimum = -1000,
-                Maximum = 2000,
-                Value = 400,
-                DecimalPlaces = 1
+                Minimum = (decimal)Constants.MIN_CENTER_COORDINATE,
+                Maximum = (decimal)Constants.MAX_CENTER_COORDINATE,
+                Value = (decimal)Constants.DEFAULT_CENTER_X,
+                DecimalPlaces = Constants.DECIMAL_PLACES
             };
 
             // 中心Y座標設定
@@ -873,10 +862,10 @@ namespace MagosaAddIn.UI
             {
                 Location = new Point(120, 48),
                 Size = new Size(80, 20),
-                Minimum = -1000,
-                Maximum = 2000,
-                Value = 300,
-                DecimalPlaces = 1
+                Minimum = (decimal)Constants.MIN_CENTER_COORDINATE,
+                Maximum = (decimal)Constants.MAX_CENTER_COORDINATE,
+                Value = (decimal)Constants.DEFAULT_CENTER_Y,
+                DecimalPlaces = Constants.DECIMAL_PLACES
             };
 
             // 半径設定
@@ -891,10 +880,10 @@ namespace MagosaAddIn.UI
             {
                 Location = new Point(120, 78),
                 Size = new Size(80, 20),
-                Minimum = 10,
-                Maximum = 500,
-                Value = 100,
-                DecimalPlaces = 1
+                Minimum = (decimal)Constants.MIN_RADIUS,
+                Maximum = (decimal)Constants.MAX_RADIUS,
+                Value = (decimal)Constants.DEFAULT_RADIUS,
+                DecimalPlaces = Constants.DECIMAL_PLACES
             };
 
             // 現在の中心を使用ボタン

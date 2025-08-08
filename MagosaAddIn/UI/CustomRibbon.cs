@@ -14,7 +14,7 @@ namespace MagosaAddIn.UI
     {
         private void CustomRibbon_Load(object sender, RibbonUIEventArgs e)
         {
-            System.Diagnostics.Debug.WriteLine("Magosa Tools リボンが読み込まれました");
+            ComExceptionHandler.LogDebug("Magosa Tools リボンが読み込まれました");
         }
 
         #region 図形分割機能
@@ -45,121 +45,140 @@ namespace MagosaAddIn.UI
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"図形分割エラー: {ex.Message}", "エラー",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                RibbonHelper.ShowAlignmentError("図形分割", ex);
             }
         }
 
         private List<PowerPoint.Shape> GetSelectedShapesForDivision()
         {
-            try
-            {
-                var app = Globals.ThisAddIn.Application;
-                if (app?.ActiveWindow?.Selection == null)
+            return ComExceptionHandler.HandleComOperation(
+                () => {
+                    var app = Globals.ThisAddIn.Application;
+                    if (app?.ActiveWindow?.Selection == null)
+                        return null;
+
+                    var selection = app.ActiveWindow.Selection;
+
+                    if (selection.Type == PowerPoint.PpSelectionType.ppSelectionShapes &&
+                        selection.ShapeRange.Count >= 1)
+                    {
+                        var shapes = new List<PowerPoint.Shape>();
+                        var nonRectangleShapes = new List<string>();
+
+                        for (int i = 1; i <= selection.ShapeRange.Count; i++)
+                        {
+                            var shape = selection.ShapeRange[i];
+
+                            // 四角形かどうかをチェック
+                            if (shape.AutoShapeType == Microsoft.Office.Core.MsoAutoShapeType.msoShapeRectangle ||
+                                shape.AutoShapeType == Microsoft.Office.Core.MsoAutoShapeType.msoShapeRoundedRectangle)
+                            {
+                                shapes.Add(shape);
+                            }
+                            else
+                            {
+                                nonRectangleShapes.Add($"図形{i}: {GetShapeTypeName(shape)}");
+                            }
+                        }
+
+                        // 四角形以外の図形が含まれている場合の警告
+                        if (nonRectangleShapes.Count > 0)
+                        {
+                            var message = "選択中に四角形以外の図形が含まれています：\n\n" +
+                                         string.Join("\n", nonRectangleShapes) +
+                                         "\n\n四角形のみを対象として処理を続行しますか？";
+
+                            var result = MessageBox.Show(message, "図形分割 - 確認",
+                                MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                            if (result == DialogResult.No)
+                            {
+                                return null;
+                            }
+                        }
+
+                        return shapes.Count > 0 ? shapes : null;
+                    }
+
                     return null;
-
-                var selection = app.ActiveWindow.Selection;
-
-                if (selection.Type == PowerPoint.PpSelectionType.ppSelectionShapes &&
-                    selection.ShapeRange.Count >= 1)
-                {
-                    var shapes = new List<PowerPoint.Shape>();
-                    var nonRectangleShapes = new List<string>();
-
-                    for (int i = 1; i <= selection.ShapeRange.Count; i++)
-                    {
-                        var shape = selection.ShapeRange[i];
-
-                        // 四角形かどうかをチェック
-                        if (shape.AutoShapeType == Microsoft.Office.Core.MsoAutoShapeType.msoShapeRectangle ||
-                            shape.AutoShapeType == Microsoft.Office.Core.MsoAutoShapeType.msoShapeRoundedRectangle)
-                        {
-                            shapes.Add(shape);
-                        }
-                        else
-                        {
-                            nonRectangleShapes.Add($"図形{i}: {GetShapeTypeName(shape)}");
-                        }
-                    }
-
-                    // 四角形以外の図形が含まれている場合の警告
-                    if (nonRectangleShapes.Count > 0)
-                    {
-                        var message = "選択中に四角形以外の図形が含まれています：\n\n" +
-                                     string.Join("\n", nonRectangleShapes) +
-                                     "\n\n四角形のみを対象として処理を続行しますか？";
-
-                        var result = MessageBox.Show(message, "図形分割 - 確認",
-                            MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-                        if (result == DialogResult.No)
-                        {
-                            return null;
-                        }
-                    }
-
-                    return shapes.Count > 0 ? shapes : null;
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"図形の取得中にエラーが発生しました: {ex.Message}");
-            }
-
-            return null;
+                },
+                "分割対象図形取得",
+                defaultValue: null,
+                throwOnError: false);
         }
 
         private string GetShapeTypeName(PowerPoint.Shape shape)
         {
-            try
-            {
-                switch (shape.Type)
-                {
-                    case Microsoft.Office.Core.MsoShapeType.msoAutoShape:
-                        return $"オートシェイプ({shape.AutoShapeType})";
-                    case Microsoft.Office.Core.MsoShapeType.msoTextBox:
-                        return "テキストボックス";
-                    case Microsoft.Office.Core.MsoShapeType.msoPicture:
-                        return "画像";
-                    case Microsoft.Office.Core.MsoShapeType.msoLine:
-                        return "線";
-                    case Microsoft.Office.Core.MsoShapeType.msoFreeform:
-                        return "フリーフォーム";
-                    default:
-                        return shape.Type.ToString();
-                }
-            }
-            catch
-            {
-                return "不明な図形";
-            }
+            return ComExceptionHandler.HandleComOperation(
+                () => {
+                    switch (shape.Type)
+                    {
+                        case Microsoft.Office.Core.MsoShapeType.msoAutoShape:
+                            return $"オートシェイプ({shape.AutoShapeType})";
+                        case Microsoft.Office.Core.MsoShapeType.msoTextBox:
+                            return "テキストボックス";
+                        case Microsoft.Office.Core.MsoShapeType.msoPicture:
+                            return "画像";
+                        case Microsoft.Office.Core.MsoShapeType.msoLine:
+                            return "線";
+                        case Microsoft.Office.Core.MsoShapeType.msoFreeform:
+                            return "フリーフォーム";
+                        default:
+                            return shape.Type.ToString();
+                    }
+                },
+                "図形タイプ名取得",
+                defaultValue: "不明な図形",
+                throwOnError: false);
         }
 
         private void ShowDivisionDialog(PowerPoint.Shape shape)
         {
-            using (var dialog = new MagosaAddIn.UI.DivisionDialog())
+            try
             {
-                if (dialog.ShowDialog() == DialogResult.OK)
+                using (var dialog = new MagosaAddIn.UI.DivisionDialog())
                 {
-                    var divider = new ShapeDivider();
-                    divider.DivideShape(shape, dialog.Rows, dialog.Columns,
-                        dialog.HorizontalMargin, dialog.VerticalMargin);
+                    if (dialog.ShowDialog() == DialogResult.OK)
+                    {
+                        var divider = new ShapeDivider();
+                        divider.DivideShape(shape, dialog.Rows, dialog.Columns,
+                            dialog.HorizontalMargin, dialog.VerticalMargin);
+
+                        string successMessage = ComExceptionHandler.CreateSuccessMessage(
+                            "図形分割",
+                            $"{dialog.Rows}×{dialog.Columns}グリッドで分割しました");
+                        RibbonHelper.ShowSuccessMessage(successMessage);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                RibbonHelper.ShowAlignmentError("図形分割", ex);
             }
         }
 
         private void ShowGridDivisionDialog(List<PowerPoint.Shape> shapes)
         {
-            using (var dialog = new MagosaAddIn.UI.GridDivisionDialog(shapes))
+            try
             {
-                if (dialog.ShowDialog() == DialogResult.OK)
+                using (var dialog = new MagosaAddIn.UI.GridDivisionDialog(shapes))
                 {
-                    var divider = new ShapeDivider();
+                    if (dialog.ShowDialog() == DialogResult.OK)
+                    {
+                        var divider = new ShapeDivider();
+                        divider.DivideShapeGroup(shapes, dialog.Rows, dialog.Columns,
+                            dialog.HorizontalMargin, dialog.VerticalMargin, dialog.DeleteOriginalShapes);
 
-                    // 修正: deleteOriginalShapesパラメータを追加
-                    divider.DivideShapeGroup(shapes, dialog.Rows, dialog.Columns,
-                        dialog.HorizontalMargin, dialog.VerticalMargin, dialog.DeleteOriginalShapes);
+                        string successMessage = ComExceptionHandler.CreateSuccessMessage(
+                            "グリッド分割",
+                            $"{shapes.Count}個の図形を{dialog.Rows}×{dialog.Columns}グリッドで分割しました");
+                        RibbonHelper.ShowSuccessMessage(successMessage);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                RibbonHelper.ShowAlignmentError("グリッド分割", ex);
             }
         }
 
@@ -176,7 +195,9 @@ namespace MagosaAddIn.UI
                 {
                     var aligner = new ShapeAligner();
                     aligner.AlignToLeft(shapes);
-                    RibbonHelper.ShowSuccessMessage($"{shapes.Count}個の図形を左端揃えしました。");
+                    string successMessage = ComExceptionHandler.CreateSuccessMessage(
+                        "左端揃え", $"{shapes.Count}個の図形を整列しました");
+                    RibbonHelper.ShowSuccessMessage(successMessage);
                 }
                 else
                 {
@@ -185,7 +206,7 @@ namespace MagosaAddIn.UI
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("左端揃え", ex.Message);
+                RibbonHelper.ShowAlignmentError("左端揃え", ex);
             }
         }
 
@@ -198,7 +219,9 @@ namespace MagosaAddIn.UI
                 {
                     var aligner = new ShapeAligner();
                     aligner.AlignToRight(shapes);
-                    RibbonHelper.ShowSuccessMessage($"{shapes.Count}個の図形を右端揃えしました。");
+                    string successMessage = ComExceptionHandler.CreateSuccessMessage(
+                        "右端揃え", $"{shapes.Count}個の図形を整列しました");
+                    RibbonHelper.ShowSuccessMessage(successMessage);
                 }
                 else
                 {
@@ -207,7 +230,7 @@ namespace MagosaAddIn.UI
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("右端揃え", ex.Message);
+                RibbonHelper.ShowAlignmentError("右端揃え", ex);
             }
         }
 
@@ -220,7 +243,9 @@ namespace MagosaAddIn.UI
                 {
                     var aligner = new ShapeAligner();
                     aligner.AlignToTop(shapes);
-                    RibbonHelper.ShowSuccessMessage($"{shapes.Count}個の図形を上端揃えしました。");
+                    string successMessage = ComExceptionHandler.CreateSuccessMessage(
+                        "上端揃え", $"{shapes.Count}個の図形を整列しました");
+                    RibbonHelper.ShowSuccessMessage(successMessage);
                 }
                 else
                 {
@@ -229,7 +254,7 @@ namespace MagosaAddIn.UI
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("上端揃え", ex.Message);
+                RibbonHelper.ShowAlignmentError("上端揃え", ex);
             }
         }
 
@@ -242,7 +267,9 @@ namespace MagosaAddIn.UI
                 {
                     var aligner = new ShapeAligner();
                     aligner.AlignToBottom(shapes);
-                    RibbonHelper.ShowSuccessMessage($"{shapes.Count}個の図形を下端揃えしました。");
+                    string successMessage = ComExceptionHandler.CreateSuccessMessage(
+                        "下端揃え", $"{shapes.Count}個の図形を整列しました");
+                    RibbonHelper.ShowSuccessMessage(successMessage);
                 }
                 else
                 {
@@ -251,7 +278,7 @@ namespace MagosaAddIn.UI
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("下端揃え", ex.Message);
+                RibbonHelper.ShowAlignmentError("下端揃え", ex);
             }
         }
 
@@ -268,7 +295,9 @@ namespace MagosaAddIn.UI
                 {
                     var aligner = new ShapeAligner();
                     aligner.AlignLeftToRight(shapes);
-                    RibbonHelper.ShowSuccessMessage($"{shapes.Count}個の図形を左端に右端を隣接整列しました。");
+                    string successMessage = ComExceptionHandler.CreateSuccessMessage(
+                        "左端→右端隣接整列", $"{shapes.Count}個の図形を整列しました");
+                    RibbonHelper.ShowSuccessMessage(successMessage);
                 }
                 else
                 {
@@ -277,7 +306,7 @@ namespace MagosaAddIn.UI
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("左端→右端整列", ex.Message);
+                RibbonHelper.ShowAlignmentError("左端→右端整列", ex);
             }
         }
 
@@ -290,7 +319,9 @@ namespace MagosaAddIn.UI
                 {
                     var aligner = new ShapeAligner();
                     aligner.AlignRightToLeft(shapes);
-                    RibbonHelper.ShowSuccessMessage($"{shapes.Count}個の図形を右端に左端を隣接整列しました。");
+                    string successMessage = ComExceptionHandler.CreateSuccessMessage(
+                        "右端→左端隣接整列", $"{shapes.Count}個の図形を整列しました");
+                    RibbonHelper.ShowSuccessMessage(successMessage);
                 }
                 else
                 {
@@ -299,7 +330,7 @@ namespace MagosaAddIn.UI
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("右端→左端整列", ex.Message);
+                RibbonHelper.ShowAlignmentError("右端→左端整列", ex);
             }
         }
 
@@ -312,7 +343,9 @@ namespace MagosaAddIn.UI
                 {
                     var aligner = new ShapeAligner();
                     aligner.AlignTopToBottom(shapes);
-                    RibbonHelper.ShowSuccessMessage($"{shapes.Count}個の図形を上端に下端を隣接整列しました。");
+                    string successMessage = ComExceptionHandler.CreateSuccessMessage(
+                        "上端→下端隣接整列", $"{shapes.Count}個の図形を整列しました");
+                    RibbonHelper.ShowSuccessMessage(successMessage);
                 }
                 else
                 {
@@ -321,7 +354,7 @@ namespace MagosaAddIn.UI
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("上端→下端整列", ex.Message);
+                RibbonHelper.ShowAlignmentError("上端→下端整列", ex);
             }
         }
 
@@ -334,7 +367,9 @@ namespace MagosaAddIn.UI
                 {
                     var aligner = new ShapeAligner();
                     aligner.AlignBottomToTop(shapes);
-                    RibbonHelper.ShowSuccessMessage($"{shapes.Count}個の図形を下端に上端を隣接整列しました。");
+                    string successMessage = ComExceptionHandler.CreateSuccessMessage(
+                        "下端→上端隣接整列", $"{shapes.Count}個の図形を整列しました");
+                    RibbonHelper.ShowSuccessMessage(successMessage);
                 }
                 else
                 {
@@ -343,7 +378,7 @@ namespace MagosaAddIn.UI
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("下端→上端整列", ex.Message);
+                RibbonHelper.ShowAlignmentError("下端→上端整列", ex);
             }
         }
 
@@ -360,7 +395,9 @@ namespace MagosaAddIn.UI
                 {
                     var aligner = new ShapeAligner();
                     aligner.AlignAndDistributeHorizontal(shapes);
-                    RibbonHelper.ShowSuccessMessage($"{shapes.Count}個の図形を水平中央揃え・等間隔配置しました。");
+                    string successMessage = ComExceptionHandler.CreateSuccessMessage(
+                        "水平中央揃え・等間隔配置", $"{shapes.Count}個の図形を配置しました");
+                    RibbonHelper.ShowSuccessMessage(successMessage);
                 }
                 else
                 {
@@ -369,7 +406,7 @@ namespace MagosaAddIn.UI
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("水平中央揃え・等間隔配置", ex.Message);
+                RibbonHelper.ShowAlignmentError("水平中央揃え・等間隔配置", ex);
             }
         }
 
@@ -382,7 +419,9 @@ namespace MagosaAddIn.UI
                 {
                     var aligner = new ShapeAligner();
                     aligner.AlignAndDistributeVertical(shapes);
-                    RibbonHelper.ShowSuccessMessage($"{shapes.Count}個の図形を垂直中央揃え・等間隔配置しました。");
+                    string successMessage = ComExceptionHandler.CreateSuccessMessage(
+                        "垂直中央揃え・等間隔配置", $"{shapes.Count}個の図形を配置しました");
+                    RibbonHelper.ShowSuccessMessage(successMessage);
                 }
                 else
                 {
@@ -391,7 +430,7 @@ namespace MagosaAddIn.UI
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("垂直中央揃え・等間隔配置", ex.Message);
+                RibbonHelper.ShowAlignmentError("垂直中央揃え・等間隔配置", ex);
             }
         }
 
@@ -411,7 +450,7 @@ namespace MagosaAddIn.UI
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("水平マージン配置", ex.Message);
+                RibbonHelper.ShowAlignmentError("水平マージン配置", ex);
             }
         }
 
@@ -431,7 +470,7 @@ namespace MagosaAddIn.UI
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("垂直マージン配置", ex.Message);
+                RibbonHelper.ShowAlignmentError("垂直マージン配置", ex);
             }
         }
 
@@ -451,7 +490,7 @@ namespace MagosaAddIn.UI
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("グリッド配置", ex.Message);
+                RibbonHelper.ShowAlignmentError("グリッド配置", ex);
             }
         }
 
@@ -471,7 +510,7 @@ namespace MagosaAddIn.UI
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("円形配置", ex.Message);
+                RibbonHelper.ShowAlignmentError("円形配置", ex);
             }
         }
 
@@ -481,53 +520,93 @@ namespace MagosaAddIn.UI
 
         private void ShowHorizontalMarginDialog(List<PowerPoint.Shape> shapes)
         {
-            using (var dialog = new MagosaAddIn.UI.MarginDialog("水平マージン配置"))
+            try
             {
-                if (dialog.ShowDialog() == DialogResult.OK)
+                using (var dialog = new MagosaAddIn.UI.MarginDialog("水平マージン配置"))
                 {
-                    var aligner = new ShapeAligner();
-                    aligner.ArrangeHorizontalWithMargin(shapes, dialog.Margin);
-                    RibbonHelper.ShowSuccessMessage($"{shapes.Count}個の図形を水平方向にマージン{dialog.Margin:F1}ptで配置しました。");
+                    if (dialog.ShowDialog() == DialogResult.OK)
+                    {
+                        var aligner = new ShapeAligner();
+                        aligner.ArrangeHorizontalWithMargin(shapes, dialog.Margin);
+                        string successMessage = ComExceptionHandler.CreateSuccessMessage(
+                            "水平マージン配置",
+                            $"{shapes.Count}個の図形をマージン{dialog.Margin:F1}ptで配置しました");
+                        RibbonHelper.ShowSuccessMessage(successMessage);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                RibbonHelper.ShowAlignmentError("水平マージン配置", ex);
             }
         }
 
         private void ShowVerticalMarginDialog(List<PowerPoint.Shape> shapes)
         {
-            using (var dialog = new MagosaAddIn.UI.MarginDialog("垂直マージン配置"))
+            try
             {
-                if (dialog.ShowDialog() == DialogResult.OK)
+                using (var dialog = new MagosaAddIn.UI.MarginDialog("垂直マージン配置"))
                 {
-                    var aligner = new ShapeAligner();
-                    aligner.ArrangeVerticalWithMargin(shapes, dialog.Margin);
-                    RibbonHelper.ShowSuccessMessage($"{shapes.Count}個の図形を垂直方向にマージン{dialog.Margin:F1}ptで配置しました。");
+                    if (dialog.ShowDialog() == DialogResult.OK)
+                    {
+                        var aligner = new ShapeAligner();
+                        aligner.ArrangeVerticalWithMargin(shapes, dialog.Margin);
+                        string successMessage = ComExceptionHandler.CreateSuccessMessage(
+                            "垂直マージン配置",
+                            $"{shapes.Count}個の図形をマージン{dialog.Margin:F1}ptで配置しました");
+                        RibbonHelper.ShowSuccessMessage(successMessage);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                RibbonHelper.ShowAlignmentError("垂直マージン配置", ex);
             }
         }
 
         private void ShowGridArrangementDialog(List<PowerPoint.Shape> shapes)
         {
-            using (var dialog = new MagosaAddIn.UI.GridArrangementDialog(shapes.Count))
+            try
             {
-                if (dialog.ShowDialog() == DialogResult.OK)
+                using (var dialog = new MagosaAddIn.UI.GridArrangementDialog(shapes.Count))
                 {
-                    var aligner = new ShapeAligner();
-                    aligner.ArrangeInGrid(shapes, dialog.Columns, dialog.HorizontalSpacing, dialog.VerticalSpacing);
-                    RibbonHelper.ShowSuccessMessage($"{shapes.Count}個の図形を{dialog.Columns}列のグリッドに配置しました。");
+                    if (dialog.ShowDialog() == DialogResult.OK)
+                    {
+                        var aligner = new ShapeAligner();
+                        aligner.ArrangeInGrid(shapes, dialog.Columns, dialog.HorizontalSpacing, dialog.VerticalSpacing);
+                        string successMessage = ComExceptionHandler.CreateSuccessMessage(
+                            "グリッド配置",
+                            $"{shapes.Count}個の図形を{dialog.Columns}列のグリッドに配置しました");
+                        RibbonHelper.ShowSuccessMessage(successMessage);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                RibbonHelper.ShowAlignmentError("グリッド配置", ex);
             }
         }
 
         private void ShowCircleArrangementDialog(List<PowerPoint.Shape> shapes)
         {
-            using (var dialog = new MagosaAddIn.UI.CircleArrangementDialog())
+            try
             {
-                if (dialog.ShowDialog() == DialogResult.OK)
+                using (var dialog = new MagosaAddIn.UI.CircleArrangementDialog())
                 {
-                    var aligner = new ShapeAligner();
-                    aligner.ArrangeInCircle(shapes, dialog.CenterX, dialog.CenterY, dialog.Radius);
-                    RibbonHelper.ShowSuccessMessage($"{shapes.Count}個の図形を円形に配置しました。");
+                    if (dialog.ShowDialog() == DialogResult.OK)
+                    {
+                        var aligner = new ShapeAligner();
+                        aligner.ArrangeInCircle(shapes, dialog.CenterX, dialog.CenterY, dialog.Radius);
+                        string successMessage = ComExceptionHandler.CreateSuccessMessage(
+                            "円形配置",
+                            $"{shapes.Count}個の図形を円形に配置しました");
+                        RibbonHelper.ShowSuccessMessage(successMessage);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                RibbonHelper.ShowAlignmentError("円形配置", ex);
             }
         }
 
