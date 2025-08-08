@@ -32,6 +32,7 @@ PowerPointでの図形操作を効率化するVSTOアドインです。図形の
 - Microsoft PowerPoint (Office 365 / 2019 / 2021)
 
 ### アーキテクチャ
+```
 MagosaAddIn/
 ├── Core/ # ビジネスロジック層
 │ ├── ShapeAligner.cs # 図形整列機能
@@ -48,6 +49,7 @@ MagosaAddIn/
 │ ├── DialogClasses.cs # 各種設定ダイアログ
 │ └── RibbonHelper.cs # リボン共通処理
 └── Properties/ # アセンブリ情報
+```
 
 ## 📋 機能詳細
 ### 🔧 図形整列機能
