@@ -54,11 +54,14 @@
             this.btnArrangeHorizontalWithMargin = this.Factory.CreateRibbonButton();
             this.btnArrangeVerticalWithMargin = this.Factory.CreateRibbonButton();
             this.btnArrangeInCircle = this.Factory.CreateRibbonButton();
+            this.group5 = this.Factory.CreateRibbonGroup();
+            this.btnSelectSameFormat = this.Factory.CreateRibbonButton();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
             this.group2.SuspendLayout();
             this.group3.SuspendLayout();
             this.group4.SuspendLayout();
+            this.group5.SuspendLayout();
             this.SuspendLayout();
             // 
             // tab1
@@ -68,6 +71,7 @@
             this.tab1.Groups.Add(this.group2);
             this.tab1.Groups.Add(this.group3);
             this.tab1.Groups.Add(this.group4);
+            this.tab1.Groups.Add(this.group5);
             this.tab1.Label = "Magosa Tools";
             this.tab1.Name = "tab1";
             // 
@@ -241,6 +245,21 @@
             this.btnArrangeInCircle.SuperTip = "選択した図形を指定した中心と半径で円形に配置します。選択図形の中心を自動取得することも可能です。";
             this.btnArrangeInCircle.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnArrangeInCircle_Click);
             // 
+            // group5
+            // 
+            this.group5.Items.Add(this.btnSelectSameFormat);
+            this.group5.Label = "選択補助";
+            this.group5.Name = "group5";
+            // 
+            // btnSelectSameFormat
+            // 
+            this.btnSelectSameFormat.Label = "同一書式選択";
+            this.btnSelectSameFormat.Name = "btnSelectSameFormat";
+            this.btnSelectSameFormat.OfficeImageId = "IconSelectArea";
+            this.btnSelectSameFormat.ShowImage = true;
+            this.btnSelectSameFormat.SuperTip = "選択中の図形を基準に、同じ書式を持つ図形を選択します。塗りつぶし色、枠線スタイル、またはその両方から選択条件を指定できます。";
+            this.btnSelectSameFormat.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnSelectSameFormat_Click);
+            // 
             // CustomRibbon
             // 
             this.Name = "CustomRibbon";
@@ -257,6 +276,8 @@
             this.group3.PerformLayout();
             this.group4.ResumeLayout(false);
             this.group4.PerformLayout();
+            this.group5.ResumeLayout(false);
+            this.group5.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -291,6 +312,10 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnArrangeVerticalWithMargin;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnArrangeInGrid;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnArrangeInCircle;
+
+        // Group 5: 選択補助
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup group5;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnSelectSameFormat;
     }
 
     partial class ThisRibbonCollection

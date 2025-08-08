@@ -34,7 +34,7 @@
     <PublishUrl>公開\</PublishUrl>
     <InstallUrl />
     <TargetCulture>ja</TargetCulture>
-    <ApplicationVersion>1.0.0.3</ApplicationVersion>
+    <ApplicationVersion>1.0.0.4</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
@@ -208,8 +208,10 @@
     <Compile Include="Core\ComExceptionHandler.cs" />
     <Compile Include="Core\Constants.cs" />
     <Compile Include="Core\DataModels.cs" />
+    <Compile Include="Core\ErrorHandler.cs" />
     <Compile Include="Core\ShapeAligner.cs" />
     <Compile Include="Core\ShapeDivider.cs" />
+    <Compile Include="Core\ShapeSelector.cs" />
     <Compile Include="Core\ShapeStyle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>

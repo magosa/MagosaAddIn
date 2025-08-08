@@ -60,7 +60,7 @@ namespace MagosaAddIn.UI
                     var selection = app.ActiveWindow.Selection;
 
                     if (selection.Type == PowerPoint.PpSelectionType.ppSelectionShapes &&
-                        selection.ShapeRange.Count >= 2)
+                        selection.ShapeRange.Count >= Constants.MIN_SHAPES_FOR_ALIGNMENT)
                     {
                         var shapes = new List<PowerPoint.Shape>();
                         for (int i = 1; i <= selection.ShapeRange.Count; i++)
@@ -78,53 +78,44 @@ namespace MagosaAddIn.UI
         }
 
         /// <summary>
-        /// 選択エラーメッセージを表示する
+        /// 選択エラーメッセージを表示する（非推奨 - ErrorHandler.ShowSelectionErrorを使用してください）
         /// </summary>
+        [Obsolete("ErrorHandler.ShowSelectionError()を使用してください")]
         public static void ShowSelectionError()
         {
-            ComExceptionHandler.LogWarning("図形選択不足: 2つ以上のオブジェクトが必要");
-            MessageBox.Show("2つ以上のオブジェクトを選択してください。", "選択エラー",
-                MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_ALIGNMENT, "図形操作");
         }
 
         /// <summary>
-        /// 整列エラーメッセージを表示する
+        /// 整列エラーメッセージを表示する（非推奨 - ErrorHandler.ShowOperationErrorを使用してください）
         /// </summary>
         /// <param name="operation">操作名</param>
         /// <param name="message">エラーメッセージ</param>
+        [Obsolete("ErrorHandler.ShowOperationError()を使用してください")]
         public static void ShowAlignmentError(string operation, string message)
         {
-            string errorMessage = ComExceptionHandler.CreateUserErrorMessage(operation, new Exception(message));
-            ComExceptionHandler.LogError($"{operation}エラー", new Exception(message));
-            MessageBox.Show(errorMessage, "エラー",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            ErrorHandler.ShowOperationError(operation, new Exception(message));
         }
 
         /// <summary>
-        /// 整列エラーメッセージを表示する（例外オブジェクト版）
+        /// 整列エラーメッセージを表示する（非推奨 - ErrorHandler.ShowOperationErrorを使用してください）
         /// </summary>
         /// <param name="operation">操作名</param>
         /// <param name="ex">例外オブジェクト</param>
+        [Obsolete("ErrorHandler.ShowOperationError()を使用してください")]
         public static void ShowAlignmentError(string operation, Exception ex)
         {
-            string errorMessage = ComExceptionHandler.CreateUserErrorMessage(operation, ex);
-            ComExceptionHandler.LogError($"{operation}エラー", ex);
-            MessageBox.Show(errorMessage, "エラー",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
+            ErrorHandler.ShowOperationError(operation, ex);
         }
 
         /// <summary>
-        /// 成功メッセージを表示する（デバッグ用）
+        /// 成功メッセージを表示する（非推奨 - ErrorHandler.ShowOperationSuccessを使用してください）
         /// </summary>
         /// <param name="message">成功メッセージ</param>
+        [Obsolete("ErrorHandler.ShowOperationSuccess()を使用してください")]
         public static void ShowSuccessMessage(string message)
         {
-            // 成功メッセージは統一されたログ出力を使用
-            ComExceptionHandler.LogDebug($"操作成功: {message}");
-
-            // 必要に応じてコメントアウトを外す
-            // string successMessage = ComExceptionHandler.CreateSuccessMessage("操作", message);
-            // MessageBox.Show(successMessage, "操作完了", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            ErrorHandler.ShowOperationSuccess("操作", message);
         }
 
         /// <summary>
@@ -179,27 +170,226 @@ namespace MagosaAddIn.UI
         /// </summary>
         /// <param name="minimumCount">必要最小図形数</param>
         /// <returns>選択が妥当な場合true</returns>
-        public static bool ValidateShapeSelection(int minimumCount = 2)
+        public static bool ValidateShapeSelection(int minimumCount = Constants.MIN_SHAPES_FOR_ALIGNMENT)
         {
-            if (!IsPowerPointAvailable())
+            try
             {
-                ComExceptionHandler.LogWarning("PowerPointが利用できません");
+                if (!IsPowerPointAvailable())
+                {
+                    ComExceptionHandler.LogWarning("PowerPointが利用できません");
+                    return false;
+                }
+
+                int selectedCount = GetSelectedShapeCount();
+                bool isValid = selectedCount >= minimumCount;
+
+                if (!isValid)
+                {
+                    ComExceptionHandler.LogWarning($"図形選択不足: {selectedCount}個選択済み、{minimumCount}個必要");
+                }
+                else
+                {
+                    ComExceptionHandler.LogDebug($"図形選択確認: {selectedCount}個選択済み");
+                }
+
+                return isValid;
+            }
+            catch (Exception ex)
+            {
+                ComExceptionHandler.LogError("図形選択検証", ex);
                 return false;
             }
+        }
 
-            int selectedCount = GetSelectedShapeCount();
-            bool isValid = selectedCount >= minimumCount;
+        /// <summary>
+        /// 選択された図形のタイプを分析する
+        /// </summary>
+        /// <returns>図形タイプの統計情報</returns>
+        public static ShapeSelectionInfo AnalyzeSelectedShapes()
+        {
+            return ComExceptionHandler.HandleComOperation(
+                () => {
+                    var info = new ShapeSelectionInfo();
 
-            if (!isValid)
-            {
-                ComExceptionHandler.LogWarning($"図形選択不足: {selectedCount}個選択済み、{minimumCount}個必要");
-            }
-            else
-            {
-                ComExceptionHandler.LogDebug($"図形選択確認: {selectedCount}個選択済み");
-            }
+                    var app = Globals.ThisAddIn.Application;
+                    if (app?.ActiveWindow?.Selection == null)
+                        return info;
 
-            return isValid;
+                    var selection = app.ActiveWindow.Selection;
+                    if (selection.Type != PowerPoint.PpSelectionType.ppSelectionShapes)
+                        return info;
+
+                    info.TotalCount = selection.ShapeRange.Count;
+
+                    for (int i = 1; i <= selection.ShapeRange.Count; i++)
+                    {
+                        var shape = selection.ShapeRange[i];
+
+                        if (IsRectangleShape(shape))
+                        {
+                            info.RectangleCount++;
+                        }
+                        else
+                        {
+                            info.NonRectangleCount++;
+                            info.NonRectangleTypes.Add(GetShapeTypeName(shape));
+                        }
+                    }
+
+                    return info;
+                },
+                "図形選択分析",
+                defaultValue: new ShapeSelectionInfo(),
+                throwOnError: false);
+        }
+
+        /// <summary>
+        /// 図形が四角形かどうかを判定する
+        /// </summary>
+        /// <param name="shape">判定する図形</param>
+        /// <returns>四角形の場合true</returns>
+        public static bool IsRectangleShape(PowerPoint.Shape shape)
+        {
+            return ComExceptionHandler.HandleComOperation(
+                () => shape.AutoShapeType == Microsoft.Office.Core.MsoAutoShapeType.msoShapeRectangle ||
+                      shape.AutoShapeType == Microsoft.Office.Core.MsoAutoShapeType.msoShapeRoundedRectangle,
+                "図形タイプ判定",
+                defaultValue: false,
+                throwOnError: false);
+        }
+
+        /// <summary>
+        /// 図形タイプ名を取得する
+        /// </summary>
+        /// <param name="shape">図形</param>
+        /// <returns>図形タイプ名</returns>
+        public static string GetShapeTypeName(PowerPoint.Shape shape)
+        {
+            return ComExceptionHandler.HandleComOperation(
+                () => {
+                    switch (shape.Type)
+                    {
+                        case Microsoft.Office.Core.MsoShapeType.msoAutoShape:
+                            return $"オートシェイプ({shape.AutoShapeType})";
+                        case Microsoft.Office.Core.MsoShapeType.msoTextBox:
+                            return "テキストボックス";
+                        case Microsoft.Office.Core.MsoShapeType.msoPicture:
+                            return "画像";
+                        case Microsoft.Office.Core.MsoShapeType.msoLine:
+                            return "線";
+                        case Microsoft.Office.Core.MsoShapeType.msoFreeform:
+                            return "フリーフォーム";
+                        case Microsoft.Office.Core.MsoShapeType.msoGroup:
+                            return "グループ";
+                        case Microsoft.Office.Core.MsoShapeType.msoTable:
+                            return "表";
+                        case Microsoft.Office.Core.MsoShapeType.msoChart:
+                            return "グラフ";
+                        default:
+                            return shape.Type.ToString();
+                    }
+                },
+                "図形タイプ名取得",
+                defaultValue: "不明な図形",
+                throwOnError: false);
+        }
+
+        /// <summary>
+        /// 選択図形の境界を取得する
+        /// </summary>
+        /// <returns>選択図形の境界情報、エラー時はnull</returns>
+        public static ShapeGroupBounds GetSelectedShapesBounds()
+        {
+            return ComExceptionHandler.HandleComOperation(
+                () => {
+                    var shapes = GetMultipleSelectedShapes();
+                    if (shapes == null || shapes.Count == 0)
+                        return null;
+
+                    return ShapeGroupBounds.FromShapes(shapes);
+                },
+                "選択図形境界取得",
+                defaultValue: null,
+                throwOnError: false);
+        }
+
+        /// <summary>
+        /// デバッグ情報を出力する
+        /// </summary>
+        /// <param name="message">デバッグメッセージ</param>
+        public static void LogDebug(string message)
+        {
+            ComExceptionHandler.LogDebug($"RibbonHelper: {message}");
+        }
+
+        /// <summary>
+        /// 警告情報を出力する
+        /// </summary>
+        /// <param name="message">警告メッセージ</param>
+        public static void LogWarning(string message)
+        {
+            ComExceptionHandler.LogWarning($"RibbonHelper: {message}");
+        }
+
+        /// <summary>
+        /// エラー情報を出力する
+        /// </summary>
+        /// <param name="message">エラーメッセージ</param>
+        /// <param name="ex">例外オブジェクト</param>
+        public static void LogError(string message, Exception ex = null)
+        {
+            ComExceptionHandler.LogError($"RibbonHelper: {message}", ex);
+        }
+    }
+
+    /// <summary>
+    /// 図形選択情報を格納するクラス
+    /// </summary>
+    public class ShapeSelectionInfo
+    {
+        /// <summary>
+        /// 総選択図形数
+        /// </summary>
+        public int TotalCount { get; set; }
+
+        /// <summary>
+        /// 四角形の数
+        /// </summary>
+        public int RectangleCount { get; set; }
+
+        /// <summary>
+        /// 四角形以外の数
+        /// </summary>
+        public int NonRectangleCount { get; set; }
+
+        /// <summary>
+        /// 四角形以外の図形タイプリスト
+        /// </summary>
+        public List<string> NonRectangleTypes { get; set; } = new List<string>();
+
+        /// <summary>
+        /// 四角形のみが選択されているか
+        /// </summary>
+        public bool IsAllRectangles => NonRectangleCount == 0 && RectangleCount > 0;
+
+        /// <summary>
+        /// 選択図形が存在するか
+        /// </summary>
+        public bool HasShapes => TotalCount > 0;
+
+        /// <summary>
+        /// 指定した最小数以上の図形が選択されているか
+        /// </summary>
+        /// <param name="minimumCount">最小数</param>
+        /// <returns>条件を満たす場合true</returns>
+        public bool HasMinimumShapes(int minimumCount) => TotalCount >= minimumCount;
+
+        /// <summary>
+        /// 選択情報の文字列表現
+        /// </summary>
+        public override string ToString()
+        {
+            return $"総数: {TotalCount}, 四角形: {RectangleCount}, その他: {NonRectangleCount}";
         }
     }
 }

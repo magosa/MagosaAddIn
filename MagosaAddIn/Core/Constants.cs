@@ -188,5 +188,14 @@
         public const int DEFAULT_GRID_COLUMNS = 3;
 
         #endregion
+
+        #region 選択補助関連
+
+        /// <summary>
+        /// 書式選択に必要な最小図形数
+        /// </summary>
+        public const int MIN_SHAPES_FOR_FORMAT_SELECTION = 1;
+
+        #endregion
     }
 }

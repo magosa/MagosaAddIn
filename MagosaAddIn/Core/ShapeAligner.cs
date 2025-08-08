@@ -21,10 +21,7 @@ namespace MagosaAddIn.Core
         {
             ComExceptionHandler.HandleComOperation(
                 () => {
-                    if (shapes == null || shapes.Count < 2)
-                    {
-                        throw new ArgumentException("2つ以上の図形が必要です。");
-                    }
+                    ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "左端揃え");
 
                     var baseShape = shapes[0]; // 基準となる図形（一番目に選択）
                     float targetPosition = baseShape.Left; // 基準図形の左端
@@ -47,10 +44,7 @@ namespace MagosaAddIn.Core
         {
             ComExceptionHandler.HandleComOperation(
                 () => {
-                    if (shapes == null || shapes.Count < 2)
-                    {
-                        throw new ArgumentException("2つ以上の図形が必要です。");
-                    }
+                    ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "右端揃え");
 
                     var baseShape = shapes[0]; // 基準となる図形（一番目に選択）
                     float targetPosition = baseShape.Left + baseShape.Width; // 基準図形の右端
@@ -73,10 +67,7 @@ namespace MagosaAddIn.Core
         {
             ComExceptionHandler.HandleComOperation(
                 () => {
-                    if (shapes == null || shapes.Count < 2)
-                    {
-                        throw new ArgumentException("2つ以上の図形が必要です。");
-                    }
+                    ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "上端揃え");
 
                     var baseShape = shapes[0]; // 基準となる図形（一番目に選択）
                     float targetPosition = baseShape.Top; // 基準図形の上端
@@ -99,10 +90,7 @@ namespace MagosaAddIn.Core
         {
             ComExceptionHandler.HandleComOperation(
                 () => {
-                    if (shapes == null || shapes.Count < 2)
-                    {
-                        throw new ArgumentException("2つ以上の図形が必要です。");
-                    }
+                    ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "下端揃え");
 
                     var baseShape = shapes[0]; // 基準となる図形（一番目に選択）
                     float targetPosition = baseShape.Top + baseShape.Height; // 基準図形の下端
@@ -129,10 +117,7 @@ namespace MagosaAddIn.Core
         {
             ComExceptionHandler.HandleComOperation(
                 () => {
-                    if (shapes == null || shapes.Count < 2)
-                    {
-                        throw new ArgumentException("2つ以上の図形が必要です。");
-                    }
+                    ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "左端→右端整列");
 
                     var baseShape = shapes[0]; // 基準となる図形（一番目に選択）
                     float targetPosition = baseShape.Left; // 基準図形の左端
@@ -156,10 +141,7 @@ namespace MagosaAddIn.Core
         {
             ComExceptionHandler.HandleComOperation(
                 () => {
-                    if (shapes == null || shapes.Count < 2)
-                    {
-                        throw new ArgumentException("2つ以上の図形が必要です。");
-                    }
+                    ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "右端→左端整列");
 
                     var baseShape = shapes[0]; // 基準となる図形（一番目に選択）
                     float targetPosition = baseShape.Left + baseShape.Width; // 基準図形の右端
@@ -183,10 +165,7 @@ namespace MagosaAddIn.Core
         {
             ComExceptionHandler.HandleComOperation(
                 () => {
-                    if (shapes == null || shapes.Count < 2)
-                    {
-                        throw new ArgumentException("2つ以上の図形が必要です。");
-                    }
+                    ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "上端→下端整列");
 
                     var baseShape = shapes[0]; // 基準となる図形（一番目に選択）
                     float targetPosition = baseShape.Top; // 基準図形の上端
@@ -210,10 +189,7 @@ namespace MagosaAddIn.Core
         {
             ComExceptionHandler.HandleComOperation(
                 () => {
-                    if (shapes == null || shapes.Count < 2)
-                    {
-                        throw new ArgumentException("2つ以上の図形が必要です。");
-                    }
+                    ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "下端→上端整列");
 
                     var baseShape = shapes[0]; // 基準となる図形（一番目に選択）
                     float targetPosition = baseShape.Top + baseShape.Height; // 基準図形の下端
@@ -241,10 +217,7 @@ namespace MagosaAddIn.Core
         {
             ComExceptionHandler.HandleComOperation(
                 () => {
-                    if (shapes == null || shapes.Count < 2)
-                    {
-                        throw new ArgumentException("2つ以上の図形が必要です。");
-                    }
+                    ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "水平中央揃え・等間隔配置");
 
                     var baseShape = shapes[0];
                     float baseCenterY = baseShape.Top + (baseShape.Height / 2);
@@ -296,10 +269,7 @@ namespace MagosaAddIn.Core
         {
             ComExceptionHandler.HandleComOperation(
                 () => {
-                    if (shapes == null || shapes.Count < 2)
-                    {
-                        throw new ArgumentException("2つ以上の図形が必要です。");
-                    }
+                    ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "垂直中央揃え・等間隔配置");
 
                     var baseShape = shapes[0];
                     float baseCenterX = baseShape.Left + (baseShape.Width / 2);
@@ -353,15 +323,8 @@ namespace MagosaAddIn.Core
         {
             ComExceptionHandler.HandleComOperation(
                 () => {
-                    if (shapes == null || shapes.Count < 2)
-                    {
-                        throw new ArgumentException("2つ以上の図形が必要です。");
-                    }
-
-                    if (margin < 0)
-                    {
-                        throw new ArgumentException("マージンは0以上の値である必要があります。");
-                    }
+                    ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "水平マージン配置");
+                    ErrorHandler.ValidateRange(margin, Constants.MIN_MARGIN, Constants.MAX_MARGIN, "マージン", "水平マージン配置");
 
                     var baseShape = shapes[0]; // 基準図形（一番目に選択）
                     float baseCenterX = baseShape.Left + (baseShape.Width / 2);
@@ -423,15 +386,8 @@ namespace MagosaAddIn.Core
         {
             ComExceptionHandler.HandleComOperation(
                 () => {
-                    if (shapes == null || shapes.Count < 2)
-                    {
-                        throw new ArgumentException("2つ以上の図形が必要です。");
-                    }
-
-                    if (margin < 0)
-                    {
-                        throw new ArgumentException("マージンは0以上の値である必要があります。");
-                    }
+                    ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "垂直マージン配置");
+                    ErrorHandler.ValidateRange(margin, Constants.MIN_MARGIN, Constants.MAX_MARGIN, "マージン", "垂直マージン配置");
 
                     var baseShape = shapes[0]; // 基準図形（一番目に選択）
                     float baseCenterY = baseShape.Top + (baseShape.Height / 2);
@@ -494,15 +450,10 @@ namespace MagosaAddIn.Core
         {
             ComExceptionHandler.HandleComOperation(
                 () => {
-                    if (shapes == null || shapes.Count < 2)
-                    {
-                        throw new ArgumentException("2つ以上の図形が必要です。");
-                    }
-
-                    if (columns <= 0)
-                    {
-                        throw new ArgumentException("列数は1以上である必要があります。");
-                    }
+                    ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "グリッド配置");
+                    ErrorHandler.ValidateRange(columns, Constants.MIN_COLUMNS, shapes.Count, "列数", "グリッド配置");
+                    ErrorHandler.ValidateRange(horizontalSpacing, Constants.MIN_MARGIN, Constants.MAX_SPACING, "水平間隔", "グリッド配置");
+                    ErrorHandler.ValidateRange(verticalSpacing, Constants.MIN_MARGIN, Constants.MAX_SPACING, "垂直間隔", "グリッド配置");
 
                     var baseShape = shapes[0];
                     float startLeft = baseShape.Left;
@@ -534,10 +485,10 @@ namespace MagosaAddIn.Core
         {
             ComExceptionHandler.HandleComOperation(
                 () => {
-                    if (shapes == null || shapes.Count < 2)
-                    {
-                        throw new ArgumentException("2つ以上の図形が必要です。");
-                    }
+                    ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "円形配置");
+                    ErrorHandler.ValidateRange(centerX, Constants.MIN_CENTER_COORDINATE, Constants.MAX_CENTER_COORDINATE, "中心X座標", "円形配置");
+                    ErrorHandler.ValidateRange(centerY, Constants.MIN_CENTER_COORDINATE, Constants.MAX_CENTER_COORDINATE, "中心Y座標", "円形配置");
+                    ErrorHandler.ValidateRange(radius, Constants.MIN_RADIUS, Constants.MAX_RADIUS, "半径", "円形配置");
 
                     double angleStep = 2 * Math.PI / shapes.Count;
 

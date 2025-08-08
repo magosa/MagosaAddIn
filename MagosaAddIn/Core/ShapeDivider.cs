@@ -27,6 +27,18 @@ namespace MagosaAddIn.Core
         {
             try
             {
+                // 入力検証
+                if (originalShape == null)
+                {
+                    ErrorHandler.ShowOperationError("図形分割", new ArgumentNullException(nameof(originalShape), "分割する図形が指定されていません。"));
+                    return;
+                }
+
+                ErrorHandler.ValidateRange(rows, Constants.MIN_ROWS, Constants.MAX_ROWS, "行数", "図形分割");
+                ErrorHandler.ValidateRange(columns, Constants.MIN_COLUMNS, Constants.MAX_COLUMNS, "列数", "図形分割");
+                ErrorHandler.ValidateRange(horizontalMargin, Constants.MIN_MARGIN, Constants.MAX_MARGIN, "水平マージン", "図形分割");
+                ErrorHandler.ValidateRange(verticalMargin, Constants.MIN_MARGIN, Constants.MAX_MARGIN, "垂直マージン", "図形分割");
+
                 var slide = ComExceptionHandler.HandleComOperation(
                     () => originalShape.Parent as PowerPoint.Slide,
                     "スライド取得");
@@ -46,12 +58,8 @@ namespace MagosaAddIn.Core
                 float cellWidth = (originalWidth - horizontalMargin * (columns - 1)) / columns;
                 float cellHeight = (originalHeight - verticalMargin * (rows - 1)) / rows;
 
-                // サイズが有効かチェック
-                if (cellWidth <= Constants.MIN_CELL_SIZE || cellHeight <= Constants.MIN_CELL_SIZE)
-                {
-                    throw new ArgumentException($"セルサイズが小さすぎます。最小サイズ: {Constants.MIN_CELL_SIZE}pt\n" +
-                        "マージンが大きすぎるか、分割数が多すぎます。");
-                }
+                // セルサイズの検証
+                ErrorHandler.ValidateCellSize(cellWidth, cellHeight, "図形分割");
 
                 // 元の図形のスタイルを保存
                 var shapeStyle = ExtractShapeStyle(originalShape);
@@ -63,6 +71,12 @@ namespace MagosaAddIn.Core
                     {
                         float left = originalLeft + col * (cellWidth + horizontalMargin);
                         float top = originalTop + row * (cellHeight + verticalMargin);
+
+                        // 座標の検証
+                        if (!ErrorHandler.ValidateCoordinates(left, top, "図形分割"))
+                        {
+                            continue;
+                        }
 
                         // 新しい四角形を作成
                         var newShape = ComExceptionHandler.HandleComOperation(
@@ -106,20 +120,12 @@ namespace MagosaAddIn.Core
         {
             try
             {
-                if (originalShapes == null || originalShapes.Count == 0)
-                {
-                    throw new ArgumentException("図形が指定されていません。");
-                }
-
-                if (rows < Constants.MIN_ROWS || rows > Constants.MAX_ROWS)
-                {
-                    throw new ArgumentException($"行数は{Constants.MIN_ROWS}以上{Constants.MAX_ROWS}以下である必要があります。");
-                }
-
-                if (columns < Constants.MIN_COLUMNS || columns > Constants.MAX_COLUMNS)
-                {
-                    throw new ArgumentException($"列数は{Constants.MIN_COLUMNS}以上{Constants.MAX_COLUMNS}以下である必要があります。");
-                }
+                // 入力検証
+                ErrorHandler.ValidateShapes(originalShapes, Constants.MIN_SHAPES_FOR_DIVISION, "グリッド分割");
+                ErrorHandler.ValidateRange(rows, Constants.MIN_ROWS, Constants.MAX_ROWS, "行数", "グリッド分割");
+                ErrorHandler.ValidateRange(columns, Constants.MIN_COLUMNS, Constants.MAX_COLUMNS, "列数", "グリッド分割");
+                ErrorHandler.ValidateRange(horizontalMargin, Constants.MIN_MARGIN, Constants.MAX_MARGIN, "水平マージン", "グリッド分割");
+                ErrorHandler.ValidateRange(verticalMargin, Constants.MIN_MARGIN, Constants.MAX_MARGIN, "垂直マージン", "グリッド分割");
 
                 // 1. 事前に図形情報を取得（COM参照を回避）
                 var shapeInfos = ExtractShapeInfos(originalShapes);
@@ -142,14 +148,8 @@ namespace MagosaAddIn.Core
                 float cellWidth = (bounds.Width - horizontalMargin * (columns - 1)) / columns;
                 float cellHeight = (bounds.Height - verticalMargin * (rows - 1)) / rows;
 
-                // 5. サイズが有効かチェック
-                if (cellWidth <= Constants.MIN_CELL_SIZE || cellHeight <= Constants.MIN_CELL_SIZE)
-                {
-                    throw new ArgumentException($"セルサイズが小さすぎます。計算されたサイズ: {cellWidth:F1}×{cellHeight:F1}pt\n" +
-                        $"範囲: {bounds.Width:F1}×{bounds.Height:F1}pt\n" +
-                        $"最小サイズ: {Constants.MIN_CELL_SIZE}pt\n" +
-                        $"マージンを小さくするか、分割数を減らしてください。");
-                }
+                // 5. セルサイズの検証
+                ErrorHandler.ValidateCellSize(cellWidth, cellHeight, "グリッド分割");
 
                 // 6. 代表的なスタイルを取得（最初の図形から）
                 var shapeStyle = ExtractShapeStyleFromInfo(shapeInfos[0]);
@@ -265,23 +265,7 @@ namespace MagosaAddIn.Core
         /// </summary>
         private ShapeGroupBounds CalculateBounds(List<ShapeInfo> shapeInfos)
         {
-            if (shapeInfos.Count == 0)
-                throw new ArgumentException("図形情報が空です。");
-
-            float minLeft = shapeInfos.Min(s => s.Left);
-            float minTop = shapeInfos.Min(s => s.Top);
-            float maxRight = shapeInfos.Max(s => s.Left + s.Width);
-            float maxBottom = shapeInfos.Max(s => s.Top + s.Height);
-
-            return new ShapeGroupBounds
-            {
-                Left = minLeft,
-                Top = minTop,
-                Right = maxRight,
-                Bottom = maxBottom,
-                Width = maxRight - minLeft,
-                Height = maxBottom - minTop
-            };
+            return ShapeGroupBounds.FromShapeInfos(shapeInfos);
         }
 
         /// <summary>
@@ -317,11 +301,8 @@ namespace MagosaAddIn.Core
                     float top = bounds.Top + row * (cellHeight + verticalMargin);
 
                     // 座標の有効性をチェック
-                    if (left < Constants.MIN_COORDINATE || left > Constants.MAX_COORDINATE ||
-                        top < Constants.MIN_COORDINATE || top > Constants.MAX_COORDINATE)
+                    if (!ErrorHandler.ValidateCoordinates(left, top, "グリッド図形作成"))
                     {
-                        ComExceptionHandler.LogWarning($"座標が範囲外: ({left:F1}, {top:F1}) - " +
-                            $"有効範囲: {Constants.MIN_COORDINATE}～{Constants.MAX_COORDINATE}pt - スキップ");
                         continue;
                     }
 

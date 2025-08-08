@@ -24,7 +24,7 @@ namespace MagosaAddIn.UI
             try
             {
                 var selectedShapes = GetSelectedShapesForDivision();
-                if (selectedShapes != null)
+                if (selectedShapes != null && selectedShapes.Count > 0)
                 {
                     if (selectedShapes.Count == 1)
                     {
@@ -39,13 +39,12 @@ namespace MagosaAddIn.UI
                 }
                 else
                 {
-                    MessageBox.Show("四角形オブジェクトを1つ以上選択してください。", "図形分割",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_DIVISION, "図形分割");
                 }
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("図形分割", ex);
+                ErrorHandler.ShowOperationError("図形分割", ex);
             }
         }
 
@@ -60,75 +59,24 @@ namespace MagosaAddIn.UI
                     var selection = app.ActiveWindow.Selection;
 
                     if (selection.Type == PowerPoint.PpSelectionType.ppSelectionShapes &&
-                        selection.ShapeRange.Count >= 1)
+                        selection.ShapeRange.Count >= Constants.MIN_SHAPES_FOR_DIVISION)
                     {
-                        var shapes = new List<PowerPoint.Shape>();
-                        var nonRectangleShapes = new List<string>();
-
+                        var allShapes = new List<PowerPoint.Shape>();
                         for (int i = 1; i <= selection.ShapeRange.Count; i++)
                         {
-                            var shape = selection.ShapeRange[i];
-
-                            // 四角形かどうかをチェック
-                            if (shape.AutoShapeType == Microsoft.Office.Core.MsoAutoShapeType.msoShapeRectangle ||
-                                shape.AutoShapeType == Microsoft.Office.Core.MsoAutoShapeType.msoShapeRoundedRectangle)
-                            {
-                                shapes.Add(shape);
-                            }
-                            else
-                            {
-                                nonRectangleShapes.Add($"図形{i}: {GetShapeTypeName(shape)}");
-                            }
+                            allShapes.Add(selection.ShapeRange[i]);
                         }
 
-                        // 四角形以外の図形が含まれている場合の警告
-                        if (nonRectangleShapes.Count > 0)
-                        {
-                            var message = "選択中に四角形以外の図形が含まれています：\n\n" +
-                                         string.Join("\n", nonRectangleShapes) +
-                                         "\n\n四角形のみを対象として処理を続行しますか？";
+                        // 四角形図形の検証
+                        var (rectangles, userContinued) = ErrorHandler.ValidateRectangleShapes(allShapes, "図形分割");
 
-                            var result = MessageBox.Show(message, "図形分割 - 確認",
-                                MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-                            if (result == DialogResult.No)
-                            {
-                                return null;
-                            }
-                        }
-
-                        return shapes.Count > 0 ? shapes : null;
+                        return userContinued ? rectangles : null;
                     }
 
                     return null;
                 },
                 "分割対象図形取得",
                 defaultValue: null,
-                throwOnError: false);
-        }
-
-        private string GetShapeTypeName(PowerPoint.Shape shape)
-        {
-            return ComExceptionHandler.HandleComOperation(
-                () => {
-                    switch (shape.Type)
-                    {
-                        case Microsoft.Office.Core.MsoShapeType.msoAutoShape:
-                            return $"オートシェイプ({shape.AutoShapeType})";
-                        case Microsoft.Office.Core.MsoShapeType.msoTextBox:
-                            return "テキストボックス";
-                        case Microsoft.Office.Core.MsoShapeType.msoPicture:
-                            return "画像";
-                        case Microsoft.Office.Core.MsoShapeType.msoLine:
-                            return "線";
-                        case Microsoft.Office.Core.MsoShapeType.msoFreeform:
-                            return "フリーフォーム";
-                        default:
-                            return shape.Type.ToString();
-                    }
-                },
-                "図形タイプ名取得",
-                defaultValue: "不明な図形",
                 throwOnError: false);
         }
 
@@ -144,16 +92,14 @@ namespace MagosaAddIn.UI
                         divider.DivideShape(shape, dialog.Rows, dialog.Columns,
                             dialog.HorizontalMargin, dialog.VerticalMargin);
 
-                        string successMessage = ComExceptionHandler.CreateSuccessMessage(
-                            "図形分割",
+                        ErrorHandler.ShowOperationSuccess("図形分割",
                             $"{dialog.Rows}×{dialog.Columns}グリッドで分割しました");
-                        RibbonHelper.ShowSuccessMessage(successMessage);
                     }
                 }
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("図形分割", ex);
+                ErrorHandler.ShowOperationError("図形分割", ex);
             }
         }
 
@@ -169,16 +115,14 @@ namespace MagosaAddIn.UI
                         divider.DivideShapeGroup(shapes, dialog.Rows, dialog.Columns,
                             dialog.HorizontalMargin, dialog.VerticalMargin, dialog.DeleteOriginalShapes);
 
-                        string successMessage = ComExceptionHandler.CreateSuccessMessage(
-                            "グリッド分割",
+                        ErrorHandler.ShowOperationSuccess("グリッド分割",
                             $"{shapes.Count}個の図形を{dialog.Rows}×{dialog.Columns}グリッドで分割しました");
-                        RibbonHelper.ShowSuccessMessage(successMessage);
                     }
                 }
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("グリッド分割", ex);
+                ErrorHandler.ShowOperationError("グリッド分割", ex);
             }
         }
 
@@ -191,22 +135,20 @@ namespace MagosaAddIn.UI
             try
             {
                 var shapes = RibbonHelper.GetMultipleSelectedShapes();
-                if (shapes != null && shapes.Count >= 2)
+                if (RibbonHelper.ValidateShapeSelection(Constants.MIN_SHAPES_FOR_ALIGNMENT))
                 {
                     var aligner = new ShapeAligner();
                     aligner.AlignToLeft(shapes);
-                    string successMessage = ComExceptionHandler.CreateSuccessMessage(
-                        "左端揃え", $"{shapes.Count}個の図形を整列しました");
-                    RibbonHelper.ShowSuccessMessage(successMessage);
+                    ErrorHandler.ShowOperationSuccess("左端揃え", $"{shapes.Count}個の図形を整列しました");
                 }
                 else
                 {
-                    RibbonHelper.ShowSelectionError();
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_ALIGNMENT, "左端揃え");
                 }
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("左端揃え", ex);
+                ErrorHandler.ShowOperationError("左端揃え", ex);
             }
         }
 
@@ -215,22 +157,20 @@ namespace MagosaAddIn.UI
             try
             {
                 var shapes = RibbonHelper.GetMultipleSelectedShapes();
-                if (shapes != null && shapes.Count >= 2)
+                if (RibbonHelper.ValidateShapeSelection(Constants.MIN_SHAPES_FOR_ALIGNMENT))
                 {
                     var aligner = new ShapeAligner();
                     aligner.AlignToRight(shapes);
-                    string successMessage = ComExceptionHandler.CreateSuccessMessage(
-                        "右端揃え", $"{shapes.Count}個の図形を整列しました");
-                    RibbonHelper.ShowSuccessMessage(successMessage);
+                    ErrorHandler.ShowOperationSuccess("右端揃え", $"{shapes.Count}個の図形を整列しました");
                 }
                 else
                 {
-                    RibbonHelper.ShowSelectionError();
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_ALIGNMENT, "右端揃え");
                 }
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("右端揃え", ex);
+                ErrorHandler.ShowOperationError("右端揃え", ex);
             }
         }
 
@@ -239,22 +179,20 @@ namespace MagosaAddIn.UI
             try
             {
                 var shapes = RibbonHelper.GetMultipleSelectedShapes();
-                if (shapes != null && shapes.Count >= 2)
+                if (RibbonHelper.ValidateShapeSelection(Constants.MIN_SHAPES_FOR_ALIGNMENT))
                 {
                     var aligner = new ShapeAligner();
                     aligner.AlignToTop(shapes);
-                    string successMessage = ComExceptionHandler.CreateSuccessMessage(
-                        "上端揃え", $"{shapes.Count}個の図形を整列しました");
-                    RibbonHelper.ShowSuccessMessage(successMessage);
+                    ErrorHandler.ShowOperationSuccess("上端揃え", $"{shapes.Count}個の図形を整列しました");
                 }
                 else
                 {
-                    RibbonHelper.ShowSelectionError();
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_ALIGNMENT, "上端揃え");
                 }
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("上端揃え", ex);
+                ErrorHandler.ShowOperationError("上端揃え", ex);
             }
         }
 
@@ -263,22 +201,20 @@ namespace MagosaAddIn.UI
             try
             {
                 var shapes = RibbonHelper.GetMultipleSelectedShapes();
-                if (shapes != null && shapes.Count >= 2)
+                if (RibbonHelper.ValidateShapeSelection(Constants.MIN_SHAPES_FOR_ALIGNMENT))
                 {
                     var aligner = new ShapeAligner();
                     aligner.AlignToBottom(shapes);
-                    string successMessage = ComExceptionHandler.CreateSuccessMessage(
-                        "下端揃え", $"{shapes.Count}個の図形を整列しました");
-                    RibbonHelper.ShowSuccessMessage(successMessage);
+                    ErrorHandler.ShowOperationSuccess("下端揃え", $"{shapes.Count}個の図形を整列しました");
                 }
                 else
                 {
-                    RibbonHelper.ShowSelectionError();
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_ALIGNMENT, "下端揃え");
                 }
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("下端揃え", ex);
+                ErrorHandler.ShowOperationError("下端揃え", ex);
             }
         }
 
@@ -291,22 +227,20 @@ namespace MagosaAddIn.UI
             try
             {
                 var shapes = RibbonHelper.GetMultipleSelectedShapes();
-                if (shapes != null && shapes.Count >= 2)
+                if (RibbonHelper.ValidateShapeSelection(Constants.MIN_SHAPES_FOR_ALIGNMENT))
                 {
                     var aligner = new ShapeAligner();
                     aligner.AlignLeftToRight(shapes);
-                    string successMessage = ComExceptionHandler.CreateSuccessMessage(
-                        "左端→右端隣接整列", $"{shapes.Count}個の図形を整列しました");
-                    RibbonHelper.ShowSuccessMessage(successMessage);
+                    ErrorHandler.ShowOperationSuccess("左端→右端隣接整列", $"{shapes.Count}個の図形を整列しました");
                 }
                 else
                 {
-                    RibbonHelper.ShowSelectionError();
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_ALIGNMENT, "左端→右端整列");
                 }
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("左端→右端整列", ex);
+                ErrorHandler.ShowOperationError("左端→右端整列", ex);
             }
         }
 
@@ -315,22 +249,20 @@ namespace MagosaAddIn.UI
             try
             {
                 var shapes = RibbonHelper.GetMultipleSelectedShapes();
-                if (shapes != null && shapes.Count >= 2)
+                if (RibbonHelper.ValidateShapeSelection(Constants.MIN_SHAPES_FOR_ALIGNMENT))
                 {
                     var aligner = new ShapeAligner();
                     aligner.AlignRightToLeft(shapes);
-                    string successMessage = ComExceptionHandler.CreateSuccessMessage(
-                        "右端→左端隣接整列", $"{shapes.Count}個の図形を整列しました");
-                    RibbonHelper.ShowSuccessMessage(successMessage);
+                    ErrorHandler.ShowOperationSuccess("右端→左端隣接整列", $"{shapes.Count}個の図形を整列しました");
                 }
                 else
                 {
-                    RibbonHelper.ShowSelectionError();
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_ALIGNMENT, "右端→左端整列");
                 }
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("右端→左端整列", ex);
+                ErrorHandler.ShowOperationError("右端→左端整列", ex);
             }
         }
 
@@ -339,22 +271,20 @@ namespace MagosaAddIn.UI
             try
             {
                 var shapes = RibbonHelper.GetMultipleSelectedShapes();
-                if (shapes != null && shapes.Count >= 2)
+                if (RibbonHelper.ValidateShapeSelection(Constants.MIN_SHAPES_FOR_ALIGNMENT))
                 {
                     var aligner = new ShapeAligner();
                     aligner.AlignTopToBottom(shapes);
-                    string successMessage = ComExceptionHandler.CreateSuccessMessage(
-                        "上端→下端隣接整列", $"{shapes.Count}個の図形を整列しました");
-                    RibbonHelper.ShowSuccessMessage(successMessage);
+                    ErrorHandler.ShowOperationSuccess("上端→下端隣接整列", $"{shapes.Count}個の図形を整列しました");
                 }
                 else
                 {
-                    RibbonHelper.ShowSelectionError();
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_ALIGNMENT, "上端→下端整列");
                 }
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("上端→下端整列", ex);
+                ErrorHandler.ShowOperationError("上端→下端整列", ex);
             }
         }
 
@@ -363,22 +293,20 @@ namespace MagosaAddIn.UI
             try
             {
                 var shapes = RibbonHelper.GetMultipleSelectedShapes();
-                if (shapes != null && shapes.Count >= 2)
+                if (RibbonHelper.ValidateShapeSelection(Constants.MIN_SHAPES_FOR_ALIGNMENT))
                 {
                     var aligner = new ShapeAligner();
                     aligner.AlignBottomToTop(shapes);
-                    string successMessage = ComExceptionHandler.CreateSuccessMessage(
-                        "下端→上端隣接整列", $"{shapes.Count}個の図形を整列しました");
-                    RibbonHelper.ShowSuccessMessage(successMessage);
+                    ErrorHandler.ShowOperationSuccess("下端→上端隣接整列", $"{shapes.Count}個の図形を整列しました");
                 }
                 else
                 {
-                    RibbonHelper.ShowSelectionError();
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_ALIGNMENT, "下端→上端整列");
                 }
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("下端→上端整列", ex);
+                ErrorHandler.ShowOperationError("下端→上端整列", ex);
             }
         }
 
@@ -391,22 +319,20 @@ namespace MagosaAddIn.UI
             try
             {
                 var shapes = RibbonHelper.GetMultipleSelectedShapes();
-                if (shapes != null && shapes.Count >= 2)
+                if (RibbonHelper.ValidateShapeSelection(Constants.MIN_SHAPES_FOR_ALIGNMENT))
                 {
                     var aligner = new ShapeAligner();
                     aligner.AlignAndDistributeHorizontal(shapes);
-                    string successMessage = ComExceptionHandler.CreateSuccessMessage(
-                        "水平中央揃え・等間隔配置", $"{shapes.Count}個の図形を配置しました");
-                    RibbonHelper.ShowSuccessMessage(successMessage);
+                    ErrorHandler.ShowOperationSuccess("水平中央揃え・等間隔配置", $"{shapes.Count}個の図形を配置しました");
                 }
                 else
                 {
-                    RibbonHelper.ShowSelectionError();
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_ALIGNMENT, "水平中央揃え・等間隔配置");
                 }
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("水平中央揃え・等間隔配置", ex);
+                ErrorHandler.ShowOperationError("水平中央揃え・等間隔配置", ex);
             }
         }
 
@@ -415,22 +341,20 @@ namespace MagosaAddIn.UI
             try
             {
                 var shapes = RibbonHelper.GetMultipleSelectedShapes();
-                if (shapes != null && shapes.Count >= 2)
+                if (RibbonHelper.ValidateShapeSelection(Constants.MIN_SHAPES_FOR_ALIGNMENT))
                 {
                     var aligner = new ShapeAligner();
                     aligner.AlignAndDistributeVertical(shapes);
-                    string successMessage = ComExceptionHandler.CreateSuccessMessage(
-                        "垂直中央揃え・等間隔配置", $"{shapes.Count}個の図形を配置しました");
-                    RibbonHelper.ShowSuccessMessage(successMessage);
+                    ErrorHandler.ShowOperationSuccess("垂直中央揃え・等間隔配置", $"{shapes.Count}個の図形を配置しました");
                 }
                 else
                 {
-                    RibbonHelper.ShowSelectionError();
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_ALIGNMENT, "垂直中央揃え・等間隔配置");
                 }
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("垂直中央揃え・等間隔配置", ex);
+                ErrorHandler.ShowOperationError("垂直中央揃え・等間隔配置", ex);
             }
         }
 
@@ -439,18 +363,18 @@ namespace MagosaAddIn.UI
             try
             {
                 var shapes = RibbonHelper.GetMultipleSelectedShapes();
-                if (shapes != null && shapes.Count >= 2)
+                if (RibbonHelper.ValidateShapeSelection(Constants.MIN_SHAPES_FOR_ALIGNMENT))
                 {
                     ShowHorizontalMarginDialog(shapes);
                 }
                 else
                 {
-                    RibbonHelper.ShowSelectionError();
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_ALIGNMENT, "水平マージン配置");
                 }
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("水平マージン配置", ex);
+                ErrorHandler.ShowOperationError("水平マージン配置", ex);
             }
         }
 
@@ -459,18 +383,18 @@ namespace MagosaAddIn.UI
             try
             {
                 var shapes = RibbonHelper.GetMultipleSelectedShapes();
-                if (shapes != null && shapes.Count >= 2)
+                if (RibbonHelper.ValidateShapeSelection(Constants.MIN_SHAPES_FOR_ALIGNMENT))
                 {
                     ShowVerticalMarginDialog(shapes);
                 }
                 else
                 {
-                    RibbonHelper.ShowSelectionError();
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_ALIGNMENT, "垂直マージン配置");
                 }
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("垂直マージン配置", ex);
+                ErrorHandler.ShowOperationError("垂直マージン配置", ex);
             }
         }
 
@@ -479,18 +403,18 @@ namespace MagosaAddIn.UI
             try
             {
                 var shapes = RibbonHelper.GetMultipleSelectedShapes();
-                if (shapes != null && shapes.Count >= 2)
+                if (RibbonHelper.ValidateShapeSelection(Constants.MIN_SHAPES_FOR_ALIGNMENT))
                 {
                     ShowGridArrangementDialog(shapes);
                 }
                 else
                 {
-                    RibbonHelper.ShowSelectionError();
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_ALIGNMENT, "グリッド配置");
                 }
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("グリッド配置", ex);
+                ErrorHandler.ShowOperationError("グリッド配置", ex);
             }
         }
 
@@ -499,18 +423,18 @@ namespace MagosaAddIn.UI
             try
             {
                 var shapes = RibbonHelper.GetMultipleSelectedShapes();
-                if (shapes != null && shapes.Count >= 2)
+                if (RibbonHelper.ValidateShapeSelection(Constants.MIN_SHAPES_FOR_ALIGNMENT))
                 {
                     ShowCircleArrangementDialog(shapes);
                 }
                 else
                 {
-                    RibbonHelper.ShowSelectionError();
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_ALIGNMENT, "円形配置");
                 }
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("円形配置", ex);
+                ErrorHandler.ShowOperationError("円形配置", ex);
             }
         }
 
@@ -528,16 +452,14 @@ namespace MagosaAddIn.UI
                     {
                         var aligner = new ShapeAligner();
                         aligner.ArrangeHorizontalWithMargin(shapes, dialog.Margin);
-                        string successMessage = ComExceptionHandler.CreateSuccessMessage(
-                            "水平マージン配置",
+                        ErrorHandler.ShowOperationSuccess("水平マージン配置",
                             $"{shapes.Count}個の図形をマージン{dialog.Margin:F1}ptで配置しました");
-                        RibbonHelper.ShowSuccessMessage(successMessage);
                     }
                 }
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("水平マージン配置", ex);
+                ErrorHandler.ShowOperationError("水平マージン配置", ex);
             }
         }
 
@@ -551,16 +473,14 @@ namespace MagosaAddIn.UI
                     {
                         var aligner = new ShapeAligner();
                         aligner.ArrangeVerticalWithMargin(shapes, dialog.Margin);
-                        string successMessage = ComExceptionHandler.CreateSuccessMessage(
-                            "垂直マージン配置",
+                        ErrorHandler.ShowOperationSuccess("垂直マージン配置",
                             $"{shapes.Count}個の図形をマージン{dialog.Margin:F1}ptで配置しました");
-                        RibbonHelper.ShowSuccessMessage(successMessage);
                     }
                 }
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("垂直マージン配置", ex);
+                ErrorHandler.ShowOperationError("垂直マージン配置", ex);
             }
         }
 
@@ -574,16 +494,14 @@ namespace MagosaAddIn.UI
                     {
                         var aligner = new ShapeAligner();
                         aligner.ArrangeInGrid(shapes, dialog.Columns, dialog.HorizontalSpacing, dialog.VerticalSpacing);
-                        string successMessage = ComExceptionHandler.CreateSuccessMessage(
-                            "グリッド配置",
+                        ErrorHandler.ShowOperationSuccess("グリッド配置",
                             $"{shapes.Count}個の図形を{dialog.Columns}列のグリッドに配置しました");
-                        RibbonHelper.ShowSuccessMessage(successMessage);
                     }
                 }
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("グリッド配置", ex);
+                ErrorHandler.ShowOperationError("グリッド配置", ex);
             }
         }
 
@@ -597,16 +515,115 @@ namespace MagosaAddIn.UI
                     {
                         var aligner = new ShapeAligner();
                         aligner.ArrangeInCircle(shapes, dialog.CenterX, dialog.CenterY, dialog.Radius);
-                        string successMessage = ComExceptionHandler.CreateSuccessMessage(
-                            "円形配置",
+                        ErrorHandler.ShowOperationSuccess("円形配置",
                             $"{shapes.Count}個の図形を円形に配置しました");
-                        RibbonHelper.ShowSuccessMessage(successMessage);
                     }
                 }
             }
             catch (Exception ex)
             {
-                RibbonHelper.ShowAlignmentError("円形配置", ex);
+                ErrorHandler.ShowOperationError("円形配置", ex);
+            }
+        }
+
+        #endregion
+
+        #region 選択補助機能
+
+        private void btnSelectSameFormat_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                // 基準となる図形を取得（単一選択が必要）
+                var baseShape = GetSingleShapeForFormatSelection();
+                if (baseShape == null)
+                {
+                    ErrorHandler.ShowSelectionError(1, "同一書式選択");
+                    return;
+                }
+
+                // 選択条件ダイアログを表示
+                ShowShapeSelectionDialog(baseShape);
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("同一書式選択", ex);
+            }
+        }
+
+        /// <summary>
+        /// 書式選択用の単一図形を取得
+        /// </summary>
+        /// <returns>基準図形、または null</returns>
+        private PowerPoint.Shape GetSingleShapeForFormatSelection()
+        {
+            return ComExceptionHandler.HandleComOperation(
+                () => {
+                    var app = Globals.ThisAddIn.Application;
+                    if (app?.ActiveWindow?.Selection == null)
+                        return null;
+
+                    var selection = app.ActiveWindow.Selection;
+
+                    if (selection.Type == PowerPoint.PpSelectionType.ppSelectionShapes &&
+                        selection.ShapeRange.Count == 1)
+                    {
+                        return selection.ShapeRange[1];
+                    }
+
+                    return null;
+                },
+                "書式選択用図形取得",
+                defaultValue: null,
+                throwOnError: false);
+        }
+
+        /// <summary>
+        /// 図形選択ダイアログを表示
+        /// </summary>
+        /// <param name="baseShape">基準図形</param>
+        private void ShowShapeSelectionDialog(PowerPoint.Shape baseShape)
+        {
+            try
+            {
+                using (var dialog = new MagosaAddIn.UI.ShapeSelectionDialog(baseShape))
+                {
+                    if (dialog.ShowDialog() == DialogResult.OK)
+                    {
+                        var selector = new ShapeSelector();
+                        selector.SelectShapesByFormat(baseShape, dialog.SelectedCriteria);
+
+                        string criteriaText = GetCriteriaDisplayText(dialog.SelectedCriteria);
+                        ErrorHandler.ShowOperationSuccess("同一書式選択",
+                            $"条件「{criteriaText}」で{dialog.MatchingShapeCount}個の図形を選択しました");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("同一書式選択", ex);
+            }
+        }
+
+        /// <summary>
+        /// 選択条件の表示用テキストを取得
+        /// </summary>
+        /// <param name="criteria">選択条件</param>
+        /// <returns>表示用テキスト</returns>
+        private string GetCriteriaDisplayText(SelectionCriteria criteria)
+        {
+            switch (criteria)
+            {
+                case SelectionCriteria.FillColorOnly:
+                    return "塗りのカラーコードが同じもの";
+                case SelectionCriteria.LineStyleOnly:
+                    return "枠線のスタイルが同じもの";
+                case SelectionCriteria.FillAndLineStyle:
+                    return "塗りと枠線のスタイルが同じもの";
+                case SelectionCriteria.ShapeTypeOnly:
+                    return "シェイプの種類が同じもの";
+                default:
+                    return "不明な条件";
             }
         }
 
