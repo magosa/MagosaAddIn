@@ -56,13 +56,21 @@
             this.btnArrangeInCircle = this.Factory.CreateRibbonButton();
             this.group5 = this.Factory.CreateRibbonGroup();
             this.btnSelectSameFormat = this.Factory.CreateRibbonButton();
+            // 新規追加: ハンドル調整グループ
+            this.group6 = this.Factory.CreateRibbonGroup();
+            this.btnAdjustmentHandles = this.Factory.CreateRibbonButton();
+            this.btnAngleHandles = this.Factory.CreateRibbonButton();
+            this.btnResetAdjustments = this.Factory.CreateRibbonButton();
+
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
             this.group2.SuspendLayout();
             this.group3.SuspendLayout();
             this.group4.SuspendLayout();
             this.group5.SuspendLayout();
+            this.group6.SuspendLayout(); // 新規追加
             this.SuspendLayout();
+
             // 
             // tab1
             // 
@@ -72,14 +80,17 @@
             this.tab1.Groups.Add(this.group3);
             this.tab1.Groups.Add(this.group4);
             this.tab1.Groups.Add(this.group5);
+            this.tab1.Groups.Add(this.group6); // 新規追加
             this.tab1.Label = "Magosa Tools";
             this.tab1.Name = "tab1";
+
             // 
             // group1
             // 
             this.group1.Items.Add(this.btnDivideShape);
             this.group1.Label = "図形操作";
             this.group1.Name = "group1";
+
             // 
             // btnDivideShape
             // 
@@ -89,6 +100,7 @@
             this.btnDivideShape.ShowImage = true;
             this.btnDivideShape.SuperTip = "選択した四角形を指定した行・列数で分割します。水平・垂直マージンを個別に設定できます。";
             this.btnDivideShape.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnDivideShape_Click);
+
             // 
             // group2
             // 
@@ -98,6 +110,7 @@
             this.group2.Items.Add(this.btnAlignToBottom);
             this.group2.Label = "基準整列";
             this.group2.Name = "group2";
+
             // 
             // btnAlignToLeft
             // 
@@ -107,6 +120,7 @@
             this.btnAlignToLeft.ShowImage = true;
             this.btnAlignToLeft.SuperTip = "基準図形の左端に、その他の図形の左端を揃えます。";
             this.btnAlignToLeft.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignToLeft_Click);
+
             // 
             // btnAlignToRight
             // 
@@ -116,6 +130,7 @@
             this.btnAlignToRight.ShowImage = true;
             this.btnAlignToRight.SuperTip = "基準図形の右端に、その他の図形の右端を揃えます。";
             this.btnAlignToRight.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignToRight_Click);
+
             // 
             // btnAlignToTop
             // 
@@ -125,6 +140,7 @@
             this.btnAlignToTop.ShowImage = true;
             this.btnAlignToTop.SuperTip = "基準図形の上端に、その他の図形の上端を揃えます。";
             this.btnAlignToTop.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignToTop_Click);
+
             // 
             // btnAlignToBottom
             // 
@@ -134,6 +150,7 @@
             this.btnAlignToBottom.ShowImage = true;
             this.btnAlignToBottom.SuperTip = "基準図形の下端に、その他の図形の下端を揃えます。";
             this.btnAlignToBottom.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignToBottom_Click);
+
             // 
             // group3
             // 
@@ -143,6 +160,7 @@
             this.group3.Items.Add(this.btnAlignBottomToTop);
             this.group3.Label = "隣接整列";
             this.group3.Name = "group3";
+
             // 
             // btnAlignLeftToRight
             // 
@@ -152,6 +170,7 @@
             this.btnAlignLeftToRight.ShowImage = true;
             this.btnAlignLeftToRight.SuperTip = "基準図形の左端に、その他の図形の右端を隣接させます。";
             this.btnAlignLeftToRight.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignLeftToRight_Click);
+
             // 
             // btnAlignRightToLeft
             // 
@@ -161,6 +180,7 @@
             this.btnAlignRightToLeft.ShowImage = true;
             this.btnAlignRightToLeft.SuperTip = "基準図形の右端に、その他の図形の左端を隣接させます。";
             this.btnAlignRightToLeft.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignRightToLeft_Click);
+
             // 
             // btnAlignTopToBottom
             // 
@@ -170,6 +190,7 @@
             this.btnAlignTopToBottom.ShowImage = true;
             this.btnAlignTopToBottom.SuperTip = "基準図形の上端に、その他の図形の下端を隣接させます。";
             this.btnAlignTopToBottom.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignTopToBottom_Click);
+
             // 
             // btnAlignBottomToTop
             // 
@@ -179,6 +200,7 @@
             this.btnAlignBottomToTop.ShowImage = true;
             this.btnAlignBottomToTop.SuperTip = "基準図形の下端に、その他の図形の上端を隣接させます。";
             this.btnAlignBottomToTop.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignBottomToTop_Click);
+
             // 
             // group4
             // 
@@ -190,6 +212,7 @@
             this.group4.Items.Add(this.btnArrangeInCircle);
             this.group4.Label = "拡張整列";
             this.group4.Name = "group4";
+
             // 
             // btnAlignAndDistributeHorizontal
             // 
@@ -199,6 +222,7 @@
             this.btnAlignAndDistributeHorizontal.ShowImage = true;
             this.btnAlignAndDistributeHorizontal.SuperTip = "基準図形の水平中央に揃えて等間隔で配置します。2つの図形の場合は中央揃えのみ実行されます。";
             this.btnAlignAndDistributeHorizontal.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignAndDistributeHorizontal_Click);
+
             // 
             // btnAlignAndDistributeVertical
             // 
@@ -208,6 +232,7 @@
             this.btnAlignAndDistributeVertical.ShowImage = true;
             this.btnAlignAndDistributeVertical.SuperTip = "基準図形の垂直中央に揃えて等間隔で配置します。2つの図形の場合は中央揃えのみ実行されます。";
             this.btnAlignAndDistributeVertical.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignAndDistributeVertical_Click);
+
             // 
             // btnArrangeInGrid
             // 
@@ -217,6 +242,7 @@
             this.btnArrangeInGrid.ShowImage = true;
             this.btnArrangeInGrid.SuperTip = "選択した図形を指定した列数のグリッド状に配置します。水平・垂直間隔を個別に設定できます。";
             this.btnArrangeInGrid.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnArrangeInGrid_Click);
+
             // 
             // btnArrangeHorizontalWithMargin
             // 
@@ -226,6 +252,7 @@
             this.btnArrangeHorizontalWithMargin.ShowImage = true;
             this.btnArrangeHorizontalWithMargin.SuperTip = "基準図形を中心に任意のマージンで水平方向に配置します。元の位置関係を保持します。";
             this.btnArrangeHorizontalWithMargin.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnArrangeHorizontalWithMargin_Click);
+
             // 
             // btnArrangeVerticalWithMargin
             // 
@@ -235,6 +262,7 @@
             this.btnArrangeVerticalWithMargin.ShowImage = true;
             this.btnArrangeVerticalWithMargin.SuperTip = "基準図形を中心に任意のマージンで垂直方向に配置します。元の位置関係を保持します。";
             this.btnArrangeVerticalWithMargin.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnArrangeVerticalWithMargin_Click);
+
             // 
             // btnArrangeInCircle
             // 
@@ -244,12 +272,14 @@
             this.btnArrangeInCircle.ShowImage = true;
             this.btnArrangeInCircle.SuperTip = "選択した図形を指定した中心と半径で円形に配置します。選択図形の中心を自動取得することも可能です。";
             this.btnArrangeInCircle.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnArrangeInCircle_Click);
+
             // 
             // group5
             // 
             this.group5.Items.Add(this.btnSelectSameFormat);
             this.group5.Label = "選択補助";
             this.group5.Name = "group5";
+
             // 
             // btnSelectSameFormat
             // 
@@ -259,6 +289,46 @@
             this.btnSelectSameFormat.ShowImage = true;
             this.btnSelectSameFormat.SuperTip = "選択中の図形を基準に、同じ書式を持つ図形を選択します。塗りつぶし色、枠線スタイル、またはその両方から選択条件を指定できます。";
             this.btnSelectSameFormat.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnSelectSameFormat_Click);
+
+            // 
+            // group6 - 新規追加: ハンドル調整グループ
+            // 
+            this.group6.Items.Add(this.btnAdjustmentHandles);
+            this.group6.Items.Add(this.btnAngleHandles);
+            this.group6.Items.Add(this.btnResetAdjustments);
+            this.group6.Label = "ハンドル調整";
+            this.group6.Name = "group6";
+
+            // 
+            // btnAdjustmentHandles - 新規追加
+            // 
+            this.btnAdjustmentHandles.Label = "調整ハンドル";
+            this.btnAdjustmentHandles.Name = "btnAdjustmentHandles";
+            this.btnAdjustmentHandles.OfficeImageId = "ShapeAdjustHandles";
+            this.btnAdjustmentHandles.ShowImage = true;
+            this.btnAdjustmentHandles.SuperTip = "選択した図形の調整ハンドルを数値で精密に設定します。角丸四角形の角丸、吹き出しの尻尾位置、矢印の矢じりなどを調整できます。";
+            this.btnAdjustmentHandles.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAdjustmentHandles_Click);
+
+            // 
+            // btnAngleHandles - 新規追加
+            // 
+            this.btnAngleHandles.Label = "角度ハンドル";
+            this.btnAngleHandles.Name = "btnAngleHandles";
+            this.btnAngleHandles.OfficeImageId = "ShapeRotateCounterclockwise90";
+            this.btnAngleHandles.ShowImage = true;
+            this.btnAngleHandles.SuperTip = "円弧・弦・扇形・ブロック円弧・ドーナツ・三日月などの角度ハンドルを数値で精密に設定します。開始角度、終了角度、内径比率などを制御できます。";
+            this.btnAngleHandles.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAngleHandles_Click);
+
+            // 
+            // btnResetAdjustments - 新規追加
+            // 
+            this.btnResetAdjustments.Label = "リセット";
+            this.btnResetAdjustments.Name = "btnResetAdjustments";
+            this.btnResetAdjustments.OfficeImageId = "Undo";
+            this.btnResetAdjustments.ShowImage = true;
+            this.btnResetAdjustments.SuperTip = "選択した図形の調整ハンドルと角度ハンドルをデフォルト値にリセットします。";
+            this.btnResetAdjustments.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnResetAdjustments_Click);
+
             // 
             // CustomRibbon
             // 
@@ -278,8 +348,9 @@
             this.group4.PerformLayout();
             this.group5.ResumeLayout(false);
             this.group5.PerformLayout();
+            this.group6.ResumeLayout(false); // 新規追加
+            this.group6.PerformLayout(); // 新規追加
             this.ResumeLayout(false);
-
         }
 
         #endregion
@@ -316,6 +387,12 @@
         // Group 5: 選択補助
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group5;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnSelectSameFormat;
+
+        // Group 6: ハンドル調整（新規追加）
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup group6;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnAdjustmentHandles;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnAngleHandles;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnResetAdjustments;
     }
 
     partial class ThisRibbonCollection

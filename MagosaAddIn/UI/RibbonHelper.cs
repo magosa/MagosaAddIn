@@ -51,27 +51,75 @@ namespace MagosaAddIn.UI
         /// <returns>選択された図形のリスト、または null</returns>
         public static List<PowerPoint.Shape> GetMultipleSelectedShapes()
         {
+            //return ComExceptionHandler.HandleComOperation(
+            //    () => {
+            //        ComExceptionHandler.LogDebug("GetMultipleSelectedShapes: 開始");
+            //        var app = Globals.ThisAddIn.Application;
+            //        if (app?.ActiveWindow?.Selection == null)
+            //        {
+            //            ComExceptionHandler.LogDebug("GetMultipleSelectedShapes: app/ActiveWindow/Selectionがnull");
+            //            return null;
+            //        }
+
+            //        var selection = app.ActiveWindow.Selection;
+            //        ComExceptionHandler.LogDebug($"GetMultipleSelectedShapes: Selection.Type = {selection.Type}");
+
+            //        if (selection.Type == PowerPoint.PpSelectionType.ppSelectionShapes &&
+            //            selection.ShapeRange.Count >= Constants.MIN_SHAPES_FOR_ALIGNMENT)
+            //        {
+            //            var shapes = new List<PowerPoint.Shape>();
+            //            for (int i = 1; i <= selection.ShapeRange.Count; i++)
+            //            {
+            //                shapes.Add(selection.ShapeRange[i]);
+            //            }
+            //            return shapes;
+            //        }
+
+            //        return null;
+            //    },
             return ComExceptionHandler.HandleComOperation(
-                () => {
-                    var app = Globals.ThisAddIn.Application;
-                    if (app?.ActiveWindow?.Selection == null)
-                        return null;
+            () => {
+                ComExceptionHandler.LogDebug("GetMultipleSelectedShapes: 開始");
 
-                    var selection = app.ActiveWindow.Selection;
+                var app = Globals.ThisAddIn.Application;
+                if (app?.ActiveWindow?.Selection == null)
+                {
+                    ComExceptionHandler.LogDebug("GetMultipleSelectedShapes: app/ActiveWindow/Selectionがnull");
+                    return null;
+                }
 
-                    if (selection.Type == PowerPoint.PpSelectionType.ppSelectionShapes &&
-                        selection.ShapeRange.Count >= Constants.MIN_SHAPES_FOR_ALIGNMENT)
+                var selection = app.ActiveWindow.Selection;
+                ComExceptionHandler.LogDebug($"GetMultipleSelectedShapes: Selection.Type = {selection.Type}");
+
+                if (selection.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+                {
+                    ComExceptionHandler.LogDebug($"GetMultipleSelectedShapes: ShapeRange.Count = {selection.ShapeRange.Count}");
+                    ComExceptionHandler.LogDebug($"GetMultipleSelectedShapes: 最小要件 = {Constants.MIN_SHAPES_FOR_ALIGNMENT}");
+
+                    if (selection.ShapeRange.Count >= Constants.MIN_SHAPES_FOR_ALIGNMENT)
                     {
                         var shapes = new List<PowerPoint.Shape>();
                         for (int i = 1; i <= selection.ShapeRange.Count; i++)
                         {
                             shapes.Add(selection.ShapeRange[i]);
+                            ComExceptionHandler.LogDebug($"GetMultipleSelectedShapes: 図形{i}を追加 - {selection.ShapeRange[i].Name}");
                         }
+                        ComExceptionHandler.LogDebug($"GetMultipleSelectedShapes: 成功 - {shapes.Count}個の図形を返す");
                         return shapes;
                     }
+                    else
+                    {
+                        ComExceptionHandler.LogDebug($"GetMultipleSelectedShapes: 図形数不足 - {selection.ShapeRange.Count}個 < {Constants.MIN_SHAPES_FOR_ALIGNMENT}個");
+                    }
+                }
+                else
+                {
+                    ComExceptionHandler.LogDebug($"GetMultipleSelectedShapes: 図形選択ではない - Type = {selection.Type}");
+                }
 
-                    return null;
-                },
+                ComExceptionHandler.LogDebug("GetMultipleSelectedShapes: nullを返す");
+                return null;
+            },
                 "複数図形取得",
                 defaultValue: null,
                 throwOnError: false);

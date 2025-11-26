@@ -205,6 +205,7 @@
     can be found.
   -->
   <ItemGroup>
+    <Compile Include="Core\ShapeHandleAdjuster.cs" />
     <Compile Include="Core\ComExceptionHandler.cs" />
     <Compile Include="Core\Constants.cs" />
     <Compile Include="Core\DataModels.cs" />
@@ -238,6 +239,7 @@
     <EmbeddedResource Include="UI\CustomRibbon.resx">
       <DependentUpon>CustomRibbon.cs</DependentUpon>
     </EmbeddedResource>
+    <None Include="MagosaAddIn_1_TemporaryKey.pfx" />
     <None Include="MagosaAddIn_TemporaryKey.pfx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -266,10 +268,10 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>MagosaAddIn_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>MagosaAddIn_1_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>48C0B183D1EA1304C303D09E8E14690B5732AE5C</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>F6F5F69CC988A5AE690A83DB6182240E9555299D</ManifestCertificateThumbprint>
   </PropertyGroup>
   <!-- Include the build rules for a C# project. -->
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -197,5 +197,74 @@
         public const int MIN_SHAPES_FOR_FORMAT_SELECTION = 1;
 
         #endregion
+
+        #region 図形ハンドル調整関連
+
+        /// <summary>
+        /// デフォルト調整ハンドル値（正規化値）
+        /// </summary>
+        public const float DEFAULT_HANDLE_VALUE = 0.5f;
+
+        /// <summary>
+        /// 調整ハンドル値の最小値（正規化値）
+        /// </summary>
+        public const float MIN_HANDLE_VALUE = 0.0f;
+
+        /// <summary>
+        /// 調整ハンドル値の最大値（正規化値）
+        /// </summary>
+        public const float MAX_HANDLE_VALUE = 1.0f;
+
+        /// <summary>
+        /// ハンドル調整に必要な最小図形数
+        /// </summary>
+        public const int MIN_SHAPES_FOR_HANDLE_ADJUSTMENT = 1;
+
+        /// <summary>
+        /// サポートする最大調整ハンドル数
+        /// </summary>
+        public const int MAX_SUPPORTED_HANDLES = 8;
+
+        /// <summary>
+        /// デフォルト調整値（mm）
+        /// </summary>
+        public const float DEFAULT_HANDLE_MM = 3.0f;
+
+        /// <summary>
+        /// 調整値の最小値（mm）
+        /// </summary>
+        public const float MIN_HANDLE_MM = 0.0f;
+
+        /// <summary>
+        /// 調整値の最大値（mm）
+        /// </summary>
+        public const float MAX_HANDLE_MM = 50.0f;
+
+        /// <summary>
+        /// デフォルト角度値（度）
+        /// </summary>
+        public const float DEFAULT_ANGLE_DEGREE = 24.0f;
+
+        /// <summary>
+        /// 角度の最小値（度）
+        /// </summary>
+        public const float MIN_ANGLE_DEGREE = 0.0f;
+
+        /// <summary>
+        /// 角度の最大値（度）
+        /// </summary>
+        public const float MAX_ANGLE_DEGREE = 360.0f;
+
+        /// <summary>
+        /// mm→pt変換係数（1mm = 2.834645669pt）
+        /// </summary>
+        public const float MM_TO_PT = 2.834645669f;
+
+        /// <summary>
+        /// pt→mm変換係数
+        /// </summary>
+        public const float PT_TO_MM = 1.0f / MM_TO_PT;
+
+        #endregion
     }
 }

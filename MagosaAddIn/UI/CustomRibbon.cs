@@ -628,5 +628,323 @@ namespace MagosaAddIn.UI
         }
 
         #endregion
+
+        #region ハンドル調整機能
+
+        /// <summary>
+        /// 調整ハンドルボタン（一般的な図形の調整ハンドル）
+        /// </summary>
+        private void btnAdjustmentHandles_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                // ★修正: ハンドル調整用の図形取得メソッドを使用★
+                var shapes = GetShapesForHandleAdjustment();
+
+                ComExceptionHandler.LogDebug($"btnAdjustmentHandles_Click: 取得した図形数 = {shapes?.Count ?? 0}");
+
+                if (shapes != null && shapes.Count >= Constants.MIN_SHAPES_FOR_HANDLE_ADJUSTMENT)
+                {
+                    var adjuster = new ShapeHandleAdjuster();
+
+                    // デバッグ情報出力
+                    ComExceptionHandler.LogDebug("=== 調整ハンドル処理開始 ===");
+                    adjuster.DebugMultipleShapesInfoLight(shapes);
+
+                    var analysis = adjuster.AnalyzeShapes(shapes);
+
+                    // 分析結果のデバッグ出力
+                    ComExceptionHandler.LogDebug($"分析結果: {analysis}");
+                    ComExceptionHandler.LogDebug($"HasAdjustmentHandles: {analysis.HasAdjustmentHandles}");
+                    ComExceptionHandler.LogDebug($"RecommendedHandleCount: {analysis.RecommendedHandleCount}");
+
+                    if (!analysis.HasAdjustmentHandles)
+                    {
+                        // エラー前にもう一度詳細確認
+                        ComExceptionHandler.LogDebug("=== エラー発生前の最終確認 ===");
+                        foreach (var shapeInfo in analysis.ShapeInfos)
+                        {
+                            ComExceptionHandler.LogDebug($"図形: {shapeInfo.ShapeName}, " +
+                                $"タイプ: {shapeInfo.ShapeType}, " +
+                                $"ハンドル数: {shapeInfo.AdjustmentCount}, " +
+                                $"調整可能: {shapeInfo.IsAdjustmentHandleShape}");
+                        }
+
+                        MessageBox.Show(
+                            "選択された図形には調整ハンドルがありません。\n\n" +
+                            "調整ハンドル対応図形の例:\n" +
+                            "・角丸四角形（角丸の調整）\n" +
+                            "・吹き出し（尻尾の位置調整）\n" +
+                            "・矢印（矢じりの調整）\n" +
+                            "・星形（内側の頂点調整）など",
+                            "調整ハンドル",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
+                        return;
+                    }
+
+                    ShowAdjustmentHandleDialog(shapes, analysis);
+                }
+                else
+                {
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_HANDLE_ADJUSTMENT, "調整ハンドル");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("調整ハンドル", ex);
+            }
+        }
+
+        /// <summary>
+        /// ハンドル調整用の図形取得（1個以上対応）
+        /// </summary>
+        private List<PowerPoint.Shape> GetShapesForHandleAdjustment()
+        {
+            return ComExceptionHandler.HandleComOperation(
+                () => {
+                    ComExceptionHandler.LogDebug("GetShapesForHandleAdjustment: 開始");
+
+                    var app = Globals.ThisAddIn.Application;
+                    if (app?.ActiveWindow?.Selection == null)
+                    {
+                        ComExceptionHandler.LogDebug("GetShapesForHandleAdjustment: app/ActiveWindow/Selectionがnull");
+                        return null;
+                    }
+
+                    var selection = app.ActiveWindow.Selection;
+                    ComExceptionHandler.LogDebug($"GetShapesForHandleAdjustment: Selection.Type = {selection.Type}");
+
+                    if (selection.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
+                    {
+                        ComExceptionHandler.LogDebug($"GetShapesForHandleAdjustment: ShapeRange.Count = {selection.ShapeRange.Count}");
+
+                        // ★修正: 1個以上であればOK★
+                        if (selection.ShapeRange.Count >= 1)
+                        {
+                            var shapes = new List<PowerPoint.Shape>();
+                            for (int i = 1; i <= selection.ShapeRange.Count; i++)
+                            {
+                                shapes.Add(selection.ShapeRange[i]);
+                                ComExceptionHandler.LogDebug($"GetShapesForHandleAdjustment: 図形{i}を追加 - {selection.ShapeRange[i].Name}");
+                            }
+                            ComExceptionHandler.LogDebug($"GetShapesForHandleAdjustment: 成功 - {shapes.Count}個の図形を返す");
+                            return shapes;
+                        }
+                        else
+                        {
+                            ComExceptionHandler.LogDebug($"GetShapesForHandleAdjustment: 図形が選択されていない");
+                        }
+                    }
+                    else
+                    {
+                        ComExceptionHandler.LogDebug($"GetShapesForHandleAdjustment: 図形選択ではない - Type = {selection.Type}");
+                    }
+
+                    ComExceptionHandler.LogDebug("GetShapesForHandleAdjustment: nullを返す");
+                    return null;
+                },
+                "ハンドル調整用図形取得",
+                defaultValue: null,
+                throwOnError: false);
+        }
+
+        /// <summary>
+        /// 角度ハンドルボタン（角度制御する図形専用）
+        /// </summary>
+        private void btnAngleHandles_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var shapes = GetShapesForHandleAdjustment();
+
+                ComExceptionHandler.LogDebug($"btnAngleHandles_Click: 取得した図形数 = {shapes?.Count ?? 0}");
+
+                if (shapes != null && shapes.Count >= Constants.MIN_SHAPES_FOR_HANDLE_ADJUSTMENT)
+                {
+                    var adjuster = new ShapeHandleAdjuster();
+
+                    // デバッグ情報出力（軽量版）
+                    ComExceptionHandler.LogDebug("=== PowerPoint動作調査開始 ===");
+                    adjuster.DebugMultipleShapesInfoLight(shapes); // 軽量版を使用
+
+                    var analysis = adjuster.AnalyzeShapes(shapes); // 高速化版を使用
+
+                    // 分析結果のデバッグ出力
+                    ComExceptionHandler.LogDebug($"角度ハンドル分析結果: {analysis}");
+                    ComExceptionHandler.LogDebug($"HasAngleHandles: {analysis.HasAngleHandles}");
+                    ComExceptionHandler.LogDebug($"RecommendedAngleHandleCount: {analysis.RecommendedAngleHandleCount}");
+
+                    if (!analysis.HasAngleHandles)
+                    {
+                        // エラー前にもう一度詳細確認
+                        ComExceptionHandler.LogDebug("=== 角度ハンドルエラー発生前の最終確認 ===");
+                        foreach (var shapeInfo in analysis.ShapeInfos)
+                        {
+                            ComExceptionHandler.LogDebug($"図形: {shapeInfo.ShapeName}, " +
+                                $"タイプ: {shapeInfo.ShapeType}, " +
+                                $"ハンドル数: {shapeInfo.AdjustmentCount}, " +
+                                $"角度ハンドル: {shapeInfo.IsAngleHandleShape}");
+                        }
+
+                        MessageBox.Show(
+                            "選択された図形には角度ハンドルがありません。\n\n" +
+                            "角度ハンドル対応図形:\n" +
+                            "・円弧（開始・終了角度）\n" +
+                            "・弦（開始・終了角度）\n" +
+                            "・扇形/部分円（開始・終了角度）\n" +
+                            "・ブロック円弧（角度・内径）\n" +
+                            "・ドーナツ（内径比率）\n" +
+                            "・三日月（角度調整）など",
+                            "角度ハンドル",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
+                        return;
+                    }
+
+                    ShowAngleHandleDialog(shapes, analysis);
+                }
+                else
+                {
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_HANDLE_ADJUSTMENT, "角度ハンドル");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("角度ハンドル", ex);
+            }
+        }
+
+
+        /// <summary>
+        /// 調整リセットボタン
+        /// </summary>
+        private void btnResetAdjustments_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                // ★修正: 専用メソッドを使用★
+                var shapes = GetShapesForHandleAdjustment();
+
+                ComExceptionHandler.LogDebug($"btnResetAdjustments_Click: 取得した図形数 = {shapes?.Count ?? 0}");
+
+                if (shapes != null && shapes.Count >= Constants.MIN_SHAPES_FOR_HANDLE_ADJUSTMENT)
+                {
+                    var adjuster = new ShapeHandleAdjuster();
+
+                    // デバッグ情報出力
+                    ComExceptionHandler.LogDebug("=== 調整リセット処理開始 ===");
+                    adjuster.DebugMultipleShapesInfoLight(shapes);
+
+                    var analysis = adjuster.AnalyzeShapes(shapes);
+
+                    if (!analysis.HasAdjustmentHandles)
+                    {
+                        MessageBox.Show(
+                            "選択された図形には調整可能なハンドルがありません。",
+                            "調整リセット",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
+                        return;
+                    }
+
+                    var result = MessageBox.Show(
+                        $"選択された{shapes.Count}個の図形の調整をリセットしますか？\n\n" +
+                        "・調整ハンドルがデフォルト値（0.5）に戻ります\n" +
+                        "・角度ハンドルもデフォルト値に戻ります\n" +
+                        $"・対象図形: {analysis.ShapesWithAdjustmentHandles}個",
+                        "調整リセット確認",
+                        MessageBoxButtons.YesNo,
+                        MessageBoxIcon.Question);
+
+                    if (result == DialogResult.Yes)
+                    {
+                        adjuster.ResetAdjustments(shapes);
+                        ErrorHandler.ShowOperationSuccess("調整リセット",
+                            $"{analysis.ShapesWithAdjustmentHandles}個の図形をリセットしました");
+                    }
+                }
+                else
+                {
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_HANDLE_ADJUSTMENT, "調整リセット");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("調整リセット", ex);
+            }
+        }
+
+        #endregion
+
+        #region ダイアログ表示メソッド
+
+        /// <summary>
+        /// 調整ハンドル用ダイアログを表示
+        /// </summary>
+        private void ShowAdjustmentHandleDialog(List<PowerPoint.Shape> shapes, ShapeHandleAnalysis analysis)
+        {
+            try
+            {
+                using (var dialog = new DynamicHandleDialog(shapes, analysis))
+                {
+                    if (dialog.ShowDialog() == DialogResult.OK && dialog.DialogResult_OK)
+                    {
+                        var adjuster = new ShapeHandleAdjuster();
+
+                        // mm単位での調整を実行
+                        adjuster.AdjustHandlesInMm(shapes, dialog.HandleValues);
+
+                        string handleInfo = string.Join(", ", dialog.HandleValues.Select((v, i) => $"ハンドル{i + 1}={v:F1}mm"));
+                        ErrorHandler.ShowOperationSuccess("調整ハンドル設定",
+                            $"{shapes.Count}個の図形を調整しました\n設定値: {handleInfo}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("調整ハンドル設定", ex);
+            }
+        }
+
+        /// <summary>
+        /// 角度ハンドル用ダイアログを表示
+        /// </summary>
+        private void ShowAngleHandleDialog(List<PowerPoint.Shape> shapes, ShapeHandleAnalysis analysis)
+        {
+            try
+            {
+                using (var dialog = new DynamicAngleHandleDialog(shapes, analysis))
+                {
+                    if (dialog.ShowDialog() == DialogResult.OK && dialog.DialogResult_OK)
+                    {
+                        var adjuster = new ShapeHandleAdjuster();
+
+                        // 度数単位での角度調整を実行
+                        adjuster.AdjustAngleHandlesInDegree(shapes, dialog.HandleValues);
+
+                        // 角度ハンドル図形の種類を取得
+                        var angleShapeTypes = analysis.ShapeInfos
+                            .Where(info => info.IsAngleHandleShape)
+                            .Select(info => info.GetDisplayShapeType())
+                            .Distinct()
+                            .ToList();
+
+                        string shapeTypeInfo = string.Join(", ", angleShapeTypes);
+                        string handleInfo = string.Join(", ", dialog.HandleValues.Select((v, i) => $"角度{i + 1}={v:F1}°"));
+
+                        ErrorHandler.ShowOperationSuccess("角度ハンドル設定",
+                            $"{analysis.ShapesWithAngleHandles}個の角度ハンドル図形を調整しました\n" +
+                            $"図形タイプ: {shapeTypeInfo}\n設定値: {handleInfo}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("角度ハンドル設定", ex);
+            }
+        }
+
+        #endregion
     }
 }
