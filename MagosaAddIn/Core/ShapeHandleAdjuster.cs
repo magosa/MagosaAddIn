@@ -269,9 +269,9 @@ namespace MagosaAddIn.Core
         }
 
         /// <summary>
-        /// 図形タイプに応じた度数を正規化値に変換（PowerPoint内部形式対応）
+        /// 図形タイプに応じた度数を正規化値に変換（PowerPoint内部形式対応・左回り対応）
         /// </summary>
-        /// <param name="degreeValue">度数値</param>
+        /// <param name="degreeValue">度数値（左回り基準）</param>
         /// <param name="shapeType">図形タイプ</param>
         /// <param name="handleIndex">ハンドルインデックス</param>
         /// <returns>PowerPoint内部形式の値</returns>
@@ -283,26 +283,40 @@ namespace MagosaAddIn.Core
                 case Office.MsoAutoShapeType.msoShapeArc:
                 case Office.MsoAutoShapeType.msoShapeChord:
                     // 扇形、円弧、弦の場合
-                    // PowerPointでは角度をラジアン × 65536 / (2π) の形式で保存
-                    // または度数を直接使用する場合もある
-                    // 実験的に度数をそのまま使用してみる
-                    float normalizedDegree = degreeValue;
+                    // 左回り（反時計回り）を右回り（時計回り）に変換
+                    float rightRotationDegree = -degreeValue; // 符号を反転
 
-                    // 角度を-180～180の範囲に正規化
-                    while (normalizedDegree > 180) normalizedDegree -= 360;
-                    while (normalizedDegree < -180) normalizedDegree += 360;
+                    // PowerPointでは0-360度を-180～+180度の範囲に変換
+                    if (rightRotationDegree > 180)
+                    {
+                        rightRotationDegree -= 360;
+                    }
+                    else if (rightRotationDegree < -180)
+                    {
+                        rightRotationDegree += 360;
+                    }
 
-                    return normalizedDegree;
+                    ComExceptionHandler.LogDebug($"角度変換（左回り→右回り）: {degreeValue}° → {-degreeValue}° → {rightRotationDegree}°");
+                    return rightRotationDegree;
 
                 case Office.MsoAutoShapeType.msoShapeBlockArc:
                     // ブロック円弧の場合
                     if (handleIndex == 0 || handleIndex == 1) // 開始角度、終了角度
                     {
-                        // ブロック円弧の角度処理
-                        float normalizedDegree2 = degreeValue;
-                        while (normalizedDegree2 > 180) normalizedDegree2 -= 360;
-                        while (normalizedDegree2 < -180) normalizedDegree2 += 360;
-                        return normalizedDegree2;
+                        float rightRotationBlockArcDegree = -degreeValue; // 符号を反転
+
+                        // 0-360度を-180～+180度に変換
+                        if (rightRotationBlockArcDegree > 180)
+                        {
+                            rightRotationBlockArcDegree -= 360;
+                        }
+                        else if (rightRotationBlockArcDegree < -180)
+                        {
+                            rightRotationBlockArcDegree += 360;
+                        }
+
+                        ComExceptionHandler.LogDebug($"ブロック円弧角度変換（左回り→右回り）: {degreeValue}° → {rightRotationBlockArcDegree}°");
+                        return rightRotationBlockArcDegree;
                     }
                     else if (handleIndex == 2) // 内径比率
                     {
@@ -317,10 +331,19 @@ namespace MagosaAddIn.Core
 
                 case Office.MsoAutoShapeType.msoShapeMoon:
                     // 三日月の場合
-                    float normalizedDegree3 = degreeValue;
-                    while (normalizedDegree3 > 180) normalizedDegree3 -= 360;
-                    while (normalizedDegree3 < -180) normalizedDegree3 += 360;
-                    return normalizedDegree3;
+                    float rightRotationMoonDegree = -degreeValue; // 符号を反転
+
+                    // 0-360度を-180～+180度に変換
+                    if (rightRotationMoonDegree > 180)
+                    {
+                        rightRotationMoonDegree -= 360;
+                    }
+                    else if (rightRotationMoonDegree < -180)
+                    {
+                        rightRotationMoonDegree += 360;
+                    }
+
+                    return rightRotationMoonDegree;
 
                 default:
                     // その他の図形
@@ -331,12 +354,12 @@ namespace MagosaAddIn.Core
         }
 
         /// <summary>
-        /// 図形タイプに応じた正規化値を度数に変換（PowerPoint内部形式対応）
+        /// 図形タイプに応じた正規化値を度数に変換（PowerPoint内部形式対応・左回り対応）
         /// </summary>
         /// <param name="normalizedValue">PowerPoint内部形式の値</param>
         /// <param name="shapeType">図形タイプ</param>
         /// <param name="handleIndex">ハンドルインデックス</param>
-        /// <returns>度数値</returns>
+        /// <returns>度数値（左回り基準）</returns>
         public float ConvertNormalizedToDegreeByShapeType(float normalizedValue, Office.MsoAutoShapeType shapeType, int handleIndex)
         {
             switch (shapeType)
@@ -345,14 +368,32 @@ namespace MagosaAddIn.Core
                 case Office.MsoAutoShapeType.msoShapeArc:
                 case Office.MsoAutoShapeType.msoShapeChord:
                     // 扇形、円弧、弦の場合
-                    // PowerPointの内部値をそのまま度数として返す
-                    return normalizedValue;
+                    // PowerPointの内部値（右回り）を左回りに変換
+                    float leftRotationDegree = -normalizedValue; // 符号を反転
+
+                    // -180～+180度を0-360度に変換
+                    if (leftRotationDegree < 0)
+                    {
+                        leftRotationDegree += 360;
+                    }
+
+                    ComExceptionHandler.LogDebug($"角度表示変換（右回り→左回り）: {normalizedValue}° → {-normalizedValue}° → {leftRotationDegree}°");
+                    return leftRotationDegree;
 
                 case Office.MsoAutoShapeType.msoShapeBlockArc:
                     // ブロック円弧の場合
                     if (handleIndex == 0 || handleIndex == 1) // 開始角度、終了角度
                     {
-                        return normalizedValue;
+                        float leftRotationBlockArcDegree = -normalizedValue; // 符号を反転
+
+                        // -180～+180度を0-360度に変換
+                        if (leftRotationBlockArcDegree < 0)
+                        {
+                            leftRotationBlockArcDegree += 360;
+                        }
+
+                        ComExceptionHandler.LogDebug($"ブロック円弧表示変換（右回り→左回り）: {normalizedValue}° → {leftRotationBlockArcDegree}°");
+                        return leftRotationBlockArcDegree;
                     }
                     else if (handleIndex == 2) // 内径比率
                     {
@@ -364,7 +405,16 @@ namespace MagosaAddIn.Core
                     return normalizedValue * 100.0f; // パーセンテージで表示
 
                 case Office.MsoAutoShapeType.msoShapeMoon:
-                    return normalizedValue;
+                    // 三日月の場合
+                    float leftRotationMoonDegree = -normalizedValue; // 符号を反転
+
+                    // -180～+180度を0-360度に変換
+                    if (leftRotationMoonDegree < 0)
+                    {
+                        leftRotationMoonDegree += 360;
+                    }
+
+                    return leftRotationMoonDegree;
 
                 default:
                     return normalizedValue;
