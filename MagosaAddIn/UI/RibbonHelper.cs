@@ -17,7 +17,7 @@ namespace MagosaAddIn.UI
         /// <returns>選択された図形、または null</returns>
         public static PowerPoint.Shape GetSingleSelectedShape()
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     var app = Globals.ThisAddIn.Application;
                     if (app?.ActiveWindow?.Selection == null)
@@ -42,7 +42,7 @@ namespace MagosaAddIn.UI
                 },
                 "単一図形取得",
                 defaultValue: null,
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace MagosaAddIn.UI
 
             //        return null;
             //    },
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
             () => {
                 ComExceptionHandler.LogDebug("GetMultipleSelectedShapes: 開始");
 
@@ -122,7 +122,7 @@ namespace MagosaAddIn.UI
             },
                 "複数図形取得",
                 defaultValue: null,
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace MagosaAddIn.UI
         /// <returns>PowerPointが利用可能な場合true</returns>
         public static bool IsPowerPointAvailable()
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     var app = Globals.ThisAddIn.Application;
                     if (app?.ActiveWindow?.Selection == null)
@@ -184,7 +184,7 @@ namespace MagosaAddIn.UI
                 },
                 "PowerPoint状態確認",
                 defaultValue: false,
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         /// <summary>
@@ -193,7 +193,7 @@ namespace MagosaAddIn.UI
         /// <returns>選択図形数、エラー時は0</returns>
         public static int GetSelectedShapeCount()
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     var app = Globals.ThisAddIn.Application;
                     if (app?.ActiveWindow?.Selection == null)
@@ -210,7 +210,7 @@ namespace MagosaAddIn.UI
                 },
                 "選択図形数取得",
                 defaultValue: 0,
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         /// <summary>
@@ -255,7 +255,7 @@ namespace MagosaAddIn.UI
         /// <returns>図形タイプの統計情報</returns>
         public static ShapeSelectionInfo AnalyzeSelectedShapes()
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     var info = new ShapeSelectionInfo();
 
@@ -288,7 +288,7 @@ namespace MagosaAddIn.UI
                 },
                 "図形選択分析",
                 defaultValue: new ShapeSelectionInfo(),
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         /// <summary>
@@ -298,12 +298,12 @@ namespace MagosaAddIn.UI
         /// <returns>四角形の場合true</returns>
         public static bool IsRectangleShape(PowerPoint.Shape shape)
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => shape.AutoShapeType == Microsoft.Office.Core.MsoAutoShapeType.msoShapeRectangle ||
                       shape.AutoShapeType == Microsoft.Office.Core.MsoAutoShapeType.msoShapeRoundedRectangle,
                 "図形タイプ判定",
                 defaultValue: false,
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         /// <summary>
@@ -313,7 +313,7 @@ namespace MagosaAddIn.UI
         /// <returns>図形タイプ名</returns>
         public static string GetShapeTypeName(PowerPoint.Shape shape)
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     switch (shape.Type)
                     {
@@ -339,7 +339,7 @@ namespace MagosaAddIn.UI
                 },
                 "図形タイプ名取得",
                 defaultValue: "不明な図形",
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         /// <summary>
@@ -348,7 +348,7 @@ namespace MagosaAddIn.UI
         /// <returns>選択図形の境界情報、エラー時はnull</returns>
         public static ShapeGroupBounds GetSelectedShapesBounds()
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     var shapes = GetMultipleSelectedShapes();
                     if (shapes == null || shapes.Count == 0)
@@ -358,7 +358,7 @@ namespace MagosaAddIn.UI
                 },
                 "選択図形境界取得",
                 defaultValue: null,
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         /// <summary>

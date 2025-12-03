@@ -291,7 +291,7 @@
             this.btnSelectSameFormat.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnSelectSameFormat_Click);
 
             // 
-            // group6 - 新規追加: ハンドル調整グループ
+            // group6
             // 
             this.group6.Items.Add(this.btnAdjustmentHandles);
             this.group6.Items.Add(this.btnAngleHandles);
@@ -300,27 +300,27 @@
             this.group6.Name = "group6";
 
             // 
-            // btnAdjustmentHandles - 新規追加
+            // btnAdjustmentHandles
             // 
             this.btnAdjustmentHandles.Label = "調整ハンドル";
             this.btnAdjustmentHandles.Name = "btnAdjustmentHandles";
-            this.btnAdjustmentHandles.OfficeImageId = "ShapeAdjustHandles";
+            this.btnAdjustmentHandles.OfficeImageId = "SelectCurrentRegion";
             this.btnAdjustmentHandles.ShowImage = true;
             this.btnAdjustmentHandles.SuperTip = "選択した図形の調整ハンドルを数値で精密に設定します。角丸四角形の角丸、吹き出しの尻尾位置、矢印の矢じりなどを調整できます。";
             this.btnAdjustmentHandles.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAdjustmentHandles_Click);
 
             // 
-            // btnAngleHandles - 新規追加
+            // btnAngleHandles
             // 
             this.btnAngleHandles.Label = "角度ハンドル";
             this.btnAngleHandles.Name = "btnAngleHandles";
-            this.btnAngleHandles.OfficeImageId = "ShapeRotateCounterclockwise90";
+            this.btnAngleHandles.OfficeImageId = "ObjectRotateFree";
             this.btnAngleHandles.ShowImage = true;
             this.btnAngleHandles.SuperTip = "円弧・弦・扇形・ブロック円弧・ドーナツ・三日月などの角度ハンドルを数値で精密に設定します。開始角度、終了角度、内径比率などを制御できます。";
             this.btnAngleHandles.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAngleHandles_Click);
 
             // 
-            // btnResetAdjustments - 新規追加
+            // btnResetAdjustments
             // 
             this.btnResetAdjustments.Label = "リセット";
             this.btnResetAdjustments.Name = "btnResetAdjustments";

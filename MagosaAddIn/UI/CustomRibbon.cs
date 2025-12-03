@@ -50,7 +50,7 @@ namespace MagosaAddIn.UI
 
         private List<PowerPoint.Shape> GetSelectedShapesForDivision()
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     var app = Globals.ThisAddIn.Application;
                     if (app?.ActiveWindow?.Selection == null)
@@ -77,7 +77,7 @@ namespace MagosaAddIn.UI
                 },
                 "分割対象図形取得",
                 defaultValue: null,
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         private void ShowDivisionDialog(PowerPoint.Shape shape)
@@ -557,7 +557,7 @@ namespace MagosaAddIn.UI
         /// <returns>基準図形、または null</returns>
         private PowerPoint.Shape GetSingleShapeForFormatSelection()
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     var app = Globals.ThisAddIn.Application;
                     if (app?.ActiveWindow?.Selection == null)
@@ -575,7 +575,7 @@ namespace MagosaAddIn.UI
                 },
                 "書式選択用図形取得",
                 defaultValue: null,
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         /// <summary>
@@ -701,7 +701,7 @@ namespace MagosaAddIn.UI
         /// </summary>
         private List<PowerPoint.Shape> GetShapesForHandleAdjustment()
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     ComExceptionHandler.LogDebug("GetShapesForHandleAdjustment: 開始");
 
@@ -746,7 +746,7 @@ namespace MagosaAddIn.UI
                 },
                 "ハンドル調整用図形取得",
                 defaultValue: null,
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         /// <summary>

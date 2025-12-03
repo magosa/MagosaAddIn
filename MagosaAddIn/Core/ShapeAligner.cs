@@ -19,21 +19,21 @@ namespace MagosaAddIn.Core
         /// <param name="shapes">選択された図形のリスト（最初の要素が基準図形）</param>
         public void AlignToLeft(List<PowerPoint.Shape> shapes)
         {
-            ComExceptionHandler.HandleComOperation(
-                () => {
+            ComExceptionHandler.ExecuteComOperation(
+                () =>
+                {
                     ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "左端揃え");
 
-                    var baseShape = shapes[0]; // 基準となる図形（一番目に選択）
-                    float targetPosition = baseShape.Left; // 基準図形の左端
+                    var baseShape = shapes[0];
+                    float targetPosition = baseShape.Left;
 
-                    // 2番目以降の図形の左端を基準図形の左端に合わせる
                     for (int i = 1; i < shapes.Count; i++)
                     {
                         var currentShape = shapes[i];
                         currentShape.Left = targetPosition;
                     }
                 },
-                "左端揃え");
+                "左端揃え"); // suppressErrors: false がデフォルト
         }
 
         /// <summary>
@@ -42,8 +42,9 @@ namespace MagosaAddIn.Core
         /// <param name="shapes">選択された図形のリスト（最初の要素が基準図形）</param>
         public void AlignToRight(List<PowerPoint.Shape> shapes)
         {
-            ComExceptionHandler.HandleComOperation(
-                () => {
+            ComExceptionHandler.ExecuteComOperation(
+                () =>
+                {
                     ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "右端揃え");
 
                     var baseShape = shapes[0]; // 基準となる図形（一番目に選択）
@@ -65,8 +66,9 @@ namespace MagosaAddIn.Core
         /// <param name="shapes">選択された図形のリスト（最初の要素が基準図形）</param>
         public void AlignToTop(List<PowerPoint.Shape> shapes)
         {
-            ComExceptionHandler.HandleComOperation(
-                () => {
+            ComExceptionHandler.ExecuteComOperation(
+                () =>
+                {
                     ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "上端揃え");
 
                     var baseShape = shapes[0]; // 基準となる図形（一番目に選択）
@@ -88,8 +90,9 @@ namespace MagosaAddIn.Core
         /// <param name="shapes">選択された図形のリスト（最初の要素が基準図形）</param>
         public void AlignToBottom(List<PowerPoint.Shape> shapes)
         {
-            ComExceptionHandler.HandleComOperation(
-                () => {
+            ComExceptionHandler.ExecuteComOperation(
+                () =>
+                {
                     ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "下端揃え");
 
                     var baseShape = shapes[0]; // 基準となる図形（一番目に選択）
@@ -115,8 +118,9 @@ namespace MagosaAddIn.Core
         /// <param name="shapes">選択された図形のリスト（最初の要素が基準図形）</param>
         public void AlignLeftToRight(List<PowerPoint.Shape> shapes)
         {
-            ComExceptionHandler.HandleComOperation(
-                () => {
+            ComExceptionHandler.ExecuteComOperation(
+                () =>
+                {
                     ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "左端→右端整列");
 
                     var baseShape = shapes[0]; // 基準となる図形（一番目に選択）
@@ -139,8 +143,9 @@ namespace MagosaAddIn.Core
         /// <param name="shapes">選択された図形のリスト（最初の要素が基準図形）</param>
         public void AlignRightToLeft(List<PowerPoint.Shape> shapes)
         {
-            ComExceptionHandler.HandleComOperation(
-                () => {
+            ComExceptionHandler.ExecuteComOperation(
+                () =>
+                {
                     ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "右端→左端整列");
 
                     var baseShape = shapes[0]; // 基準となる図形（一番目に選択）
@@ -163,8 +168,9 @@ namespace MagosaAddIn.Core
         /// <param name="shapes">選択された図形のリスト（最初の要素が基準図形）</param>
         public void AlignTopToBottom(List<PowerPoint.Shape> shapes)
         {
-            ComExceptionHandler.HandleComOperation(
-                () => {
+            ComExceptionHandler.ExecuteComOperation(
+                () =>
+                {
                     ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "上端→下端整列");
 
                     var baseShape = shapes[0]; // 基準となる図形（一番目に選択）
@@ -187,8 +193,9 @@ namespace MagosaAddIn.Core
         /// <param name="shapes">選択された図形のリスト（最初の要素が基準図形）</param>
         public void AlignBottomToTop(List<PowerPoint.Shape> shapes)
         {
-            ComExceptionHandler.HandleComOperation(
-                () => {
+            ComExceptionHandler.ExecuteComOperation(
+                () =>
+                {
                     ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "下端→上端整列");
 
                     var baseShape = shapes[0]; // 基準となる図形（一番目に選択）
@@ -215,8 +222,9 @@ namespace MagosaAddIn.Core
         /// <param name="shapes">選択された図形のリスト</param>
         public void AlignAndDistributeHorizontal(List<PowerPoint.Shape> shapes)
         {
-            ComExceptionHandler.HandleComOperation(
-                () => {
+            ComExceptionHandler.ExecuteComOperation(
+                () =>
+                {
                     ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "水平中央揃え・等間隔配置");
 
                     var baseShape = shapes[0];
@@ -267,8 +275,9 @@ namespace MagosaAddIn.Core
         /// <param name="shapes">選択された図形のリスト</param>
         public void AlignAndDistributeVertical(List<PowerPoint.Shape> shapes)
         {
-            ComExceptionHandler.HandleComOperation(
-                () => {
+            ComExceptionHandler.ExecuteComOperation(
+                () =>
+                {
                     ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "垂直中央揃え・等間隔配置");
 
                     var baseShape = shapes[0];
@@ -321,8 +330,9 @@ namespace MagosaAddIn.Core
         /// <param name="margin">図形間のマージン（pt）</param>
         public void ArrangeHorizontalWithMargin(List<PowerPoint.Shape> shapes, float margin)
         {
-            ComExceptionHandler.HandleComOperation(
-                () => {
+            ComExceptionHandler.ExecuteComOperation(
+                () =>
+                {
                     ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "水平マージン配置");
                     ErrorHandler.ValidateRange(margin, Constants.MIN_MARGIN, Constants.MAX_MARGIN, "マージン", "水平マージン配置");
 
@@ -384,8 +394,9 @@ namespace MagosaAddIn.Core
         /// <param name="margin">図形間のマージン（pt）</param>
         public void ArrangeVerticalWithMargin(List<PowerPoint.Shape> shapes, float margin)
         {
-            ComExceptionHandler.HandleComOperation(
-                () => {
+            ComExceptionHandler.ExecuteComOperation(
+                () =>
+                {
                     ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "垂直マージン配置");
                     ErrorHandler.ValidateRange(margin, Constants.MIN_MARGIN, Constants.MAX_MARGIN, "マージン", "垂直マージン配置");
 
@@ -448,8 +459,9 @@ namespace MagosaAddIn.Core
         /// <param name="verticalSpacing">垂直間隔</param>
         public void ArrangeInGrid(List<PowerPoint.Shape> shapes, int columns, float horizontalSpacing, float verticalSpacing)
         {
-            ComExceptionHandler.HandleComOperation(
-                () => {
+            ComExceptionHandler.ExecuteComOperation(
+                () =>
+                {
                     ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "グリッド配置");
                     ErrorHandler.ValidateRange(columns, Constants.MIN_COLUMNS, shapes.Count, "列数", "グリッド配置");
                     ErrorHandler.ValidateRange(horizontalSpacing, Constants.MIN_MARGIN, Constants.MAX_SPACING, "水平間隔", "グリッド配置");
@@ -483,8 +495,9 @@ namespace MagosaAddIn.Core
         /// <param name="radius">半径</param>
         public void ArrangeInCircle(List<PowerPoint.Shape> shapes, float centerX, float centerY, float radius)
         {
-            ComExceptionHandler.HandleComOperation(
-                () => {
+            ComExceptionHandler.ExecuteComOperation(
+                () =>
+                {
                     ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "円形配置");
                     ErrorHandler.ValidateRange(centerX, Constants.MIN_CENTER_COORDINATE, Constants.MAX_CENTER_COORDINATE, "中心X座標", "円形配置");
                     ErrorHandler.ValidateRange(centerY, Constants.MIN_CENTER_COORDINATE, Constants.MAX_CENTER_COORDINATE, "中心Y座標", "円形配置");

@@ -18,7 +18,7 @@ namespace MagosaAddIn.Core
         /// <param name="criteria">選択条件</param>
         public void SelectShapesByFormat(PowerPoint.Shape baseShape, SelectionCriteria criteria)
         {
-            ComExceptionHandler.HandleComOperation(
+            ComExceptionHandler.ExecuteComOperation(
                 () => {
                     if (baseShape == null)
                     {
@@ -68,7 +68,7 @@ namespace MagosaAddIn.Core
         {
             var matchingShapes = new List<PowerPoint.Shape>();
 
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     ComExceptionHandler.LogDebug($"図形検索開始 - 条件: {criteria}, 基準図形: {baseFormat.ShapeName}");
                     ComExceptionHandler.LogDebug($"基準書式 - {baseFormat}");
@@ -78,17 +78,17 @@ namespace MagosaAddIn.Core
                     ComExceptionHandler.LogDebug($"基準図形を追加: {baseFormat.ShapeName}");
 
                     // 基準図形のID/名前を取得（重複チェック用）
-                    string baseShapeName = ComExceptionHandler.HandleComOperation(
+                    string baseShapeName = ComExceptionHandler.ExecuteComOperation(
                         () => baseShape.Name,
                         "基準図形名取得",
                         defaultValue: "",
-                        throwOnError: false);
+                        suppressErrors: true);
 
-                    int baseShapeId = ComExceptionHandler.HandleComOperation(
+                    int baseShapeId = ComExceptionHandler.ExecuteComOperation(
                         () => baseShape.Id,
                         "基準図形ID取得",
                         defaultValue: -1,
-                        throwOnError: false);
+                        suppressErrors: true);
 
                     ComExceptionHandler.LogDebug($"スライド内図形数: {slide.Shapes.Count}");
 
@@ -98,11 +98,11 @@ namespace MagosaAddIn.Core
                         var shape = slide.Shapes[i];
 
                         // 基準図形と同じ図形はスキップ（既に追加済み）
-                        int currentShapeId = ComExceptionHandler.HandleComOperation(
+                        int currentShapeId = ComExceptionHandler.ExecuteComOperation(
                             () => shape.Id,
                             "図形ID取得",
                             defaultValue: -2,
-                            throwOnError: false);
+                            suppressErrors: true);
 
                         if (currentShapeId == baseShapeId)
                         {
@@ -120,11 +120,11 @@ namespace MagosaAddIn.Core
                             {
                                 matchingShapes.Add(shape);
 
-                                string shapeName = ComExceptionHandler.HandleComOperation(
+                                string shapeName = ComExceptionHandler.ExecuteComOperation(
                                     () => shape.Name,
                                     "図形名取得",
                                     defaultValue: $"図形{i}",
-                                    throwOnError: false);
+                                    suppressErrors: true);
 
                                 ComExceptionHandler.LogDebug($"★一致図形追加: {shapeName} (ID={currentShapeId})");
                             }
@@ -144,7 +144,7 @@ namespace MagosaAddIn.Core
                 },
                 "同一書式図形検索",
                 defaultValue: matchingShapes,
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         /// <summary>
@@ -154,7 +154,7 @@ namespace MagosaAddIn.Core
         /// <returns>書式情報</returns>
         private ShapeFormatInfo ExtractShapeFormat(PowerPoint.Shape shape)
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     var format = new ShapeFormatInfo
                     {
@@ -226,7 +226,7 @@ namespace MagosaAddIn.Core
                 },
                 $"図形書式抽出: {shape.Name}",
                 defaultValue: null,
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         /// <summary>
@@ -319,7 +319,7 @@ namespace MagosaAddIn.Core
         /// <param name="shapes">選択する図形のリスト</param>
         private void SelectShapes(PowerPoint.Slide slide, List<PowerPoint.Shape> shapes)
         {
-            ComExceptionHandler.HandleComOperation(
+            ComExceptionHandler.ExecuteComOperation(
                 () => {
                     if (shapes.Count == 0)
                     {
@@ -428,7 +428,7 @@ namespace MagosaAddIn.Core
         /// <returns>選択可能な図形数（基準図形も含む）</returns>
         public int GetMatchingShapeCount(PowerPoint.Shape baseShape, SelectionCriteria criteria)
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     if (baseShape == null)
                         return 0;
@@ -446,7 +446,7 @@ namespace MagosaAddIn.Core
                 },
                 "一致図形数取得",
                 defaultValue: 0,
-                throwOnError: false);
+                suppressErrors: true);
         }
     }
 

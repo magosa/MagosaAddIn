@@ -39,7 +39,7 @@ namespace MagosaAddIn.Core
                 ErrorHandler.ValidateRange(horizontalMargin, Constants.MIN_MARGIN, Constants.MAX_MARGIN, "水平マージン", "図形分割");
                 ErrorHandler.ValidateRange(verticalMargin, Constants.MIN_MARGIN, Constants.MAX_MARGIN, "垂直マージン", "図形分割");
 
-                var slide = ComExceptionHandler.HandleComOperation(
+                var slide = ComExceptionHandler.ExecuteComOperation(
                     () => originalShape.Parent as PowerPoint.Slide,
                     "スライド取得");
 
@@ -79,7 +79,7 @@ namespace MagosaAddIn.Core
                         }
 
                         // 新しい四角形を作成
-                        var newShape = ComExceptionHandler.HandleComOperation(
+                        var newShape = ComExceptionHandler.ExecuteComOperation(
                             () => slide.Shapes.AddShape(
                                 Office.MsoAutoShapeType.msoShapeRectangle,
                                 left, top, cellWidth, cellHeight),
@@ -91,7 +91,7 @@ namespace MagosaAddIn.Core
                 }
 
                 // 元の図形を削除
-                ComExceptionHandler.HandleComOperation(
+                ComExceptionHandler.ExecuteComOperation(
                     () => originalShape.Delete(),
                     "元図形削除");
             }
@@ -355,7 +355,7 @@ namespace MagosaAddIn.Core
         /// </summary>
         private ShapeStyle ExtractShapeStyle(PowerPoint.Shape shape)
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     var style = new ShapeStyle();
 
@@ -403,7 +403,7 @@ namespace MagosaAddIn.Core
         /// </summary>
         private void ApplyShapeStyle(PowerPoint.Shape shape, ShapeStyle style)
         {
-            ComExceptionHandler.HandleComOperation(
+            ComExceptionHandler.ExecuteComOperation(
                 () => {
                     // 塗りつぶしを適用
                     if (style.FillColor.HasValue)
@@ -440,20 +440,20 @@ namespace MagosaAddIn.Core
             // 塗りつぶしを適用
             if (style.FillColor.HasValue)
             {
-                ComExceptionHandler.HandleComOperation(
+                ComExceptionHandler.ExecuteComOperation(
                     () => {
                         shape.Fill.Visible = Office.MsoTriState.msoTrue;
                         shape.Fill.ForeColor.RGB = style.FillColor.Value;
                         shape.Fill.Transparency = style.FillTransparency;
                     },
                     "塗りつぶし適用",
-                    throwOnError: false);
+                    suppressErrors: true);
             }
 
             // 線を適用
             if (style.LineColor.HasValue)
             {
-                ComExceptionHandler.HandleComOperation(
+                ComExceptionHandler.ExecuteComOperation(
                     () => {
                         shape.Line.Visible = Office.MsoTriState.msoTrue;
                         shape.Line.ForeColor.RGB = style.LineColor.Value;
@@ -461,19 +461,19 @@ namespace MagosaAddIn.Core
                         shape.Line.DashStyle = style.LineDashStyle;
                     },
                     "線適用",
-                    throwOnError: false);
+                    suppressErrors: true);
             }
 
             // 影を適用
             if (style.HasShadow)
             {
-                ComExceptionHandler.HandleComOperation(
+                ComExceptionHandler.ExecuteComOperation(
                     () => {
                         shape.Shadow.Visible = Office.MsoTriState.msoTrue;
                         shape.Shadow.ForeColor.RGB = style.ShadowColor;
                     },
                     "影適用",
-                    throwOnError: false);
+                    suppressErrors: true);
             }
         }
 

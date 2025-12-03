@@ -20,7 +20,7 @@ namespace MagosaAddIn.Core
         /// <param name="handleValues">ハンドル値の配列（インデックス0 = ハンドル1）</param>
         public void AdjustHandles(List<PowerPoint.Shape> shapes, float[] handleValues)
         {
-            ComExceptionHandler.HandleComOperation(
+            ComExceptionHandler.ExecuteComOperation(
                 () => {
                     ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_HANDLE_ADJUSTMENT, "調整ハンドル設定");
 
@@ -56,7 +56,7 @@ namespace MagosaAddIn.Core
         /// <param name="handleValuesInMm">ハンドル値の配列（mm単位）</param>
         public void AdjustHandlesInMm(List<PowerPoint.Shape> shapes, float[] handleValuesInMm)
         {
-            ComExceptionHandler.HandleComOperation(
+            ComExceptionHandler.ExecuteComOperation(
                 () => {
                     ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_HANDLE_ADJUSTMENT, "調整ハンドル設定（mm）");
 
@@ -99,7 +99,7 @@ namespace MagosaAddIn.Core
         /// <param name="angleValuesInDegree">角度値の配列（度数単位）</param>
         public void AdjustAngleHandlesInDegree(List<PowerPoint.Shape> shapes, float[] angleValuesInDegree)
         {
-            ComExceptionHandler.HandleComOperation(
+            ComExceptionHandler.ExecuteComOperation(
                 () => {
                     ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_HANDLE_ADJUSTMENT, "角度ハンドル設定（度）");
 
@@ -165,7 +165,7 @@ namespace MagosaAddIn.Core
         /// <param name="shapes">対象図形リスト</param>
         public void ResetAdjustments(List<PowerPoint.Shape> shapes)
         {
-            ComExceptionHandler.HandleComOperation(
+            ComExceptionHandler.ExecuteComOperation(
                 () => {
                     ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_HANDLE_ADJUSTMENT, "調整リセット");
 
@@ -194,7 +194,7 @@ namespace MagosaAddIn.Core
         /// <returns>正規化値</returns>
         private float ConvertMmToNormalized(float mmValue, PowerPoint.Shape shape, int handleIndex)
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     // 図形のサイズを取得
                     float shapeWidth = shape.Width;
@@ -212,7 +212,7 @@ namespace MagosaAddIn.Core
                 },
                 $"mm→正規化変換: {mmValue}mm",
                 defaultValue: Constants.DEFAULT_HANDLE_VALUE,
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         /// <summary>
@@ -224,7 +224,7 @@ namespace MagosaAddIn.Core
         /// <returns>mm値</returns>
         public float ConvertNormalizedToMm(float normalizedValue, PowerPoint.Shape shape, int handleIndex)
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     // 図形のサイズを取得
                     float shapeWidth = shape.Width;
@@ -239,7 +239,7 @@ namespace MagosaAddIn.Core
                 },
                 $"正規化→mm変換: {normalizedValue}",
                 defaultValue: Constants.DEFAULT_HANDLE_MM,
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         /// <summary>
@@ -429,7 +429,7 @@ namespace MagosaAddIn.Core
         /// <param name="shape">対象図形</param>
         public void InvestigateAngleHandleBehavior(PowerPoint.Shape shape)
         {
-            ComExceptionHandler.HandleComOperation(
+            ComExceptionHandler.ExecuteComOperation(
                 () => {
                     ComExceptionHandler.LogDebug($"=== PowerPoint角度ハンドル調査 ===");
                     ComExceptionHandler.LogDebug($"図形: {shape.Name}, タイプ: {shape.AutoShapeType}");
@@ -487,7 +487,7 @@ namespace MagosaAddIn.Core
                     ComExceptionHandler.LogDebug($"=== 調査完了 ===");
                 },
                 "PowerPoint角度ハンドル調査",
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         #endregion
@@ -502,7 +502,7 @@ namespace MagosaAddIn.Core
         /// <returns>設定成功フラグ</returns>
         private bool SetMultipleAdjustmentHandles(PowerPoint.Shape shape, float[] handleValues)
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     int availableHandles = shape.Adjustments.Count;
                     int handlesToSet = Math.Min(handleValues.Length, availableHandles);
@@ -524,7 +524,7 @@ namespace MagosaAddIn.Core
                 },
                 $"調整ハンドル設定: {shape.Name}",
                 defaultValue: false,
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         /// <summary>
@@ -534,7 +534,7 @@ namespace MagosaAddIn.Core
         /// <returns>リセット成功フラグ</returns>
         private bool ResetShapeAdjustments(PowerPoint.Shape shape)
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     // 調整ハンドルをデフォルト値にリセット
                     for (int i = 1; i <= shape.Adjustments.Count; i++)
@@ -547,7 +547,7 @@ namespace MagosaAddIn.Core
                 },
                 $"調整リセット: {shape.Name}",
                 defaultValue: false,
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         #endregion
@@ -561,7 +561,7 @@ namespace MagosaAddIn.Core
         /// <returns>分析結果</returns>
         public ShapeHandleAnalysis AnalyzeShapes(List<PowerPoint.Shape> shapes)
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     var analysis = new ShapeHandleAnalysis();
 
@@ -628,7 +628,7 @@ namespace MagosaAddIn.Core
                 },
                 "図形分析",
                 defaultValue: new ShapeHandleAnalysis(),
-                throwOnError: false);
+                suppressErrors: true); // 分析処理なのでエラーを抑制
         }
 
         /// <summary>
@@ -638,7 +638,7 @@ namespace MagosaAddIn.Core
         /// <returns>ハンドル情報</returns>
         public ShapeHandleInfo GetHandleInfoFast(PowerPoint.Shape shape) // publicに変更
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     var info = new ShapeHandleInfo
                     {
@@ -666,7 +666,7 @@ namespace MagosaAddIn.Core
                 },
                 $"ハンドル情報取得（高速）: {shape.Name}",
                 defaultValue: new ShapeHandleInfo { ShapeName = "エラー" },
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         /// <summary>
@@ -676,7 +676,7 @@ namespace MagosaAddIn.Core
         /// <returns>ハンドル情報</returns>
         public ShapeHandleInfo GetHandleInfo(PowerPoint.Shape shape)
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     var info = new ShapeHandleInfo
                     {
@@ -721,7 +721,7 @@ namespace MagosaAddIn.Core
                 },
                 $"ハンドル情報取得: {shape.Name}",
                 defaultValue: new ShapeHandleInfo { ShapeName = "エラー" },
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         /// <summary>
@@ -780,7 +780,7 @@ namespace MagosaAddIn.Core
         /// <returns>角度ハンドルを持つ場合true</returns>
         private bool IsAngleHandleShape(PowerPoint.Shape shape)
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     switch (shape.AutoShapeType)
                     {
@@ -798,7 +798,7 @@ namespace MagosaAddIn.Core
                 },
                 $"角度ハンドル判定: {shape.Name}",
                 defaultValue: false,
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         /// <summary>
@@ -808,7 +808,7 @@ namespace MagosaAddIn.Core
         /// <returns>調整ハンドルを持つ場合true</returns>
         private bool IsAdjustmentHandleShape(PowerPoint.Shape shape)
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     // 実際の調整ハンドル数をチェック
                     int actualHandleCount = shape.Adjustments.Count;
@@ -929,7 +929,7 @@ namespace MagosaAddIn.Core
                 },
                 $"調整ハンドル判定: {shape.Name}",
                 defaultValue: false,
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         /// <summary>
@@ -939,7 +939,7 @@ namespace MagosaAddIn.Core
         /// <returns>ハンドル情報</returns>
         public ShapeHandleInfo GetHandleInfoDetailed(PowerPoint.Shape shape)
         {
-            return ComExceptionHandler.HandleComOperation(
+            return ComExceptionHandler.ExecuteComOperation(
                 () => {
                     var info = new ShapeHandleInfo
                     {
@@ -985,7 +985,7 @@ namespace MagosaAddIn.Core
                 },
                 $"ハンドル情報取得（詳細）: {shape.Name}",
                 defaultValue: new ShapeHandleInfo { ShapeName = "エラー" },
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         /// <summary>
@@ -1330,7 +1330,7 @@ namespace MagosaAddIn.Core
         /// <param name="shape">対象図形</param>
         public void DebugShapeInfo(PowerPoint.Shape shape)
         {
-            ComExceptionHandler.HandleComOperation(
+            ComExceptionHandler.ExecuteComOperation(
                 () => {
                     ComExceptionHandler.LogDebug($"=== 図形詳細情報 ===");
                     ComExceptionHandler.LogDebug($"名前: {shape.Name}");
@@ -1349,7 +1349,7 @@ namespace MagosaAddIn.Core
                     ComExceptionHandler.LogDebug($"==================");
                 },
                 "図形詳細情報出力",
-                throwOnError: false);
+                suppressErrors: true);
         }
 
         /// <summary>
@@ -1358,7 +1358,7 @@ namespace MagosaAddIn.Core
         /// <param name="shapes">対象図形リスト</param>
         public void DebugMultipleShapesInfoLight(List<PowerPoint.Shape> shapes)
         {
-            ComExceptionHandler.LogDebug($"=== 複数図形分析開始 ({shapes?.Count ?? 0}個) ===");
+            ComExceptionHandler.LogInfo($"=== 複数図形分析開始 ({shapes?.Count ?? 0}個) ===");
 
             if (shapes != null)
             {

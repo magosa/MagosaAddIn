@@ -8,93 +8,179 @@ namespace MagosaAddIn.Core
     /// </summary>
     public static class ComExceptionHandler
     {
-        #region COM例外処理
+        #region COM例外処理（統一版）
 
         /// <summary>
-        /// COM例外を統一的に処理する
+        /// COM操作を安全に実行する（戻り値なし）
         /// </summary>
         /// <param name="action">実行するアクション</param>
         /// <param name="operationName">操作名</param>
-        /// <param name="throwOnError">エラー時に例外をスローするか</param>
+        /// <param name="suppressErrors">エラーを抑制するか（false=例外をスロー、true=ログのみ出力）</param>
         /// <returns>処理が成功した場合true</returns>
-        public static bool HandleComOperation(Action action, string operationName, bool throwOnError = true)
+        public static bool ExecuteComOperation(Action action, string operationName, bool suppressErrors = false)
         {
+            if (action == null)
+            {
+                LogError($"{operationName}: アクションがnullです");
+                return false;
+            }
+
             try
             {
-                action?.Invoke();
-                LogDebug($"{operationName}: 成功");
+                action.Invoke();
+                LogDebug($"{operationName}: 成功", LogLevel.Debug);
                 return true;
             }
             catch (COMException comEx)
             {
-                string errorMessage = $"{operationName}中にCOM例外が発生しました";
-                LogDebug($"{errorMessage}: HRESULT=0x{comEx.HResult:X8}, Message={comEx.Message}");
-
-                if (throwOnError)
-                {
-                    throw new Exception($"{errorMessage}: {GetComErrorDescription(comEx)}");
-                }
-                return false;
+                return HandleComExceptionInternal(operationName, comEx, suppressErrors);
+            }
+            catch (InvalidOperationException invEx)
+            {
+                return HandleInvalidOperationInternal(operationName, invEx, suppressErrors);
+            }
+            catch (ArgumentException argEx)
+            {
+                return HandleArgumentExceptionInternal(operationName, argEx, suppressErrors);
             }
             catch (Exception ex)
             {
-                string errorMessage = $"{operationName}中にエラーが発生しました";
-                LogDebug($"{errorMessage}: {ex.Message}");
-
-                if (throwOnError)
-                {
-                    throw new Exception($"{errorMessage}: {ex.Message}");
-                }
-                return false;
+                return HandleGeneralExceptionInternal(operationName, ex, suppressErrors);
             }
         }
 
         /// <summary>
-        /// COM例外を統一的に処理する（戻り値あり）
+        /// COM操作を安全に実行する（戻り値あり）
         /// </summary>
         /// <typeparam name="T">戻り値の型</typeparam>
         /// <param name="func">実行する関数</param>
         /// <param name="operationName">操作名</param>
         /// <param name="defaultValue">エラー時のデフォルト値</param>
-        /// <param name="throwOnError">エラー時に例外をスローするか</param>
+        /// <param name="suppressErrors">エラーを抑制するか（false=例外をスロー、true=デフォルト値を返す）</param>
         /// <returns>処理結果またはデフォルト値</returns>
-        public static T HandleComOperation<T>(Func<T> func, string operationName, T defaultValue = default(T), bool throwOnError = true)
+        public static T ExecuteComOperation<T>(Func<T> func, string operationName, T defaultValue = default(T), bool suppressErrors = false)
         {
+            if (func == null)
+            {
+                LogError($"{operationName}: 関数がnullです");
+                return defaultValue;
+            }
+
             try
             {
-                var result = func != null ? func.Invoke() : defaultValue;
-                LogDebug($"{operationName}: 成功");
+                var result = func.Invoke();
+                LogDebug($"{operationName}: 成功", LogLevel.Debug);
                 return result;
             }
             catch (COMException comEx)
             {
-                string errorMessage = $"{operationName}中にCOM例外が発生しました";
-                LogDebug($"{errorMessage}: HRESULT=0x{comEx.HResult:X8}, Message={comEx.Message}");
-
-                if (throwOnError)
-                {
-                    throw new Exception($"{errorMessage}: {GetComErrorDescription(comEx)}");
-                }
+                HandleComExceptionInternal(operationName, comEx, suppressErrors);
+                return defaultValue;
+            }
+            catch (InvalidOperationException invEx)
+            {
+                HandleInvalidOperationInternal(operationName, invEx, suppressErrors);
+                return defaultValue;
+            }
+            catch (ArgumentException argEx)
+            {
+                HandleArgumentExceptionInternal(operationName, argEx, suppressErrors);
                 return defaultValue;
             }
             catch (Exception ex)
             {
-                string errorMessage = $"{operationName}中にエラーが発生しました";
-                LogDebug($"{errorMessage}: {ex.Message}");
-
-                if (throwOnError)
-                {
-                    throw new Exception($"{errorMessage}: {ex.Message}");
-                }
+                HandleGeneralExceptionInternal(operationName, ex, suppressErrors);
                 return defaultValue;
             }
         }
 
         /// <summary>
+        /// 旧メソッド（互換性維持）- 新規コードでは使用非推奨
+        /// </summary>
+        [Obsolete("ExecuteComOperation()を使用してください")]
+        public static bool HandleComOperation(Action action, string operationName, bool throwOnError = true)
+        {
+            return ExecuteComOperation(action, operationName, suppressErrors: !throwOnError);
+        }
+
+        /// <summary>
+        /// 旧メソッド（互換性維持）- 新規コードでは使用非推奨
+        /// </summary>
+        [Obsolete("ExecuteComOperation<T>()を使用してください")]
+        public static T HandleComOperation<T>(Func<T> func, string operationName, T defaultValue = default(T), bool throwOnError = true)
+        {
+            return ExecuteComOperation(func, operationName, defaultValue, suppressErrors: !throwOnError);
+        }
+
+        #endregion
+
+        #region 内部例外処理メソッド
+
+        /// <summary>
+        /// COM例外の内部処理
+        /// </summary>
+        private static bool HandleComExceptionInternal(string operationName, COMException comEx, bool suppressErrors)
+        {
+            string errorMessage = $"{operationName}中にCOM例外が発生しました";
+            string detailMessage = GetComErrorDescription(comEx);
+
+            LogError($"{errorMessage}: HRESULT=0x{comEx.HResult:X8}, {detailMessage}");
+
+            if (!suppressErrors)
+            {
+                throw new ComOperationException($"{errorMessage}: {detailMessage}", comEx);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// InvalidOperation例外の内部処理
+        /// </summary>
+        private static bool HandleInvalidOperationInternal(string operationName, InvalidOperationException invEx, bool suppressErrors)
+        {
+            string errorMessage = $"{operationName}中に無効な操作が実行されました";
+            LogError($"{errorMessage}: {invEx.Message}");
+
+            if (!suppressErrors)
+            {
+                throw new InvalidOperationException($"{errorMessage}: {invEx.Message}", invEx);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Argument例外の内部処理
+        /// </summary>
+        private static bool HandleArgumentExceptionInternal(string operationName, ArgumentException argEx, bool suppressErrors)
+        {
+            string errorMessage = $"{operationName}中に引数エラーが発生しました";
+            LogError($"{errorMessage}: {argEx.Message}");
+
+            if (!suppressErrors)
+            {
+                throw new ArgumentException($"{errorMessage}: {argEx.Message}", argEx);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 一般例外の内部処理
+        /// </summary>
+        private static bool HandleGeneralExceptionInternal(string operationName, Exception ex, bool suppressErrors)
+        {
+            string errorMessage = $"{operationName}中に予期しないエラーが発生しました";
+            LogError($"{errorMessage}: {ex.GetType().Name} - {ex.Message}");
+
+            if (!suppressErrors)
+            {
+                throw new Exception($"{errorMessage}: {ex.Message}", ex);
+            }
+            return false;
+        }
+
+        /// <summary>
         /// COM例外の詳細説明を取得
         /// </summary>
-        /// <param name="comEx">COM例外</param>
-        /// <returns>エラーの詳細説明</returns>
         private static string GetComErrorDescription(COMException comEx)
         {
             switch ((uint)comEx.HResult)
@@ -107,6 +193,10 @@ namespace MagosaAddIn.Core
                     return "アクセスが拒否されました";
                 case 0x800401E3: // MK_E_UNAVAILABLE
                     return "オブジェクトが利用できません";
+                case 0x80020009: // DISP_E_EXCEPTION
+                    return "ディスパッチ例外が発生しました";
+                case 0x8002000E: // DISP_E_PARAMNOTFOUND
+                    return "パラメータが見つかりません";
                 default:
                     return $"COM例外 (HRESULT: 0x{comEx.HResult:X8})";
             }
@@ -114,22 +204,36 @@ namespace MagosaAddIn.Core
 
         #endregion
 
-        #region ログ出力
+        #region ログ出力（改良版）
 
         /// <summary>
-        /// デバッグログを統一フォーマットで出力
+        /// ログレベル設定（本番環境では Warning 以上のみ出力）
+        /// </summary>
+        public static LogLevel MinimumLogLevel { get; set; } = LogLevel.Debug;
+
+        /// <summary>
+        /// 統一されたログ出力
         /// </summary>
         /// <param name="message">ログメッセージ</param>
         /// <param name="level">ログレベル</param>
         public static void LogDebug(string message, LogLevel level = LogLevel.Info)
         {
+            // ログレベルフィルタリング
+            if (level < MinimumLogLevel)
+                return;
+
             string timestamp = DateTime.Now.ToString("HH:mm:ss.fff");
             string levelStr = GetLogLevelString(level);
             string formattedMessage = $"[{timestamp}] [{levelStr}] MagosaAddIn: {message}";
 
             System.Diagnostics.Debug.WriteLine(formattedMessage);
 
-            // 必要に応じてファイル出力やイベントログ出力を追加可能
+            // 本番環境では追加でファイル出力やイベントログ出力を実装可能
+            if (level >= LogLevel.Error)
+            {
+                // 重要なエラーは追加ログ出力（将来実装）
+                // WriteToErrorLog(formattedMessage);
+            }
         }
 
         /// <summary>
@@ -153,10 +257,17 @@ namespace MagosaAddIn.Core
         }
 
         /// <summary>
+        /// 情報ログを出力
+        /// </summary>
+        /// <param name="message">情報メッセージ</param>
+        public static void LogInfo(string message)
+        {
+            LogDebug(message, LogLevel.Info);
+        }
+
+        /// <summary>
         /// ログレベルの文字列表現を取得
         /// </summary>
-        /// <param name="level">ログレベル</param>
-        /// <returns>ログレベル文字列</returns>
         private static string GetLogLevelString(LogLevel level)
         {
             switch (level)
@@ -171,7 +282,7 @@ namespace MagosaAddIn.Core
 
         #endregion
 
-        #region ユーザーメッセージ生成
+        #region ユーザーメッセージ生成（改良版）
 
         /// <summary>
         /// ユーザー向けエラーメッセージを生成
@@ -181,13 +292,22 @@ namespace MagosaAddIn.Core
         /// <returns>ユーザー向けメッセージ</returns>
         public static string CreateUserErrorMessage(string operationName, Exception ex)
         {
-            if (ex is COMException comEx)
+            switch (ex)
             {
-                return $"{operationName}中にエラーが発生しました。\n\n詳細: {GetComErrorDescription(comEx)}\n\nPowerPointを再起動してお試しください。";
-            }
-            else
-            {
-                return $"{operationName}中にエラーが発生しました。\n\n詳細: {ex.Message}";
+                case ComOperationException comOpEx:
+                    return $"{operationName}中にエラーが発生しました。\n\n詳細: {comOpEx.UserMessage}\n\nPowerPointを再起動してお試しください。";
+
+                case COMException comEx:
+                    return $"{operationName}中にエラーが発生しました。\n\n詳細: {GetComErrorDescription(comEx)}\n\nPowerPointを再起動してお試しください。";
+
+                case ArgumentException argEx:
+                    return $"{operationName}の設定値に問題があります。\n\n詳細: {argEx.Message}";
+
+                case InvalidOperationException invEx:
+                    return $"{operationName}を実行できませんでした。\n\n詳細: {invEx.Message}\n\n図形の選択状態を確認してください。";
+
+                default:
+                    return $"{operationName}中にエラーが発生しました。\n\n詳細: {ex.Message}";
             }
         }
 
@@ -208,13 +328,33 @@ namespace MagosaAddIn.Core
     }
 
     /// <summary>
-    /// ログレベル列挙型
+    /// ログレベル列挙型（改良版）
     /// </summary>
     public enum LogLevel
     {
-        Debug,
-        Info,
-        Warning,
-        Error
+        Debug = 0,
+        Info = 1,
+        Warning = 2,
+        Error = 3
+    }
+
+    /// <summary>
+    /// COM操作専用例外クラス
+    /// </summary>
+    public class ComOperationException : Exception
+    {
+        public string UserMessage { get; }
+
+        public ComOperationException(string message, Exception innerException = null)
+            : base(message, innerException)
+        {
+            UserMessage = message;
+        }
+
+        public ComOperationException(string message, string userMessage, Exception innerException = null)
+            : base(message, innerException)
+        {
+            UserMessage = userMessage;
+        }
     }
 }
