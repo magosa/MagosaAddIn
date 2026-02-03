@@ -5,6 +5,7 @@ using System.Linq;
 using System.Windows.Forms;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 using MagosaAddIn.Core;
+using Office = Microsoft.Office.Core;
 
 namespace MagosaAddIn.UI
 {
@@ -24,7 +25,6 @@ namespace MagosaAddIn.UI
         private NumericUpDown numVerticalMargin;
         private Button btnOK;
         private Button btnCancel;
-        private CheckBox chkLinkMargins;
 
         public DivisionDialog()
         {
@@ -214,7 +214,6 @@ namespace MagosaAddIn.UI
                 numVerticalMargin?.Dispose();
                 btnOK?.Dispose();
                 btnCancel?.Dispose();
-                chkLinkMargins?.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -486,7 +485,6 @@ namespace MagosaAddIn.UI
                 numColumns?.Dispose();
                 numHorizontalMargin?.Dispose();
                 numVerticalMargin?.Dispose();
-                chkLinkMargins?.Dispose();
                 chkDeleteOriginal?.Dispose();
                 btnOK?.Dispose();
                 btnCancel?.Dispose();
@@ -1061,11 +1059,11 @@ namespace MagosaAddIn.UI
             {
                 try
                 {
-                    var shapeName = ComExceptionHandler.HandleComOperation(
+                    var shapeName = ComExceptionHandler.ExecuteComOperation(
                         () => baseShape.Name,
                         "基準図形名取得",
                         defaultValue: "不明な図形",
-                        throwOnError: false);
+                        suppressErrors: true);
 
                     lblBaseShapeInfo.Text = $"基準図形: {shapeName}";
                 }
@@ -1135,6 +1133,467 @@ namespace MagosaAddIn.UI
                 btnCancel?.Dispose();
                 lblPreview?.Dispose();
                 lblBaseShapeInfo?.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+    }
+
+    /// <summary>
+    /// レイヤー（重なり順）調整用ダイアログ
+    /// </summary>
+    public partial class LayerAdjustmentDialog : Form
+    {
+        public LayerOrder SelectedOrder { get; private set; }
+
+        private RadioButton rbSelectionOrderToFront;
+        private RadioButton rbSelectionOrderToBack;
+        private RadioButton rbLeftToRightToFront;
+        private RadioButton rbTopToBottomToFront;
+        private Button btnOK;
+        private Button btnCancel;
+        private Label lblInfo;
+
+        public LayerAdjustmentDialog(int shapeCount)
+        {
+            InitializeComponent(shapeCount);
+            SetDefaultValues();
+        }
+
+        private void SetDefaultValues()
+        {
+            SelectedOrder = LayerOrder.SelectionOrderToFront;
+        }
+
+        private void InitializeComponent(int shapeCount)
+        {
+            this.SuspendLayout();
+
+            // フォームの基本設定
+            this.Text = "レイヤー（重なり順）調整";
+            this.Size = new Size(450, 320);
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
+
+            // 情報表示ラベル
+            lblInfo = new Label
+            {
+                Location = new Point(20, 20),
+                Size = new Size(400, 30),
+                Text = $"選択図形: {shapeCount}個\n重なり順を調整します。",
+                ForeColor = Color.DarkBlue,
+                Font = new Font(SystemFonts.DefaultFont, FontStyle.Bold)
+            };
+
+            // 調整方法グループ
+            var groupOrder = new GroupBox
+            {
+                Text = "調整方法",
+                Location = new Point(20, 60),
+                Size = new Size(400, 160)
+            };
+
+            rbSelectionOrderToFront = new RadioButton
+            {
+                Text = "選択順に前面へ配置（1番目が最背面、最後が最前面）",
+                Location = new Point(20, 25),
+                Size = new Size(360, 20),
+                Checked = true
+            };
+
+            rbSelectionOrderToBack = new RadioButton
+            {
+                Text = "選択順に背面へ配置（1番目が最前面、最後が最背面）",
+                Location = new Point(20, 55),
+                Size = new Size(360, 20)
+            };
+
+            rbLeftToRightToFront = new RadioButton
+            {
+                Text = "左から右へ前面に配置（左側が最背面、右側が最前面）",
+                Location = new Point(20, 85),
+                Size = new Size(360, 20)
+            };
+
+            rbTopToBottomToFront = new RadioButton
+            {
+                Text = "上から下へ前面に配置（上側が最背面、下側が最前面）",
+                Location = new Point(20, 115),
+                Size = new Size(360, 20)
+            };
+
+            groupOrder.Controls.AddRange(new Control[] {
+                rbSelectionOrderToFront,
+                rbSelectionOrderToBack,
+                rbLeftToRightToFront,
+                rbTopToBottomToFront
+            });
+
+            // ボタン
+            btnOK = new Button
+            {
+                Text = "実行",
+                Location = new Point(220, 240),
+                Size = new Size(90, 28),
+                DialogResult = DialogResult.OK,
+                Font = new Font(SystemFonts.DefaultFont, FontStyle.Bold)
+            };
+            btnOK.Click += BtnOK_Click;
+
+            btnCancel = new Button
+            {
+                Text = "キャンセル",
+                Location = new Point(320, 240),
+                Size = new Size(90, 28),
+                DialogResult = DialogResult.Cancel
+            };
+
+            // コントロールをフォームに追加
+            this.Controls.AddRange(new Control[] {
+                lblInfo,
+                groupOrder,
+                btnOK,
+                btnCancel
+            });
+
+            this.AcceptButton = btnOK;
+            this.CancelButton = btnCancel;
+
+            this.ResumeLayout(false);
+        }
+
+        private void BtnOK_Click(object sender, EventArgs e)
+        {
+            if (rbSelectionOrderToFront.Checked)
+                SelectedOrder = LayerOrder.SelectionOrderToFront;
+            else if (rbSelectionOrderToBack.Checked)
+                SelectedOrder = LayerOrder.SelectionOrderToBack;
+            else if (rbLeftToRightToFront.Checked)
+                SelectedOrder = LayerOrder.LeftToRightToFront;
+            else if (rbTopToBottomToFront.Checked)
+                SelectedOrder = LayerOrder.TopToBottomToFront;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                rbSelectionOrderToFront?.Dispose();
+                rbSelectionOrderToBack?.Dispose();
+                rbLeftToRightToFront?.Dispose();
+                rbTopToBottomToFront?.Dispose();
+                btnOK?.Dispose();
+                btnCancel?.Dispose();
+                lblInfo?.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+    }
+
+    /// <summary>
+    /// 自動ナンバリング用ダイアログ
+    /// </summary>
+    public partial class NumberingDialog : Form
+    {
+        public int StartNumber { get; private set; }
+        public int Increment { get; private set; }
+        public NumberFormat SelectedFormat { get; private set; }
+        public float FontSize { get; private set; }
+
+        private NumericUpDown numStartNumber;
+        private NumericUpDown numIncrement;
+        private NumericUpDown numFontSize;
+        private ComboBox cmbFormat;
+        private Label lblPreview;
+        private Button btnOK;
+        private Button btnCancel;
+        private Label lblInfo;
+
+        public NumberingDialog(int shapeCount)
+        {
+            InitializeComponent(shapeCount);
+            SetDefaultValues();
+            UpdatePreview();
+        }
+
+        private void SetDefaultValues()
+        {
+            StartNumber = Constants.DEFAULT_START_NUMBER;
+            Increment = Constants.DEFAULT_INCREMENT;
+            SelectedFormat = NumberFormat.Arabic;
+            FontSize = Constants.DEFAULT_NUMBER_FONT_SIZE;
+        }
+
+        private void InitializeComponent(int shapeCount)
+        {
+            this.SuspendLayout();
+
+            // フォームの基本設定
+            this.Text = "自動ナンバリング";
+            this.Size = new Size(450, 400);
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
+
+            // 情報表示ラベル
+            lblInfo = new Label
+            {
+                Location = new Point(20, 20),
+                Size = new Size(400, 30),
+                Text = $"選択図形: {shapeCount}個\n選択順に番号を付けます。",
+                ForeColor = Color.DarkBlue,
+                Font = new Font(SystemFonts.DefaultFont, FontStyle.Bold)
+            };
+
+            // 開始番号
+            var lblStartNumber = new Label
+            {
+                Text = "開始番号:",
+                Location = new Point(20, 70),
+                Size = new Size(100, 20),
+                TextAlign = ContentAlignment.MiddleLeft
+            };
+
+            numStartNumber = new NumericUpDown
+            {
+                Location = new Point(130, 68),
+                Size = new Size(100, 20),
+                Minimum = Constants.MIN_START_NUMBER,
+                Maximum = Constants.MAX_START_NUMBER,
+                Value = Constants.DEFAULT_START_NUMBER
+            };
+            numStartNumber.ValueChanged += (s, e) => UpdatePreview();
+
+            // 増分値
+            var lblIncrement = new Label
+            {
+                Text = "増分値:",
+                Location = new Point(20, 100),
+                Size = new Size(100, 20),
+                TextAlign = ContentAlignment.MiddleLeft
+            };
+
+            numIncrement = new NumericUpDown
+            {
+                Location = new Point(130, 98),
+                Size = new Size(100, 20),
+                Minimum = Constants.MIN_INCREMENT,
+                Maximum = Constants.MAX_INCREMENT,
+                Value = Constants.DEFAULT_INCREMENT
+            };
+            numIncrement.ValueChanged += (s, e) => UpdatePreview();
+
+            // 番号フォーマット
+            var lblFormat = new Label
+            {
+                Text = "番号フォーマット:",
+                Location = new Point(20, 130),
+                Size = new Size(100, 20),
+                TextAlign = ContentAlignment.MiddleLeft
+            };
+
+            cmbFormat = new ComboBox
+            {
+                Location = new Point(130, 128),
+                Size = new Size(200, 20),
+                DropDownStyle = ComboBoxStyle.DropDownList
+            };
+            cmbFormat.Items.AddRange(new object[] {
+                "1, 2, 3... (算用数字)",
+                "①②③... (丸数字)",
+                "A, B, C... (大文字)",
+                "a, b, c... (小文字)",
+                "I, II, III... (ローマ数字大文字)",
+                "i, ii, iii... (ローマ数字小文字)"
+            });
+            cmbFormat.SelectedIndex = 0;
+            cmbFormat.SelectedIndexChanged += (s, e) => UpdatePreview();
+
+            // フォントサイズ
+            var lblFontSize = new Label
+            {
+                Text = "フォントサイズ:",
+                Location = new Point(20, 160),
+                Size = new Size(100, 20),
+                TextAlign = ContentAlignment.MiddleLeft
+            };
+
+            numFontSize = new NumericUpDown
+            {
+                Location = new Point(130, 158),
+                Size = new Size(100, 20),
+                Minimum = 8,
+                Maximum = 72,
+                Value = (decimal)Constants.DEFAULT_NUMBER_FONT_SIZE,
+                DecimalPlaces = 0
+            };
+
+            var lblUnit = new Label
+            {
+                Text = "pt",
+                Location = new Point(240, 160),
+                Size = new Size(20, 20),
+                ForeColor = Color.Gray
+            };
+
+            // プレビュー
+            var lblPreviewTitle = new Label
+            {
+                Text = "プレビュー:",
+                Location = new Point(20, 200),
+                Size = new Size(100, 20),
+                Font = new Font(SystemFonts.DefaultFont, FontStyle.Bold)
+            };
+
+            lblPreview = new Label
+            {
+                Location = new Point(20, 225),
+                Size = new Size(400, 80),
+                Text = "",
+                BorderStyle = BorderStyle.FixedSingle,
+                BackColor = Color.WhiteSmoke,
+                Font = new Font(SystemFonts.DefaultFont.FontFamily, 12)
+            };
+
+            // ボタン
+            btnOK = new Button
+            {
+                Text = "適用",
+                Location = new Point(220, 325),
+                Size = new Size(90, 28),
+                DialogResult = DialogResult.OK,
+                Font = new Font(SystemFonts.DefaultFont, FontStyle.Bold)
+            };
+            btnOK.Click += BtnOK_Click;
+
+            btnCancel = new Button
+            {
+                Text = "キャンセル",
+                Location = new Point(320, 325),
+                Size = new Size(90, 28),
+                DialogResult = DialogResult.Cancel
+            };
+
+            // コントロールをフォームに追加
+            this.Controls.AddRange(new Control[] {
+                lblInfo,
+                lblStartNumber, numStartNumber,
+                lblIncrement, numIncrement,
+                lblFormat, cmbFormat,
+                lblFontSize, numFontSize, lblUnit,
+                lblPreviewTitle, lblPreview,
+                btnOK, btnCancel
+            });
+
+            this.AcceptButton = btnOK;
+            this.CancelButton = btnCancel;
+
+            this.ResumeLayout(false);
+        }
+
+        private void UpdatePreview()
+        {
+            try
+            {
+                int start = (int)numStartNumber.Value;
+                int inc = (int)numIncrement.Value;
+                NumberFormat format = (NumberFormat)cmbFormat.SelectedIndex;
+
+                var previewNumbers = new List<string>();
+
+                for (int i = 0; i < Math.Min(5, 10); i++)
+                {
+                    int num = start + (i * inc);
+                    string formatted = FormatNumberForPreview(num, format);
+                    previewNumbers.Add(formatted);
+                }
+
+                lblPreview.Text = string.Join(", ", previewNumbers) + "...";
+            }
+            catch
+            {
+                lblPreview.Text = "プレビュー取得エラー";
+            }
+        }
+
+        private string FormatNumberForPreview(int number, NumberFormat format)
+        {
+            switch (format)
+            {
+                case NumberFormat.Arabic:
+                    return number.ToString();
+                case NumberFormat.CircledArabic:
+                    if (number >= 1 && number <= 20)
+                        return char.ConvertFromUtf32(0x245F + number);
+                    return $"({number})";
+                case NumberFormat.UpperAlpha:
+                    return GetAlpha(number, true);
+                case NumberFormat.LowerAlpha:
+                    return GetAlpha(number, false);
+                case NumberFormat.UpperRoman:
+                    return GetRoman(number, true);
+                case NumberFormat.LowerRoman:
+                    return GetRoman(number, false);
+                default:
+                    return number.ToString();
+            }
+        }
+
+        private string GetAlpha(int number, bool isUpper)
+        {
+            if (number < 1) return isUpper ? "A" : "a";
+            string result = "";
+            int n = number;
+            while (n > 0)
+            {
+                n--;
+                result = (char)((isUpper ? 'A' : 'a') + (n % 26)) + result;
+                n = n / 26;
+            }
+            return result;
+        }
+
+        private string GetRoman(int number, bool isUpper)
+        {
+            if (number < 1 || number > 3999) return number.ToString();
+            int[] values = { 1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1 };
+            string[] upper = { "M", "CM", "D", "CD", "C", "XC", "L", "XL", "X", "IX", "V", "IV", "I" };
+            string[] lower = { "m", "cm", "d", "cd", "c", "xc", "l", "xl", "x", "ix", "v", "iv", "i" };
+            string[] romans = isUpper ? upper : lower;
+            string result = "";
+            for (int i = 0; i < values.Length; i++)
+            {
+                while (number >= values[i])
+                {
+                    number -= values[i];
+                    result += romans[i];
+                }
+            }
+            return result;
+        }
+
+        private void BtnOK_Click(object sender, EventArgs e)
+        {
+            StartNumber = (int)numStartNumber.Value;
+            Increment = (int)numIncrement.Value;
+            SelectedFormat = (NumberFormat)cmbFormat.SelectedIndex;
+            FontSize = (float)numFontSize.Value;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                numStartNumber?.Dispose();
+                numIncrement?.Dispose();
+                numFontSize?.Dispose();
+                cmbFormat?.Dispose();
+                lblPreview?.Dispose();
+                btnOK?.Dispose();
+                btnCancel?.Dispose();
+                lblInfo?.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -1881,6 +2340,195 @@ namespace MagosaAddIn.UI
                 btnGetCurrentValues?.Dispose();
                 lblShapeInfo?.Dispose();
                 groupHandles?.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+    }
+
+    /// <summary>
+    /// 図形置き換え設定用ダイアログ
+    /// </summary>
+    public partial class ShapeReplacementDialog : Form
+    {
+        public SizeMode SelectedSizeMode { get; private set; }
+        public bool InheritStyle { get; private set; }
+        public bool InheritText { get; private set; }
+
+        private RadioButton rbKeepOriginalSize;
+        private RadioButton rbUseTemplateSize;
+        private CheckBox chkInheritStyle;
+        private CheckBox chkInheritText;
+        private Button btnOK;
+        private Button btnCancel;
+        private Label lblInfo;
+        private Label lblNote;
+
+        public ShapeReplacementDialog(int savedShapeCount, string templateShapeName)
+        {
+            InitializeComponent(savedShapeCount, templateShapeName);
+            SetDefaultValues();
+        }
+
+        private void SetDefaultValues()
+        {
+            SelectedSizeMode = SizeMode.KeepOriginal;
+            InheritStyle = false;
+            InheritText = false;
+        }
+
+        private void InitializeComponent(int savedShapeCount, string templateShapeName)
+        {
+            this.SuspendLayout();
+
+            // フォームの基本設定
+            this.Text = "図形置き換え設定";
+            this.Size = new Size(420, 380);
+            this.StartPosition = FormStartPosition.CenterScreen;
+            this.FormBorderStyle = FormBorderStyle.FixedDialog;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
+
+            // 情報表示ラベル
+            lblInfo = new Label
+            {
+                Location = new Point(20, 20),
+                Size = new Size(370, 40),
+                Text = $"対象図形: {savedShapeCount}個\nテンプレート: {templateShapeName}",
+                ForeColor = Color.DarkBlue,
+                Font = new Font(SystemFonts.DefaultFont, FontStyle.Bold)
+            };
+
+            // サイズモード設定グループ
+            var groupSize = new GroupBox
+            {
+                Text = "サイズ設定",
+                Location = new Point(20, 70),
+                Size = new Size(370, 80)
+            };
+
+            rbKeepOriginalSize = new RadioButton
+            {
+                Text = "元のサイズを維持",
+                Location = new Point(20, 25),
+                Size = new Size(330, 20),
+                Checked = true
+            };
+
+            rbUseTemplateSize = new RadioButton
+            {
+                Text = "テンプレートサイズに統一",
+                Location = new Point(20, 50),
+                Size = new Size(330, 20)
+            };
+
+            groupSize.Controls.AddRange(new Control[] {
+                rbKeepOriginalSize,
+                rbUseTemplateSize
+            });
+
+            // スタイル・テキスト継承設定グループ
+            var groupInherit = new GroupBox
+            {
+                Text = "継承設定",
+                Location = new Point(20, 160),
+                Size = new Size(370, 100)
+            };
+
+            chkInheritStyle = new CheckBox
+            {
+                Text = "スタイルを継承（塗りつぶし・枠線・影）",
+                Location = new Point(20, 25),
+                Size = new Size(330, 20),
+                Checked = false
+            };
+
+            chkInheritText = new CheckBox
+            {
+                Text = "テキストを継承",
+                Location = new Point(20, 55),
+                Size = new Size(330, 20),
+                Checked = false
+            };
+
+            var lblInheritNote = new Label
+            {
+                Text = "※チェックなしの場合、テンプレート図形の設定を使用",
+                Location = new Point(20, 75),
+                Size = new Size(330, 20),
+                ForeColor = Color.Gray,
+                Font = new Font(SystemFonts.DefaultFont.FontFamily, 8)
+            };
+
+            groupInherit.Controls.AddRange(new Control[] {
+                chkInheritStyle,
+                chkInheritText,
+                lblInheritNote
+            });
+
+            // 注意事項ラベル
+            lblNote = new Label
+            {
+                Text = "※ 各図形の中心点の位置は維持されます\n※ 元の図形は削除されます",
+                Location = new Point(20, 270),
+                Size = new Size(370, 35),
+                ForeColor = Color.DarkGreen,
+                Font = new Font(SystemFonts.DefaultFont.FontFamily, 9, FontStyle.Italic)
+            };
+
+            // ボタン
+            btnOK = new Button
+            {
+                Text = "実行",
+                Location = new Point(190, 315),
+                Size = new Size(90, 28),
+                DialogResult = DialogResult.OK,
+                Font = new Font(SystemFonts.DefaultFont, FontStyle.Bold)
+            };
+            btnOK.Click += BtnOK_Click;
+
+            btnCancel = new Button
+            {
+                Text = "キャンセル",
+                Location = new Point(290, 315),
+                Size = new Size(90, 28),
+                DialogResult = DialogResult.Cancel
+            };
+
+            // コントロールをフォームに追加
+            this.Controls.AddRange(new Control[] {
+                lblInfo,
+                groupSize,
+                groupInherit,
+                lblNote,
+                btnOK,
+                btnCancel
+            });
+
+            this.AcceptButton = btnOK;
+            this.CancelButton = btnCancel;
+
+            this.ResumeLayout(false);
+        }
+
+        private void BtnOK_Click(object sender, EventArgs e)
+        {
+            SelectedSizeMode = rbKeepOriginalSize.Checked ? SizeMode.KeepOriginal : SizeMode.UseTemplate;
+            InheritStyle = chkInheritStyle.Checked;
+            InheritText = chkInheritText.Checked;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                rbKeepOriginalSize?.Dispose();
+                rbUseTemplateSize?.Dispose();
+                chkInheritStyle?.Dispose();
+                chkInheritText?.Dispose();
+                btnOK?.Dispose();
+                btnCancel?.Dispose();
+                lblInfo?.Dispose();
+                lblNote?.Dispose();
             }
             base.Dispose(disposing);
         }

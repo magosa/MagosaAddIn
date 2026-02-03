@@ -12,9 +12,12 @@ namespace MagosaAddIn.UI
 {
     public partial class CustomRibbon
     {
+        private ShapeReplacer shapeReplacer;
+
         private void CustomRibbon_Load(object sender, RibbonUIEventArgs e)
         {
             ComExceptionHandler.LogDebug("Magosa Tools リボンが読み込まれました");
+            shapeReplacer = new ShapeReplacer();
         }
 
         #region 図形分割機能
@@ -215,6 +218,50 @@ namespace MagosaAddIn.UI
             catch (Exception ex)
             {
                 ErrorHandler.ShowOperationError("下端揃え", ex);
+            }
+        }
+
+        private void btnAlignToHorizontalCenter_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var shapes = RibbonHelper.GetMultipleSelectedShapes();
+                if (RibbonHelper.ValidateShapeSelection(Constants.MIN_SHAPES_FOR_ALIGNMENT))
+                {
+                    var aligner = new ShapeAligner();
+                    aligner.AlignToHorizontalCenter(shapes);
+                    ErrorHandler.ShowOperationSuccess("水平中央揃え", $"{shapes.Count}個の図形を整列しました");
+                }
+                else
+                {
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_ALIGNMENT, "水平中央揃え");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("水平中央揃え", ex);
+            }
+        }
+
+        private void btnAlignToVerticalCenter_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var shapes = RibbonHelper.GetMultipleSelectedShapes();
+                if (RibbonHelper.ValidateShapeSelection(Constants.MIN_SHAPES_FOR_ALIGNMENT))
+                {
+                    var aligner = new ShapeAligner();
+                    aligner.AlignToVerticalCenter(shapes);
+                    ErrorHandler.ShowOperationSuccess("垂直中央揃え", $"{shapes.Count}個の図形を整列しました");
+                }
+                else
+                {
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_ALIGNMENT, "垂直中央揃え");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("垂直中央揃え", ex);
             }
         }
 
@@ -523,6 +570,141 @@ namespace MagosaAddIn.UI
             catch (Exception ex)
             {
                 ErrorHandler.ShowOperationError("円形配置", ex);
+            }
+        }
+
+        #endregion
+
+        #region レイヤー調整機能
+
+        private void btnLayerAdjustment_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var shapes = RibbonHelper.GetMultipleSelectedShapes();
+                if (RibbonHelper.ValidateShapeSelection(Constants.MIN_SHAPES_FOR_LAYER))
+                {
+                    ShowLayerAdjustmentDialog(shapes);
+                }
+                else
+                {
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_LAYER, "レイヤー調整");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("レイヤー調整", ex);
+            }
+        }
+
+        private void ShowLayerAdjustmentDialog(List<PowerPoint.Shape> shapes)
+        {
+            try
+            {
+                using (var dialog = new MagosaAddIn.UI.LayerAdjustmentDialog(shapes.Count))
+                {
+                    if (dialog.ShowDialog() == DialogResult.OK)
+                    {
+                        var manager = new ShapeLayerManager();
+                        manager.AdjustLayers(shapes, dialog.SelectedOrder);
+
+                        string orderText = GetLayerOrderText(dialog.SelectedOrder);
+                        ErrorHandler.ShowOperationSuccess("レイヤー調整",
+                            $"{shapes.Count}個の図形の重なり順を調整しました\n方法: {orderText}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("レイヤー調整", ex);
+            }
+        }
+
+        private string GetLayerOrderText(LayerOrder order)
+        {
+            switch (order)
+            {
+                case LayerOrder.SelectionOrderToFront:
+                    return "選択順に前面へ配置";
+                case LayerOrder.SelectionOrderToBack:
+                    return "選択順に背面へ配置";
+                case LayerOrder.LeftToRightToFront:
+                    return "左から右へ前面に配置";
+                case LayerOrder.TopToBottomToFront:
+                    return "上から下へ前面に配置";
+                default:
+                    return "不明";
+            }
+        }
+
+        #endregion
+
+        #region 自動ナンバリング機能
+
+        private void btnAutoNumbering_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var shapes = RibbonHelper.GetMultipleSelectedShapes();
+                if (RibbonHelper.ValidateShapeSelection(Constants.MIN_SHAPES_FOR_NUMBERING))
+                {
+                    ShowNumberingDialog(shapes);
+                }
+                else
+                {
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_NUMBERING, "自動ナンバリング");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("自動ナンバリング", ex);
+            }
+        }
+
+        private void ShowNumberingDialog(List<PowerPoint.Shape> shapes)
+        {
+            try
+            {
+                using (var dialog = new MagosaAddIn.UI.NumberingDialog(shapes.Count))
+                {
+                    if (dialog.ShowDialog() == DialogResult.OK)
+                    {
+                        var numbering = new ShapeNumbering();
+                        numbering.ApplyNumbering(shapes, dialog.StartNumber, dialog.Increment, 
+                            dialog.SelectedFormat, dialog.FontSize);
+
+                        string formatText = GetNumberFormatText(dialog.SelectedFormat);
+                        ErrorHandler.ShowOperationSuccess("自動ナンバリング",
+                            $"{shapes.Count}個の図形に番号を付けました\n" +
+                            $"開始番号: {dialog.StartNumber}, 増分: {dialog.Increment}\n" +
+                            $"フォーマット: {formatText}, サイズ: {dialog.FontSize}pt");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("自動ナンバリング", ex);
+            }
+        }
+
+        private string GetNumberFormatText(NumberFormat format)
+        {
+            switch (format)
+            {
+                case NumberFormat.Arabic:
+                    return "算用数字 (1, 2, 3...)";
+                case NumberFormat.CircledArabic:
+                    return "丸数字 (①②③...)";
+                case NumberFormat.UpperAlpha:
+                    return "大文字アルファベット (A, B, C...)";
+                case NumberFormat.LowerAlpha:
+                    return "小文字アルファベット (a, b, c...)";
+                case NumberFormat.UpperRoman:
+                    return "ローマ数字大文字 (I, II, III...)";
+                case NumberFormat.LowerRoman:
+                    return "ローマ数字小文字 (i, ii, iii...)";
+                default:
+                    return "不明";
             }
         }
 
@@ -943,6 +1125,155 @@ namespace MagosaAddIn.UI
             {
                 ErrorHandler.ShowOperationError("角度ハンドル設定", ex);
             }
+        }
+
+        #endregion
+
+        #region 図形置き換え機能
+
+        /// <summary>
+        /// 選択完了ボタン（置き換え対象図形を記憶）
+        /// </summary>
+        private void btnSaveShapes_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var shapes = RibbonHelper.GetMultipleSelectedShapes();
+                if (shapes != null && shapes.Count >= Constants.MIN_SHAPES_FOR_REPLACEMENT)
+                {
+                    shapeReplacer.SaveShapes(shapes);
+                    UpdateSavedCountLabel();
+                    ErrorHandler.ShowOperationSuccess("図形記憶", 
+                        $"{shapes.Count}個の図形を記憶しました。\n次にテンプレート図形を1つ選択して「置き換え実行」をクリックしてください。");
+                }
+                else
+                {
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_REPLACEMENT, "図形記憶");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("図形記憶", ex);
+            }
+        }
+
+        /// <summary>
+        /// 置き換え実行ボタン
+        /// </summary>
+        private void btnReplaceShapes_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                // 記憶図形チェック
+                int savedCount = shapeReplacer.GetSavedShapeCount();
+                if (savedCount == 0)
+                {
+                    MessageBox.Show(
+                        "先に置き換え対象の図形を選択して「選択完了」してください。",
+                        "図形置き換え",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // テンプレート図形チェック（1個のみ）
+                var templateShape = GetSingleShapeForReplacement();
+                if (templateShape == null)
+                {
+                    MessageBox.Show(
+                        "テンプレート図形を1つ選択してください。",
+                        "図形置き換え",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // ダイアログ表示
+                ShowReplacementDialog(templateShape, savedCount);
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("図形置き換え", ex);
+            }
+        }
+
+        /// <summary>
+        /// 置き換え用の単一図形を取得（テンプレート図形）
+        /// </summary>
+        private PowerPoint.Shape GetSingleShapeForReplacement()
+        {
+            return ComExceptionHandler.ExecuteComOperation(
+                () => {
+                    var app = Globals.ThisAddIn.Application;
+                    if (app?.ActiveWindow?.Selection == null)
+                        return null;
+
+                    var selection = app.ActiveWindow.Selection;
+
+                    if (selection.Type == PowerPoint.PpSelectionType.ppSelectionShapes &&
+                        selection.ShapeRange.Count == Constants.TEMPLATE_SHAPE_COUNT)
+                    {
+                        return selection.ShapeRange[1];
+                    }
+
+                    return null;
+                },
+                "テンプレート図形取得",
+                defaultValue: null,
+                suppressErrors: true);
+        }
+
+        /// <summary>
+        /// 図形置き換えダイアログを表示
+        /// </summary>
+        private void ShowReplacementDialog(PowerPoint.Shape templateShape, int savedShapeCount)
+        {
+            try
+            {
+                string templateShapeName = ComExceptionHandler.HandleComOperation(
+                    () => templateShape.Name,
+                    "テンプレート図形名取得",
+                    defaultValue: "不明な図形",
+                    throwOnError: false);
+
+                using (var dialog = new ShapeReplacementDialog(savedShapeCount, templateShapeName))
+                {
+                    if (dialog.ShowDialog() == DialogResult.OK)
+                    {
+                        var options = new ReplacementOptions
+                        {
+                            SizeMode = dialog.SelectedSizeMode,
+                            InheritStyle = dialog.InheritStyle,
+                            InheritText = dialog.InheritText
+                        };
+
+                        shapeReplacer.ReplaceShapes(templateShape, options);
+                        UpdateSavedCountLabel();
+
+                        string sizeInfo = dialog.SelectedSizeMode == SizeMode.KeepOriginal ? "元のサイズ" : "テンプレートサイズ";
+                        string styleInfo = dialog.InheritStyle ? "スタイル継承あり" : "テンプレートスタイル使用";
+                        string textInfo = dialog.InheritText ? "テキスト継承あり" : "テンプレートテキスト使用";
+
+                        ErrorHandler.ShowOperationSuccess("図形置き換え",
+                            $"{savedShapeCount}個の図形を置き換えました。\n" +
+                            $"サイズ: {sizeInfo}\n" +
+                            $"{styleInfo}, {textInfo}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("図形置き換え", ex);
+            }
+        }
+
+        /// <summary>
+        /// 記憶図形数ラベルを更新
+        /// </summary>
+        private void UpdateSavedCountLabel()
+        {
+            int count = shapeReplacer.GetSavedShapeCount();
+            lblSavedCount.Label = $"記憶: {count}個";
         }
 
         #endregion

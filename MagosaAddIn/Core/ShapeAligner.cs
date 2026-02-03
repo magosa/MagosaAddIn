@@ -108,6 +108,54 @@ namespace MagosaAddIn.Core
                 "下端揃え");
         }
 
+        /// <summary>
+        /// 1つめの選択オブジェクトを基準にその他のオブジェクトを水平方向で中央揃え
+        /// </summary>
+        /// <param name="shapes">選択された図形のリスト（最初の要素が基準図形）</param>
+        public void AlignToHorizontalCenter(List<PowerPoint.Shape> shapes)
+        {
+            ComExceptionHandler.ExecuteComOperation(
+                () =>
+                {
+                    ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "水平中央揃え");
+
+                    var baseShape = shapes[0]; // 基準となる図形（一番目に選択）
+                    float baseCenterY = baseShape.Top + (baseShape.Height / 2); // 基準図形の水平中央（Y座標）
+
+                    // 2番目以降の図形の水平中央を基準図形の水平中央に合わせる
+                    for (int i = 1; i < shapes.Count; i++)
+                    {
+                        var currentShape = shapes[i];
+                        currentShape.Top = baseCenterY - (currentShape.Height / 2);
+                    }
+                },
+                "水平中央揃え");
+        }
+
+        /// <summary>
+        /// 1つめの選択オブジェクトを基準にその他のオブジェクトを垂直方向で中央揃え
+        /// </summary>
+        /// <param name="shapes">選択された図形のリスト（最初の要素が基準図形）</param>
+        public void AlignToVerticalCenter(List<PowerPoint.Shape> shapes)
+        {
+            ComExceptionHandler.ExecuteComOperation(
+                () =>
+                {
+                    ErrorHandler.ValidateShapes(shapes, Constants.MIN_SHAPES_FOR_ALIGNMENT, "垂直中央揃え");
+
+                    var baseShape = shapes[0]; // 基準となる図形（一番目に選択）
+                    float baseCenterX = baseShape.Left + (baseShape.Width / 2); // 基準図形の垂直中央（X座標）
+
+                    // 2番目以降の図形の垂直中央を基準図形の垂直中央に合わせる
+                    for (int i = 1; i < shapes.Count; i++)
+                    {
+                        var currentShape = shapes[i];
+                        currentShape.Left = baseCenterX - (currentShape.Width / 2);
+                    }
+                },
+                "垂直中央揃え");
+        }
+
         #endregion
 
         #region 隣接整列機能

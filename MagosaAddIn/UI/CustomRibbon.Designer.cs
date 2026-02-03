@@ -37,11 +37,15 @@
             this.tab1 = this.Factory.CreateRibbonTab();
             this.group1 = this.Factory.CreateRibbonGroup();
             this.btnDivideShape = this.Factory.CreateRibbonButton();
+            this.btnLayerAdjustment = this.Factory.CreateRibbonButton();
+            this.btnAutoNumbering = this.Factory.CreateRibbonButton();
             this.group2 = this.Factory.CreateRibbonGroup();
             this.btnAlignToLeft = this.Factory.CreateRibbonButton();
             this.btnAlignToRight = this.Factory.CreateRibbonButton();
             this.btnAlignToTop = this.Factory.CreateRibbonButton();
             this.btnAlignToBottom = this.Factory.CreateRibbonButton();
+            this.btnAlignToHorizontalCenter = this.Factory.CreateRibbonButton();
+            this.btnAlignToVerticalCenter = this.Factory.CreateRibbonButton();
             this.group3 = this.Factory.CreateRibbonGroup();
             this.btnAlignLeftToRight = this.Factory.CreateRibbonButton();
             this.btnAlignRightToLeft = this.Factory.CreateRibbonButton();
@@ -61,6 +65,11 @@
             this.btnAdjustmentHandles = this.Factory.CreateRibbonButton();
             this.btnAngleHandles = this.Factory.CreateRibbonButton();
             this.btnResetAdjustments = this.Factory.CreateRibbonButton();
+            // 新規追加: 図形置き換えグループ
+            this.group7 = this.Factory.CreateRibbonGroup();
+            this.btnSaveShapes = this.Factory.CreateRibbonButton();
+            this.btnReplaceShapes = this.Factory.CreateRibbonButton();
+            this.lblSavedCount = this.Factory.CreateRibbonLabel();
 
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
@@ -75,12 +84,13 @@
             // tab1
             // 
             this.tab1.ControlId.ControlIdType = Microsoft.Office.Tools.Ribbon.RibbonControlIdType.Office;
-            this.tab1.Groups.Add(this.group1);
-            this.tab1.Groups.Add(this.group2);
-            this.tab1.Groups.Add(this.group3);
-            this.tab1.Groups.Add(this.group4);
-            this.tab1.Groups.Add(this.group5);
-            this.tab1.Groups.Add(this.group6); // 新規追加
+            this.tab1.Groups.Add(this.group5); // ①選択補助
+            this.tab1.Groups.Add(this.group1); // ②図形操作
+            this.tab1.Groups.Add(this.group7); // ③図形置き換え
+            this.tab1.Groups.Add(this.group6); // ④ハンドル調整
+            this.tab1.Groups.Add(this.group2); // ⑤基準整列
+            this.tab1.Groups.Add(this.group3); // ⑥隣接整列
+            this.tab1.Groups.Add(this.group4); // ⑦拡張整列
             this.tab1.Label = "Magosa Tools";
             this.tab1.Name = "tab1";
 
@@ -88,6 +98,8 @@
             // group1
             // 
             this.group1.Items.Add(this.btnDivideShape);
+            this.group1.Items.Add(this.btnLayerAdjustment);
+            this.group1.Items.Add(this.btnAutoNumbering);
             this.group1.Label = "図形操作";
             this.group1.Name = "group1";
 
@@ -102,12 +114,34 @@
             this.btnDivideShape.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnDivideShape_Click);
 
             // 
+            // btnLayerAdjustment
+            // 
+            this.btnLayerAdjustment.Label = "レイヤー調整";
+            this.btnLayerAdjustment.Name = "btnLayerAdjustment";
+            this.btnLayerAdjustment.OfficeImageId = "ObjectBringToFront";
+            this.btnLayerAdjustment.ShowImage = true;
+            this.btnLayerAdjustment.SuperTip = "選択した図形の重なり順を調整します。選択順または位置に基づいて前面・背面を設定できます。";
+            this.btnLayerAdjustment.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnLayerAdjustment_Click);
+
+            // 
+            // btnAutoNumbering
+            // 
+            this.btnAutoNumbering.Label = "自動ナンバリング";
+            this.btnAutoNumbering.Name = "btnAutoNumbering";
+            this.btnAutoNumbering.OfficeImageId = "NumberStyleGallery";
+            this.btnAutoNumbering.ShowImage = true;
+            this.btnAutoNumbering.SuperTip = "選択した図形に自動で番号を付けます。算用数字、丸数字、アルファベット、ローマ数字などから選択できます。";
+            this.btnAutoNumbering.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAutoNumbering_Click);
+
+            // 
             // group2
             // 
             this.group2.Items.Add(this.btnAlignToLeft);
             this.group2.Items.Add(this.btnAlignToRight);
             this.group2.Items.Add(this.btnAlignToTop);
             this.group2.Items.Add(this.btnAlignToBottom);
+            this.group2.Items.Add(this.btnAlignToHorizontalCenter);
+            this.group2.Items.Add(this.btnAlignToVerticalCenter);
             this.group2.Label = "基準整列";
             this.group2.Name = "group2";
 
@@ -150,6 +184,26 @@
             this.btnAlignToBottom.ShowImage = true;
             this.btnAlignToBottom.SuperTip = "基準図形の下端に、その他の図形の下端を揃えます。";
             this.btnAlignToBottom.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignToBottom_Click);
+
+            // 
+            // btnAlignToHorizontalCenter
+            // 
+            this.btnAlignToHorizontalCenter.Label = "水平中央揃え";
+            this.btnAlignToHorizontalCenter.Name = "btnAlignToHorizontalCenter";
+            this.btnAlignToHorizontalCenter.OfficeImageId = "AlignDistributeHorizontally";
+            this.btnAlignToHorizontalCenter.ShowImage = true;
+            this.btnAlignToHorizontalCenter.SuperTip = "基準図形の水平中央に、その他の図形の水平中央を揃えます。";
+            this.btnAlignToHorizontalCenter.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignToHorizontalCenter_Click);
+
+            // 
+            // btnAlignToVerticalCenter
+            // 
+            this.btnAlignToVerticalCenter.Label = "垂直中央揃え";
+            this.btnAlignToVerticalCenter.Name = "btnAlignToVerticalCenter";
+            this.btnAlignToVerticalCenter.OfficeImageId = "AlignDistributeVertically";
+            this.btnAlignToVerticalCenter.ShowImage = true;
+            this.btnAlignToVerticalCenter.SuperTip = "基準図形の垂直中央に、その他の図形の垂直中央を揃えます。";
+            this.btnAlignToVerticalCenter.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignToVerticalCenter_Click);
 
             // 
             // group3
@@ -218,7 +272,7 @@
             // 
             this.btnAlignAndDistributeHorizontal.Label = "水平中央・等間隔";
             this.btnAlignAndDistributeHorizontal.Name = "btnAlignAndDistributeHorizontal";
-            this.btnAlignAndDistributeHorizontal.OfficeImageId = "AlignDistributeHorizontally";
+            this.btnAlignAndDistributeHorizontal.OfficeImageId = "HorizontalSpacingIncrease";
             this.btnAlignAndDistributeHorizontal.ShowImage = true;
             this.btnAlignAndDistributeHorizontal.SuperTip = "基準図形の水平中央に揃えて等間隔で配置します。2つの図形の場合は中央揃えのみ実行されます。";
             this.btnAlignAndDistributeHorizontal.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignAndDistributeHorizontal_Click);
@@ -228,7 +282,7 @@
             // 
             this.btnAlignAndDistributeVertical.Label = "垂直中央・等間隔";
             this.btnAlignAndDistributeVertical.Name = "btnAlignAndDistributeVertical";
-            this.btnAlignAndDistributeVertical.OfficeImageId = "AlignDistributeHorizontally";
+            this.btnAlignAndDistributeVertical.OfficeImageId = "VerticalSpacingIncrease";
             this.btnAlignAndDistributeVertical.ShowImage = true;
             this.btnAlignAndDistributeVertical.SuperTip = "基準図形の垂直中央に揃えて等間隔で配置します。2つの図形の場合は中央揃えのみ実行されます。";
             this.btnAlignAndDistributeVertical.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAlignAndDistributeVertical_Click);
@@ -330,6 +384,41 @@
             this.btnResetAdjustments.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnResetAdjustments_Click);
 
             // 
+            // group7
+            // 
+            this.group7.Items.Add(this.btnSaveShapes);
+            this.group7.Items.Add(this.btnReplaceShapes);
+            this.group7.Items.Add(this.lblSavedCount);
+            this.group7.Label = "図形置き換え";
+            this.group7.Name = "group7";
+
+            // 
+            // btnSaveShapes
+            // 
+            this.btnSaveShapes.Label = "選択完了";
+            this.btnSaveShapes.Name = "btnSaveShapes";
+            this.btnSaveShapes.OfficeImageId = "AreaSelect";
+            this.btnSaveShapes.ShowImage = true;
+            this.btnSaveShapes.SuperTip = "置き換える複数の図形を選択して記憶します。記憶後、テンプレート図形を選択して置き換え実行してください。";
+            this.btnSaveShapes.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnSaveShapes_Click);
+
+            // 
+            // btnReplaceShapes
+            // 
+            this.btnReplaceShapes.Label = "置き換え実行";
+            this.btnReplaceShapes.Name = "btnReplaceShapes";
+            this.btnReplaceShapes.OfficeImageId = "ReplaceShape";
+            this.btnReplaceShapes.ShowImage = true;
+            this.btnReplaceShapes.SuperTip = "記憶した図形をテンプレート図形で一括置き換えます。テンプレート図形を1つ選択してからクリックしてください。";
+            this.btnReplaceShapes.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnReplaceShapes_Click);
+
+            // 
+            // lblSavedCount
+            // 
+            this.lblSavedCount.Label = "記憶: 0個";
+            this.lblSavedCount.Name = "lblSavedCount";
+
+            // 
             // CustomRibbon
             // 
             this.Name = "CustomRibbon";
@@ -357,9 +446,11 @@
 
         internal Microsoft.Office.Tools.Ribbon.RibbonTab tab1;
 
-        // Group 1: 図形分割
+        // Group 1: 図形操作
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group1;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnDivideShape;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnLayerAdjustment;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnAutoNumbering;
 
         // Group 2: 基準整列
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group2;
@@ -367,6 +458,8 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnAlignToRight;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnAlignToTop;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnAlignToBottom;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnAlignToHorizontalCenter;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnAlignToVerticalCenter;
 
         // Group 3: 隣接整列
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group3;
@@ -393,6 +486,12 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnAdjustmentHandles;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnAngleHandles;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnResetAdjustments;
+
+        // Group 7: 図形置き換え（新規追加）
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup group7;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnSaveShapes;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnReplaceShapes;
+        internal Microsoft.Office.Tools.Ribbon.RibbonLabel lblSavedCount;
     }
 
     partial class ThisRibbonCollection

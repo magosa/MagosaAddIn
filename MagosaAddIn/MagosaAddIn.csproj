@@ -34,7 +34,7 @@
     <PublishUrl>公開\</PublishUrl>
     <InstallUrl />
     <TargetCulture>ja</TargetCulture>
-    <ApplicationVersion>1.0.0.5</ApplicationVersion>
+    <ApplicationVersion>1.0.0.6</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
@@ -212,6 +212,9 @@
     <Compile Include="Core\ErrorHandler.cs" />
     <Compile Include="Core\ShapeAligner.cs" />
     <Compile Include="Core\ShapeDivider.cs" />
+    <Compile Include="Core\ShapeLayerManager.cs" />
+    <Compile Include="Core\ShapeNumbering.cs" />
+    <Compile Include="Core\ShapeReplacer.cs" />
     <Compile Include="Core\ShapeSelector.cs" />
     <Compile Include="Core\ShapeStyle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">

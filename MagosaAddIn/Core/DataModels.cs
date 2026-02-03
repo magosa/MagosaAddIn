@@ -5,6 +5,40 @@ using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 namespace MagosaAddIn.Core
 {
     /// <summary>
+    /// レイヤー（重なり順）の調整方向
+    /// </summary>
+    public enum LayerOrder
+    {
+        /// <summary>選択順に前面へ配置</summary>
+        SelectionOrderToFront,
+        /// <summary>選択順に背面へ配置</summary>
+        SelectionOrderToBack,
+        /// <summary>左から右へ前面に配置</summary>
+        LeftToRightToFront,
+        /// <summary>上から下へ前面に配置</summary>
+        TopToBottomToFront
+    }
+
+    /// <summary>
+    /// 自動ナンバリングのフォーマット形式
+    /// </summary>
+    public enum NumberFormat
+    {
+        /// <summary>算用数字（1, 2, 3...）</summary>
+        Arabic,
+        /// <summary>丸数字（①②③...）</summary>
+        CircledArabic,
+        /// <summary>大文字アルファベット（A, B, C...）</summary>
+        UpperAlpha,
+        /// <summary>小文字アルファベット（a, b, c...）</summary>
+        LowerAlpha,
+        /// <summary>ローマ数字大文字（I, II, III...）</summary>
+        UpperRoman,
+        /// <summary>ローマ数字小文字（i, ii, iii...）</summary>
+        LowerRoman
+    }
+
+    /// <summary>
     /// 図形情報を格納するクラス
     /// </summary>
     public class ShapeInfo
@@ -14,7 +48,12 @@ namespace MagosaAddIn.Core
         public float Width { get; set; }
         public float Height { get; set; }
         public string Name { get; set; }
+        public string ShapeName { get; set; }
         public PowerPoint.Shape OriginalShape { get; set; }
+
+        // 中心座標
+        public float CenterX { get; set; }
+        public float CenterY { get; set; }
 
         // スタイル情報
         public int? FillColor { get; set; }
@@ -22,6 +61,11 @@ namespace MagosaAddIn.Core
         public int? LineColor { get; set; }
         public float LineWeight { get; set; } = Constants.DEFAULT_LINE_WEIGHT;
         public Office.MsoLineDashStyle LineDashStyle { get; set; }
+        public bool HasShadow { get; set; }
+        public int ShadowColor { get; set; }
+
+        // テキスト情報
+        public string Text { get; set; }
 
         /// <summary>
         /// 図形情報の文字列表現

@@ -198,6 +198,20 @@
 
         #endregion
 
+        #region 図形置き換え関連
+
+        /// <summary>
+        /// 図形置き換えに必要な最小図形数
+        /// </summary>
+        public const int MIN_SHAPES_FOR_REPLACEMENT = 1;
+
+        /// <summary>
+        /// テンプレート図形選択に必要な図形数
+        /// </summary>
+        public const int TEMPLATE_SHAPE_COUNT = 1;
+
+        #endregion
+
         #region 図形ハンドル調整関連
 
         /// <summary>
@@ -264,6 +278,59 @@
         /// pt→mm変換係数
         /// </summary>
         public const float PT_TO_MM = 1.0f / MM_TO_PT;
+
+        #endregion
+
+        #region レイヤー調整関連
+
+        /// <summary>
+        /// レイヤー調整に必要な最小図形数
+        /// </summary>
+        public const int MIN_SHAPES_FOR_LAYER = 2;
+
+        #endregion
+
+        #region 自動ナンバリング関連
+
+        /// <summary>
+        /// 自動ナンバリングに必要な最小図形数
+        /// </summary>
+        public const int MIN_SHAPES_FOR_NUMBERING = 1;
+
+        /// <summary>
+        /// デフォルト開始番号
+        /// </summary>
+        public const int DEFAULT_START_NUMBER = 1;
+
+        /// <summary>
+        /// デフォルト増分値
+        /// </summary>
+        public const int DEFAULT_INCREMENT = 1;
+
+        /// <summary>
+        /// 開始番号の最小値
+        /// </summary>
+        public const int MIN_START_NUMBER = 0;
+
+        /// <summary>
+        /// 開始番号の最大値
+        /// </summary>
+        public const int MAX_START_NUMBER = 999;
+
+        /// <summary>
+        /// 増分値の最小値
+        /// </summary>
+        public const int MIN_INCREMENT = -10;
+
+        /// <summary>
+        /// 増分値の最大値
+        /// </summary>
+        public const int MAX_INCREMENT = 10;
+
+        /// <summary>
+        /// デフォルトフォントサイズ（pt）
+        /// </summary>
+        public const float DEFAULT_NUMBER_FONT_SIZE = 18.0f;
 
         #endregion
     }
