@@ -48,35 +48,10 @@ namespace MagosaAddIn.UI
         /// <summary>
         /// 複数の図形を取得する
         /// </summary>
+        /// <param name="minimumCount">最小要件図形数（デフォルト: 2）</param>
         /// <returns>選択された図形のリスト、または null</returns>
-        public static List<PowerPoint.Shape> GetMultipleSelectedShapes()
+        public static List<PowerPoint.Shape> GetMultipleSelectedShapes(int minimumCount = Constants.MIN_SHAPES_FOR_ALIGNMENT)
         {
-            //return ComExceptionHandler.HandleComOperation(
-            //    () => {
-            //        ComExceptionHandler.LogDebug("GetMultipleSelectedShapes: 開始");
-            //        var app = Globals.ThisAddIn.Application;
-            //        if (app?.ActiveWindow?.Selection == null)
-            //        {
-            //            ComExceptionHandler.LogDebug("GetMultipleSelectedShapes: app/ActiveWindow/Selectionがnull");
-            //            return null;
-            //        }
-
-            //        var selection = app.ActiveWindow.Selection;
-            //        ComExceptionHandler.LogDebug($"GetMultipleSelectedShapes: Selection.Type = {selection.Type}");
-
-            //        if (selection.Type == PowerPoint.PpSelectionType.ppSelectionShapes &&
-            //            selection.ShapeRange.Count >= Constants.MIN_SHAPES_FOR_ALIGNMENT)
-            //        {
-            //            var shapes = new List<PowerPoint.Shape>();
-            //            for (int i = 1; i <= selection.ShapeRange.Count; i++)
-            //            {
-            //                shapes.Add(selection.ShapeRange[i]);
-            //            }
-            //            return shapes;
-            //        }
-
-            //        return null;
-            //    },
             return ComExceptionHandler.ExecuteComOperation(
             () => {
                 ComExceptionHandler.LogDebug("GetMultipleSelectedShapes: 開始");
@@ -94,9 +69,9 @@ namespace MagosaAddIn.UI
                 if (selection.Type == PowerPoint.PpSelectionType.ppSelectionShapes)
                 {
                     ComExceptionHandler.LogDebug($"GetMultipleSelectedShapes: ShapeRange.Count = {selection.ShapeRange.Count}");
-                    ComExceptionHandler.LogDebug($"GetMultipleSelectedShapes: 最小要件 = {Constants.MIN_SHAPES_FOR_ALIGNMENT}");
+                    ComExceptionHandler.LogDebug($"GetMultipleSelectedShapes: 最小要件 = {minimumCount}");
 
-                    if (selection.ShapeRange.Count >= Constants.MIN_SHAPES_FOR_ALIGNMENT)
+                    if (selection.ShapeRange.Count >= minimumCount)
                     {
                         var shapes = new List<PowerPoint.Shape>();
                         for (int i = 1; i <= selection.ShapeRange.Count; i++)
@@ -109,7 +84,7 @@ namespace MagosaAddIn.UI
                     }
                     else
                     {
-                        ComExceptionHandler.LogDebug($"GetMultipleSelectedShapes: 図形数不足 - {selection.ShapeRange.Count}個 < {Constants.MIN_SHAPES_FOR_ALIGNMENT}個");
+                        ComExceptionHandler.LogDebug($"GetMultipleSelectedShapes: 図形数不足 - {selection.ShapeRange.Count}個 < {minimumCount}個");
                     }
                 }
                 else
@@ -273,14 +248,14 @@ namespace MagosaAddIn.UI
                     {
                         var shape = selection.ShapeRange[i];
 
-                        if (IsRectangleShape(shape))
+                        if (ErrorHandler.IsRectangleShape(shape))
                         {
                             info.RectangleCount++;
                         }
                         else
                         {
                             info.NonRectangleCount++;
-                            info.NonRectangleTypes.Add(GetShapeTypeName(shape));
+                            info.NonRectangleTypes.Add(ErrorHandler.GetShapeTypeName(shape));
                         }
                     }
 
@@ -288,57 +263,6 @@ namespace MagosaAddIn.UI
                 },
                 "図形選択分析",
                 defaultValue: new ShapeSelectionInfo(),
-                suppressErrors: true);
-        }
-
-        /// <summary>
-        /// 図形が四角形かどうかを判定する
-        /// </summary>
-        /// <param name="shape">判定する図形</param>
-        /// <returns>四角形の場合true</returns>
-        public static bool IsRectangleShape(PowerPoint.Shape shape)
-        {
-            return ComExceptionHandler.ExecuteComOperation(
-                () => shape.AutoShapeType == Microsoft.Office.Core.MsoAutoShapeType.msoShapeRectangle ||
-                      shape.AutoShapeType == Microsoft.Office.Core.MsoAutoShapeType.msoShapeRoundedRectangle,
-                "図形タイプ判定",
-                defaultValue: false,
-                suppressErrors: true);
-        }
-
-        /// <summary>
-        /// 図形タイプ名を取得する
-        /// </summary>
-        /// <param name="shape">図形</param>
-        /// <returns>図形タイプ名</returns>
-        public static string GetShapeTypeName(PowerPoint.Shape shape)
-        {
-            return ComExceptionHandler.ExecuteComOperation(
-                () => {
-                    switch (shape.Type)
-                    {
-                        case Microsoft.Office.Core.MsoShapeType.msoAutoShape:
-                            return $"オートシェイプ({shape.AutoShapeType})";
-                        case Microsoft.Office.Core.MsoShapeType.msoTextBox:
-                            return "テキストボックス";
-                        case Microsoft.Office.Core.MsoShapeType.msoPicture:
-                            return "画像";
-                        case Microsoft.Office.Core.MsoShapeType.msoLine:
-                            return "線";
-                        case Microsoft.Office.Core.MsoShapeType.msoFreeform:
-                            return "フリーフォーム";
-                        case Microsoft.Office.Core.MsoShapeType.msoGroup:
-                            return "グループ";
-                        case Microsoft.Office.Core.MsoShapeType.msoTable:
-                            return "表";
-                        case Microsoft.Office.Core.MsoShapeType.msoChart:
-                            return "グラフ";
-                        default:
-                            return shape.Type.ToString();
-                    }
-                },
-                "図形タイプ名取得",
-                defaultValue: "不明な図形",
                 suppressErrors: true);
         }
 

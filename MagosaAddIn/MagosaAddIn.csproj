@@ -226,7 +226,40 @@
     <Compile Include="UI\CustomRibbon.Designer.cs">
       <DependentUpon>CustomRibbon.cs</DependentUpon>
     </Compile>
-    <Compile Include="UI\DialogClasses.cs">
+    <Compile Include="UI\Dialogs\BaseDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Dialogs\CircleArrangementDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Dialogs\DivisionDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Dialogs\DynamicAngleHandleDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Dialogs\DynamicHandleDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Dialogs\GridArrangementDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Dialogs\GridDivisionDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Dialogs\LayerAdjustmentDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Dialogs\MarginDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Dialogs\NumberingDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Dialogs\ShapeReplacementDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Dialogs\ShapeSelectionDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UI\RibbonHelper.cs" />

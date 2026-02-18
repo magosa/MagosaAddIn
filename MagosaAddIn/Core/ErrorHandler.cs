@@ -251,7 +251,7 @@ namespace MagosaAddIn.Core
         /// <summary>
         /// 図形が四角形かどうかを判定
         /// </summary>
-        private static bool IsRectangleShape(PowerPoint.Shape shape)
+        public static bool IsRectangleShape(PowerPoint.Shape shape)
         {
             return ComExceptionHandler.HandleComOperation(
                 () => shape.AutoShapeType == Microsoft.Office.Core.MsoAutoShapeType.msoShapeRectangle ||
@@ -264,7 +264,7 @@ namespace MagosaAddIn.Core
         /// <summary>
         /// 図形タイプ名を取得
         /// </summary>
-        private static string GetShapeTypeName(PowerPoint.Shape shape)
+        public static string GetShapeTypeName(PowerPoint.Shape shape)
         {
             return ComExceptionHandler.HandleComOperation(
                 () => {

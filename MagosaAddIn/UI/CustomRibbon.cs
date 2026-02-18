@@ -1,5 +1,6 @@
 ﻿using MagosaAddIn.Core;
 using MagosaAddIn.UI;
+using MagosaAddIn.UI.Dialogs;
 using Microsoft.Office.Tools.Ribbon;
 using System;
 using System.Collections.Generic;
@@ -87,7 +88,7 @@ namespace MagosaAddIn.UI
         {
             try
             {
-                using (var dialog = new MagosaAddIn.UI.DivisionDialog())
+                using (var dialog = new DivisionDialog())
                 {
                     if (dialog.ShowDialog() == DialogResult.OK)
                     {
@@ -110,7 +111,7 @@ namespace MagosaAddIn.UI
         {
             try
             {
-                using (var dialog = new MagosaAddIn.UI.GridDivisionDialog(shapes))
+                using (var dialog = new GridDivisionDialog(shapes))
                 {
                     if (dialog.ShowDialog() == DialogResult.OK)
                     {
@@ -493,7 +494,7 @@ namespace MagosaAddIn.UI
         {
             try
             {
-                using (var dialog = new MagosaAddIn.UI.MarginDialog("水平マージン配置"))
+                using (var dialog = new MarginDialog("水平マージン配置"))
                 {
                     if (dialog.ShowDialog() == DialogResult.OK)
                     {
@@ -514,7 +515,7 @@ namespace MagosaAddIn.UI
         {
             try
             {
-                using (var dialog = new MagosaAddIn.UI.MarginDialog("垂直マージン配置"))
+                using (var dialog = new MarginDialog("垂直マージン配置"))
                 {
                     if (dialog.ShowDialog() == DialogResult.OK)
                     {
@@ -535,7 +536,7 @@ namespace MagosaAddIn.UI
         {
             try
             {
-                using (var dialog = new MagosaAddIn.UI.GridArrangementDialog(shapes.Count))
+                using (var dialog = new GridArrangementDialog(shapes.Count))
                 {
                     if (dialog.ShowDialog() == DialogResult.OK)
                     {
@@ -556,7 +557,7 @@ namespace MagosaAddIn.UI
         {
             try
             {
-                using (var dialog = new MagosaAddIn.UI.CircleArrangementDialog())
+                using (var dialog = new CircleArrangementDialog())
                 {
                     if (dialog.ShowDialog() == DialogResult.OK)
                     {
@@ -601,7 +602,7 @@ namespace MagosaAddIn.UI
         {
             try
             {
-                using (var dialog = new MagosaAddIn.UI.LayerAdjustmentDialog(shapes.Count))
+                using (var dialog = new LayerAdjustmentDialog(shapes.Count))
                 {
                     if (dialog.ShowDialog() == DialogResult.OK)
                     {
@@ -645,8 +646,9 @@ namespace MagosaAddIn.UI
         {
             try
             {
-                var shapes = RibbonHelper.GetMultipleSelectedShapes();
-                if (RibbonHelper.ValidateShapeSelection(Constants.MIN_SHAPES_FOR_NUMBERING))
+                // ★修正: 最小要件1個を指定★
+                var shapes = RibbonHelper.GetMultipleSelectedShapes(Constants.MIN_SHAPES_FOR_NUMBERING);
+                if (shapes != null && shapes.Count >= Constants.MIN_SHAPES_FOR_NUMBERING)
                 {
                     ShowNumberingDialog(shapes);
                 }
@@ -665,7 +667,7 @@ namespace MagosaAddIn.UI
         {
             try
             {
-                using (var dialog = new MagosaAddIn.UI.NumberingDialog(shapes.Count))
+                using (var dialog = new NumberingDialog(shapes.Count))
                 {
                     if (dialog.ShowDialog() == DialogResult.OK)
                     {
@@ -768,7 +770,7 @@ namespace MagosaAddIn.UI
         {
             try
             {
-                using (var dialog = new MagosaAddIn.UI.ShapeSelectionDialog(baseShape))
+                using (var dialog = new ShapeSelectionDialog(baseShape))
                 {
                     if (dialog.ShowDialog() == DialogResult.OK)
                     {
@@ -1230,11 +1232,11 @@ namespace MagosaAddIn.UI
         {
             try
             {
-                string templateShapeName = ComExceptionHandler.HandleComOperation(
+                string templateShapeName = ComExceptionHandler.ExecuteComOperation(
                     () => templateShape.Name,
                     "テンプレート図形名取得",
                     defaultValue: "不明な図形",
-                    throwOnError: false);
+                    suppressErrors: true);
 
                 using (var dialog = new ShapeReplacementDialog(savedShapeCount, templateShapeName))
                 {

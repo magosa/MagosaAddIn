@@ -34,6 +34,7 @@ PowerPointでの図形操作を効率化するVSTOアドインです。図形の
 - **多様なフォーマット**: 算用数字、丸数字、アルファベット、ローマ数字
 - **柔軟な設定**: 開始番号・増分値・フォントサイズを指定可能
 - **テキスト継承**: 既存テキストの先頭に番号を追加
+- **単一図形対応**: 1個の図形からナンバリング可能
 
 ### 🔄 図形置き換え機能
 - **一括置き換え**: 複数図形をテンプレート図形で一括置換
@@ -57,25 +58,37 @@ PowerPointでの図形操作を効率化するVSTOアドインです。図形の
 ### アーキテクチャ
 ```
 MagosaAddIn/
-├── Core/ # ビジネスロジック層
+├── Core/                          # ビジネスロジック層
 │   ├── ShapeAligner.cs           # 図形整列機能
 │   ├── ShapeDivider.cs           # 図形分割機能
 │   ├── ShapeSelector.cs          # 図形選択補助機能
-│   ├── ShapeHandleAdjuster.cs    # 図形ハンドル調整機能 [NEW]
-│   ├── ShapeLayerManager.cs      # レイヤー（重なり順）管理 [NEW]
-│   ├── ShapeNumbering.cs         # 自動ナンバリング機能 [NEW]
-│   ├── ShapeReplacer.cs          # 図形置き換え機能 [NEW]
+│   ├── ShapeHandleAdjuster.cs    # 図形ハンドル調整機能
+│   ├── ShapeLayerManager.cs      # レイヤー（重なり順）管理
+│   ├── ShapeNumbering.cs         # 自動ナンバリング機能
+│   ├── ShapeReplacer.cs          # 図形置き換え機能
 │   ├── ShapeStyle.cs             # 図形スタイル管理
 │   ├── Constants.cs              # 定数定義
 │   ├── ComExceptionHandler.cs    # COM例外処理統一
 │   ├── ErrorHandler.cs           # エラーハンドリング統一
 │   └── DataModels.cs             # 共通データクラス
-├── UI/ # ユーザーインターフェース層
+├── UI/                            # ユーザーインターフェース層
 │   ├── CustomRibbon.cs           # リボンUI制御
 │   ├── CustomRibbon.Designer.cs  # リボンUIデザイン
-│   ├── DialogClasses.cs          # 各種設定ダイアログ
-│   └── RibbonHelper.cs           # リボン共通処理
-└── Properties/ # アセンブリ情報
+│   ├── RibbonHelper.cs           # リボン共通処理
+│   └── Dialogs/                  # ダイアログモジュール
+│       ├── BaseDialog.cs         # ダイアログ基底クラス
+│       ├── CircleArrangementDialog.cs      # 円形配置設定
+│       ├── DivisionDialog.cs               # 単一図形分割設定
+│       ├── DynamicAngleHandleDialog.cs     # 角度ハンドル設定（動的UI）
+│       ├── DynamicHandleDialog.cs          # 調整ハンドル設定（動的UI）
+│       ├── GridArrangementDialog.cs        # グリッド配置設定
+│       ├── GridDivisionDialog.cs           # 複数図形グリッド分割設定
+│       ├── LayerAdjustmentDialog.cs        # レイヤー調整方法選択
+│       ├── MarginDialog.cs                 # マージン値設定
+│       ├── NumberingDialog.cs              # 自動ナンバリング設定
+│       ├── ShapeReplacementDialog.cs       # 図形置き換えオプション設定
+│       └── ShapeSelectionDialog.cs         # 図形選択条件設定
+└── Properties/                    # アセンブリ情報
 ```
 
 ## 📋 機能詳細
@@ -234,23 +247,31 @@ MagosaAddIn/
 | 隣接整列 | 各方向の隣接配置 |
 | 拡張整列 | 等間隔・マージン・グリッド・円形配置 |
 | 選択補助 | 同一書式選択 |
-| ハンドル調整 | 調整ハンドル・角度ハンドル・調整リセット [NEW] |
-| レイヤー調整 | 重なり順の調整 [NEW] |
-| 自動ナンバリング | 図形への番号付け [NEW] |
-| 図形置き換え | 選択完了・置き換え実行 [NEW] |
+| ハンドル調整 | 調整ハンドル・角度ハンドル・調整リセット |
+| レイヤー調整 | 重なり順の調整 |
+| 自動ナンバリング | 図形への番号付け |
+| 図形置き換え | 選択完了・置き換え実行 |
 
 ### ダイアログ
+#### 共通基盤
+- **BaseDialog**: 全ダイアログの基底クラス
+  - **統一されたレイアウト定数**: マージン、スペース、ボタンサイズ等を一元管理
+  - **共通コントロール作成メソッド**: Label、NumericUpDown、Button等を統一的に生成
+  - **レスポンシブボタン配置**: カスタムサイズ対応の自動ボタン配置機能
+  - **DRY原則の徹底**: コード重複を削減し保守性を大幅向上
+
+#### 機能別ダイアログ
 - **DivisionDialog**: 単一図形分割設定
 - **GridDivisionDialog**: 複数図形グリッド分割設定
 - **MarginDialog**: マージン値設定
 - **GridArrangementDialog**: グリッド配置設定
 - **CircleArrangementDialog**: 円形配置設定
 - **ShapeSelectionDialog**: 図形選択条件設定
-- **DynamicHandleDialog**: 調整ハンドル設定（動的UI生成） [NEW]
-- **DynamicAngleHandleDialog**: 角度ハンドル設定（動的UI生成） [NEW]
-- **LayerAdjustmentDialog**: レイヤー調整方法選択 [NEW]
-- **NumberingDialog**: 自動ナンバリング設定 [NEW]
-- **ShapeReplacementDialog**: 図形置き換えオプション設定 [NEW]
+- **DynamicHandleDialog**: 調整ハンドル設定（動的UI生成）
+- **DynamicAngleHandleDialog**: 角度ハンドル設定（動的UI生成）
+- **LayerAdjustmentDialog**: レイヤー調整方法選択
+- **NumberingDialog**: 自動ナンバリング設定
+- **ShapeReplacementDialog**: 図形置き換えオプション設定
 
 ## 🔧 技術的特徴
 
@@ -268,11 +289,26 @@ MagosaAddIn/
 - **責任分離**: UI層・ビジネスロジック層・データ層の分離
 - **統一されたインターフェース**: 一貫したメソッド設計
 - **拡張性**: 新機能追加が容易な設計
+- **継承による共通化**: BaseDialogによるダイアログの統一設計
+- **DRY原則**: 重複コードの削減（IsRectangleShape等のメソッド統一）
+- **パラメータ化**: 柔軟な設定を可能にするパラメータ設計
 
 ### パフォーマンス最適化
 - **高速分析**: 図形ハンドル情報の高速取得（キャッシュ機構）
 - **一括処理**: 複数図形の効率的な一括操作
 - **メモリ管理**: 適切なCOMオブジェクトの解放
+
+### UI/UXの統一
+- **レイアウト定数による一元管理**:
+  - DefaultMargin = 20px
+  - StandardVerticalSpacing = 30px
+  - ButtonTopMargin = 30px
+  - ButtonBottomMargin = 60px
+  - ButtonSpacing = 10px
+  - ButtonRightMargin = 20px
+- **動的レイアウト計算**: ボタン位置・フォーム高さを自動計算
+- **カスタムサイズ対応**: ボタンサイズに応じた位置調整
+- **統一された見た目**: すべてのダイアログで一貫したマージン・パディング
 
 ## 📊 制限事項
 
@@ -328,14 +364,35 @@ MagosaAddIn/
 バグレポートや機能要望は、GitHubのIssuesページでお知らせください。
 
 ## 📝 更新履歴
-### Version 1.0.6 (最新)
-- 図形ハンドル調整機能を追加（調整ハンドル・角度ハンドル）
-- レイヤー（重なり順）調整機能を追加
-- 自動ナンバリング機能を追加（6種類のフォーマット対応）
-- 図形置き換え機能を追加（一括置換・属性継承）
-- 水平中央揃え・垂直中央揃え機能を追加
-- エラーハンドリングとログ機構を強化
-- パフォーマンス最適化（図形分析の高速化）
+
+### Version 1.0.6 (2026年2月18日)
+- **🎨 UI/UX大幅改善**: 全ダイアログの統一的なレイアウト実現
+  - **BaseDialog.csの拡張**:
+    - `AddStandardButtons()`メソッドにカスタムサイズ対応を追加
+    - ボタン幅・高さをパラメータで指定可能に
+    - ボタン位置を動的計算：`xPosition = ClientSize.Width - (buttonWidth * 2 + ButtonSpacing + ButtonRightMargin)`
+  - **ボタン配置の完全統一**:
+    - ボタン間スペース: ButtonSpacing = 10px（全ダイアログで統一）
+    - ボタン右端マージン: ButtonRightMargin = 20px
+    - カスタムサイズでも正確な位置計算
+  - **マジックナンバーの完全排除**:
+    - すべてのマージン・スペースを定数化
+    - レイアウト計算式の一元化
+    - 保守性の大幅向上
+  - **影響を受けたダイアログ**: ShapeReplacementDialog、LayerAdjustmentDialog、NumberingDialog
+
+- **🐛 バグ修正**: ナンバリング機能の例外処理
+  - **問題**: 1個の図形選択時に`shapes`がnullになる
+  - **原因**: `RibbonHelper.GetMultipleSelectedShapes()`が常に最小2個を要求
+  - **解決策**:
+    - `GetMultipleSelectedShapes()`にminimumCountパラメータを追加
+    - ナンバリング機能で`MIN_SHAPES_FOR_NUMBERING = 1`を指定
+    - 1個の図形からナンバリング可能に
+
+- **🔧 API改善**: RibbonHelper.csの柔軟性向上
+  - `GetMultipleSelectedShapes(int minimumCount = Constants.MIN_SHAPES_FOR_ALIGNMENT)`
+  - デフォルト値は2（既存機能に影響なし）
+  - 機能ごとに最小要件を指定可能
 
 ---
 **MagosaAddIn** - PowerPointでの図形操作をより効率的に！
