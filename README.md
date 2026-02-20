@@ -72,7 +72,7 @@ PowerPointでの図形操作を効率化するVSTOアドインです。図形の
 - **フレームワーク**: .NET Framework 4.7.2
 - **技術**: VSTO (Visual Studio Tools for Office)
 - **配置方式**: ClickOnce
-- **バージョン**: 1.0.6
+- **バージョン**: 1.0.7
 
 ### 対象アプリケーション
 - Microsoft PowerPoint (Office 365 / 2019 / 2021)
