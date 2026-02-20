@@ -339,4 +339,108 @@ namespace MagosaAddIn.Core
     }
 
     #endregion
+
+    #region テーマカラー生成関連
+
+    /// <summary>
+    /// 配色パターンの種類
+    /// </summary>
+    public enum ColorSchemeType
+    {
+        // 色相ベース配色
+        /// <summary>ダイアード（補色）- 色相環で180°反対</summary>
+        Dyad,
+        /// <summary>トライアド（3等分）- 色相環で120°間隔</summary>
+        Triad,
+        /// <summary>テトラード（4等分）- 色相環で90°間隔</summary>
+        Tetrad,
+        /// <summary>ペンタード（5等分）- 色相環で72°間隔</summary>
+        Pentad,
+        /// <summary>ヘクサード（6等分）- 色相環で60°間隔</summary>
+        Hexad,
+        /// <summary>アナロジー（類似色）- 色相環で隣接</summary>
+        Analogy,
+        /// <summary>インターミディエート - 色相環で90°</summary>
+        Intermediate,
+        /// <summary>オポーネント - 色相環で135°</summary>
+        Opponent,
+        /// <summary>スプリットコンプリメンタリー - 補色の分割</summary>
+        SplitComplementary,
+
+        // トーンベース配色
+        /// <summary>トーンオントーン - 同色相・明度差大</summary>
+        ToneOnTone,
+        /// <summary>トーンイントーン - トーン統一・色相変化</summary>
+        ToneInTone,
+        /// <summary>カマイユ - 色相・トーン近似</summary>
+        Camaieu,
+        /// <summary>フォカマイユ - カマイユより色相変化</summary>
+        FauxCamaieu,
+        /// <summary>ドミナントカラー - 同色相統一</summary>
+        DominantColor,
+        /// <summary>アイデンティティ - 1色相・明度彩度変化</summary>
+        Identity,
+        /// <summary>グラデーション - 段階的変化</summary>
+        Gradation,
+
+        // コントラスト配色
+        /// <summary>色相コントラスト - 補色関係</summary>
+        HueContrast,
+        /// <summary>明度コントラスト - 明暗対比</summary>
+        LightnessContrast,
+        /// <summary>彩度コントラスト - 鮮やか⇔くすみ</summary>
+        SaturationContrast
+    }
+
+    /// <summary>
+    /// テーマカラー生成オプション
+    /// </summary>
+    public class ThemeColorOptions
+    {
+        /// <summary>ベースカラー（PowerPoint RGB値）</summary>
+        public int BaseColor { get; set; }
+
+        /// <summary>配色パターン</summary>
+        public ColorSchemeType SchemeType { get; set; }
+
+        /// <summary>生成する色数（3～10色）</summary>
+        public int ColorCount { get; set; } = 5;
+
+        /// <summary>明度バリエーション段階数（2～5段階）</summary>
+        public int LightnessSteps { get; set; } = 3;
+
+        /// <summary>パレット配置を行うか</summary>
+        public bool ArrangePalette { get; set; } = false;
+
+        /// <summary>選択図形に適用するか</summary>
+        public bool ApplyToShapes { get; set; } = false;
+    }
+
+    /// <summary>
+    /// カラーパレット配置位置
+    /// </summary>
+    public enum PalettePosition
+    {
+        /// <summary>スライド右側</summary>
+        Right,
+        /// <summary>スライド下側</summary>
+        Bottom
+    }
+
+    /// <summary>
+    /// カラーパレット配置オプション
+    /// </summary>
+    public class PaletteArrangementOptions
+    {
+        /// <summary>セルサイズ（pt）</summary>
+        public float CellSize { get; set; } = 20f;
+
+        /// <summary>配置位置</summary>
+        public PalettePosition Position { get; set; } = PalettePosition.Right;
+
+        /// <summary>スライドとの間隔（pt）</summary>
+        public float Margin { get; set; } = 20f;
+    }
+
+    #endregion
 }

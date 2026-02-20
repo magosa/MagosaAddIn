@@ -34,7 +34,7 @@
     <PublishUrl>公開\</PublishUrl>
     <InstallUrl />
     <TargetCulture>ja</TargetCulture>
-    <ApplicationVersion>1.0.0.6</ApplicationVersion>
+    <ApplicationVersion>1.0.0.7</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
@@ -207,6 +207,8 @@
   <ItemGroup>
     <Compile Include="Core\ShapeHandleAdjuster.cs" />
     <Compile Include="Core\ComExceptionHandler.cs" />
+    <Compile Include="Core\ColorConverter.cs" />
+    <Compile Include="Core\ColorPaletteArranger.cs" />
     <Compile Include="Core\Constants.cs" />
     <Compile Include="Core\DataModels.cs" />
     <Compile Include="Core\ErrorHandler.cs" />
@@ -219,6 +221,7 @@
     <Compile Include="Core\ShapeResizer.cs" />
     <Compile Include="Core\ShapeSelector.cs" />
     <Compile Include="Core\ShapeStyle.cs" />
+    <Compile Include="Core\ThemeColorGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -280,6 +283,9 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UI\Dialogs\ShapeSelectionDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Dialogs\ThemeColorDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UI\RibbonHelper.cs" />

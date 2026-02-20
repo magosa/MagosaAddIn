@@ -39,6 +39,7 @@
             this.btnDivideShape = this.Factory.CreateRibbonButton();
             this.btnLayerAdjustment = this.Factory.CreateRibbonButton();
             this.btnAutoNumbering = this.Factory.CreateRibbonButton();
+            this.btnThemeColorGenerator = this.Factory.CreateRibbonButton();
             this.group2 = this.Factory.CreateRibbonGroup();
             this.btnAlignToLeft = this.Factory.CreateRibbonButton();
             this.btnAlignToRight = this.Factory.CreateRibbonButton();
@@ -116,6 +117,7 @@
             this.group1.Items.Add(this.btnDivideShape);
             this.group1.Items.Add(this.btnLayerAdjustment);
             this.group1.Items.Add(this.btnAutoNumbering);
+            this.group1.Items.Add(this.btnThemeColorGenerator);
             this.group1.Label = "図形操作";
             this.group1.Name = "group1";
 
@@ -148,6 +150,16 @@
             this.btnAutoNumbering.ShowImage = true;
             this.btnAutoNumbering.SuperTip = "選択した図形に自動で番号を付けます。算用数字、丸数字、アルファベット、ローマ数字などから選択できます。";
             this.btnAutoNumbering.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAutoNumbering_Click);
+
+            // 
+            // btnThemeColorGenerator
+            // 
+            this.btnThemeColorGenerator.Label = "カラー生成";
+            this.btnThemeColorGenerator.Name = "btnThemeColorGenerator";
+            this.btnThemeColorGenerator.OfficeImageId = "SmartArtChangeColorsGallery";
+            this.btnThemeColorGenerator.ShowImage = true;
+            this.btnThemeColorGenerator.SuperTip = "配色理論に基づいて17種類のカラーパレットを生成します。図形への適用やスライド枠外への配置が可能です。";
+            this.btnThemeColorGenerator.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnThemeColorGenerator_Click);
 
             // 
             // group2
@@ -585,6 +597,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnDivideShape;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnLayerAdjustment;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnAutoNumbering;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnThemeColorGenerator;
 
         // Group 2: 基準整列
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group2;

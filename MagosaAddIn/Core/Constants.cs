@@ -441,5 +441,69 @@
         public const float DEFAULT_START_ANGLE = 0.0f;
 
         #endregion
+
+        #region テーマカラー生成関連
+
+        /// <summary>
+        /// テーマカラー生成に必要な最小図形数（0=図形なしでも可）
+        /// </summary>
+        public const int MIN_SHAPES_FOR_THEME_COLOR = 0;
+
+        /// <summary>
+        /// デフォルトベースカラー（オレンジ系）
+        /// </summary>
+        public const int DEFAULT_BASE_COLOR = 0x5733FF;
+
+        /// <summary>
+        /// デフォルト色数
+        /// </summary>
+        public const int DEFAULT_THEME_COLOR_COUNT = 5;
+
+        /// <summary>
+        /// テーマカラー色数の最小値
+        /// </summary>
+        public const int MIN_THEME_COLOR_COUNT = 2;
+
+        /// <summary>
+        /// テーマカラー色数の最大値
+        /// </summary>
+        public const int MAX_THEME_COLOR_COUNT = 10;
+
+        /// <summary>
+        /// デフォルト明度段階数
+        /// </summary>
+        public const int DEFAULT_LIGHTNESS_STEPS = 3;
+
+        /// <summary>
+        /// 明度段階数の最小値
+        /// </summary>
+        public const int MIN_LIGHTNESS_STEPS = 1;
+
+        /// <summary>
+        /// 明度段階数の最大値
+        /// </summary>
+        public const int MAX_LIGHTNESS_STEPS = 10;
+
+        /// <summary>
+        /// デフォルトパレットセルサイズ（pt）
+        /// </summary>
+        public const float DEFAULT_PALETTE_CELL_SIZE = 20f;
+
+        /// <summary>
+        /// パレットセルサイズの最小値（pt）
+        /// </summary>
+        public const float MIN_PALETTE_CELL_SIZE = 10f;
+
+        /// <summary>
+        /// パレットセルサイズの最大値（pt）
+        /// </summary>
+        public const float MAX_PALETTE_CELL_SIZE = 50f;
+
+        /// <summary>
+        /// デフォルトパレットマージン（pt）
+        /// </summary>
+        public const float DEFAULT_PALETTE_MARGIN = 20f;
+
+        #endregion
     }
 }

@@ -1564,5 +1564,94 @@ namespace MagosaAddIn.UI
         }
 
         #endregion
+
+        #region テーマカラー生成機能
+
+        /// <summary>
+        /// テーマカラー生成ボタン
+        /// </summary>
+        private void btnThemeColorGenerator_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                ShowThemeColorDialog();
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("テーマカラー生成", ex);
+            }
+        }
+
+        /// <summary>
+        /// テーマカラー生成ダイアログを表示
+        /// </summary>
+        private void ShowThemeColorDialog()
+        {
+            try
+            {
+                using (var dialog = new ThemeColorDialog())
+                {
+                    if (dialog.ShowDialog() == DialogResult.OK)
+                    {
+                        var generator = new ThemeColorGenerator();
+                        var arranger = new ColorPaletteArranger();
+
+                        // 選択図形を取得（オプション）
+                        List<PowerPoint.Shape> shapes = null;
+                        if (dialog.ApplyToShapes)
+                        {
+                            shapes = RibbonHelper.GetMultipleSelectedShapes(Constants.MIN_SHAPES_FOR_THEME_COLOR);
+                        }
+
+                        // 色を適用
+                        if (dialog.ApplyToShapes && shapes != null && shapes.Count > 0)
+                        {
+                            arranger.ApplyColorsToShapes(shapes, dialog.GeneratedColors, ColorApplyMode.Sequential);
+                        }
+
+                        // パレット配置
+                        if (dialog.ArrangePalette)
+                        {
+                            if (dialog.LightnessSteps > 1)
+                            {
+                                // 明度バリエーション付きでグリッド配置
+                                var colorMatrix = generator.GenerateLightnessVariations(
+                                    dialog.GeneratedColors, dialog.LightnessSteps);
+                                arranger.ArrangeColorGrid(colorMatrix);
+                            }
+                            else
+                            {
+                                // 単一行で配置
+                                arranger.ArrangeColorRow(dialog.GeneratedColors);
+                            }
+                        }
+
+                        // 成功メッセージ
+                        string schemeName = ThemeColorGenerator.GetSchemeDisplayName(dialog.SelectedScheme);
+                        string message = $"テーマカラーを生成しました\n" +
+                                       $"配色パターン: {schemeName}\n" +
+                                       $"色数: {dialog.GeneratedColors.Count}色";
+
+                        if (dialog.ApplyToShapes && shapes != null && shapes.Count > 0)
+                        {
+                            message += $"\n{shapes.Count}個の図形に適用しました";
+                        }
+
+                        if (dialog.ArrangePalette)
+                        {
+                            message += "\nカラーパレットを配置しました";
+                        }
+
+                        ErrorHandler.ShowOperationSuccess("テーマカラー生成", message);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("テーマカラー生成", ex);
+            }
+        }
+
+        #endregion
     }
 }
