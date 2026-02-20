@@ -211,10 +211,12 @@
     <Compile Include="Core\DataModels.cs" />
     <Compile Include="Core\ErrorHandler.cs" />
     <Compile Include="Core\ShapeAligner.cs" />
+    <Compile Include="Core\ShapeArrayer.cs" />
     <Compile Include="Core\ShapeDivider.cs" />
     <Compile Include="Core\ShapeLayerManager.cs" />
     <Compile Include="Core\ShapeNumbering.cs" />
     <Compile Include="Core\ShapeReplacer.cs" />
+    <Compile Include="Core\ShapeResizer.cs" />
     <Compile Include="Core\ShapeSelector.cs" />
     <Compile Include="Core\ShapeStyle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -232,6 +234,9 @@
     <Compile Include="UI\Dialogs\CircleArrangementDialog.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="UI\Dialogs\CircularArrayDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="UI\Dialogs\DivisionDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -244,10 +249,16 @@
     <Compile Include="UI\Dialogs\GridArrangementDialog.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="UI\Dialogs\GridArrayDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="UI\Dialogs\GridDivisionDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UI\Dialogs\LayerAdjustmentDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Dialogs\LinearArrayDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UI\Dialogs\MarginDialog.cs">
@@ -256,7 +267,16 @@
     <Compile Include="UI\Dialogs\NumberingDialog.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="UI\Dialogs\PathArrayDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Dialogs\RotationCopyDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="UI\Dialogs\ShapeReplacementDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Dialogs\ShapeResizeDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UI\Dialogs\ShapeSelectionDialog.cs">

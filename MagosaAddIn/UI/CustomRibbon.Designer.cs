@@ -70,6 +70,20 @@
             this.btnSaveShapes = this.Factory.CreateRibbonButton();
             this.btnReplaceShapes = this.Factory.CreateRibbonButton();
             this.lblSavedCount = this.Factory.CreateRibbonLabel();
+            // 新規追加: サイズ調整グループ
+            this.group8 = this.Factory.CreateRibbonGroup();
+            this.menuSizeUnify = this.Factory.CreateRibbonMenu();
+            this.btnResizeToReference = this.Factory.CreateRibbonButton();
+            this.btnResizeToMaximum = this.Factory.CreateRibbonButton();
+            this.btnResizeToMinimum = this.Factory.CreateRibbonButton();
+            this.menuKeepRatio = this.Factory.CreateRibbonMenu();
+            this.btnResizeToWidthKeepRatio = this.Factory.CreateRibbonButton();
+            this.btnResizeToHeightKeepRatio = this.Factory.CreateRibbonButton();
+            this.btnResizeDialog = this.Factory.CreateRibbonButton();
+            // 新規追加: 配列複製グループ
+            this.group9 = this.Factory.CreateRibbonGroup();
+            this.btnCircularArray = this.Factory.CreateRibbonButton();
+            this.btnGridArray = this.Factory.CreateRibbonButton();
 
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
@@ -88,9 +102,11 @@
             this.tab1.Groups.Add(this.group1); // ②図形操作
             this.tab1.Groups.Add(this.group7); // ③図形置き換え
             this.tab1.Groups.Add(this.group6); // ④ハンドル調整
-            this.tab1.Groups.Add(this.group2); // ⑤基準整列
-            this.tab1.Groups.Add(this.group3); // ⑥隣接整列
-            this.tab1.Groups.Add(this.group4); // ⑦拡張整列
+            this.tab1.Groups.Add(this.group8); // ⑤サイズ調整
+            this.tab1.Groups.Add(this.group9); // ⑥配列複製
+            this.tab1.Groups.Add(this.group2); // ⑦基準整列
+            this.tab1.Groups.Add(this.group3); // ⑧隣接整列
+            this.tab1.Groups.Add(this.group4); // ⑨拡張整列
             this.tab1.Label = "Magosa Tools";
             this.tab1.Name = "tab1";
 
@@ -419,8 +435,126 @@
             this.lblSavedCount.Name = "lblSavedCount";
 
             // 
-            // CustomRibbon
+            // group8
             // 
+            this.group8.Items.Add(this.btnResizeDialog);
+            this.group8.Items.Add(this.menuSizeUnify);
+            this.group8.Items.Add(this.menuKeepRatio);
+            this.group8.Label = "サイズ調整";
+            this.group8.Name = "group8";
+
+            // 
+            // menuSizeUnify
+            // 
+            this.menuSizeUnify.Items.Add(this.btnResizeToReference);
+            this.menuSizeUnify.Items.Add(this.btnResizeToMaximum);
+            this.menuSizeUnify.Items.Add(this.btnResizeToMinimum);
+            this.menuSizeUnify.Label = "サイズ統一";
+            this.menuSizeUnify.Name = "menuSizeUnify";
+            this.menuSizeUnify.OfficeImageId = "SizeToControlHeightAndWidth";
+            this.menuSizeUnify.ShowImage = true;
+
+            // 
+            // menuKeepRatio
+            // 
+            this.menuKeepRatio.Items.Add(this.btnResizeToWidthKeepRatio);
+            this.menuKeepRatio.Items.Add(this.btnResizeToHeightKeepRatio);
+            this.menuKeepRatio.Label = "比率保持";
+            this.menuKeepRatio.Name = "menuKeepRatio";
+            this.menuKeepRatio.OfficeImageId = "DiagramScale";
+            this.menuKeepRatio.ShowImage = true;
+
+            // 
+            // btnResizeToReference
+            // 
+            this.btnResizeToReference.Label = "基準サイズに合わせる";
+            this.btnResizeToReference.Name = "btnResizeToReference";
+            this.btnResizeToReference.OfficeImageId = "AutomaticResize";
+            this.btnResizeToReference.ShowImage = true;
+            this.btnResizeToReference.SuperTip = "選択した複数の図形を、基準図形と同じサイズに調整します。";
+            this.btnResizeToReference.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnResizeToReference_Click);
+
+            // 
+            // btnResizeToWidthKeepRatio
+            // 
+            this.btnResizeToWidthKeepRatio.Label = "幅を統一";
+            this.btnResizeToWidthKeepRatio.Name = "btnResizeToWidthKeepRatio";
+            this.btnResizeToWidthKeepRatio.OfficeImageId = "SizeToControlWidth";
+            this.btnResizeToWidthKeepRatio.ShowImage = true;
+            this.btnResizeToWidthKeepRatio.SuperTip = "選択した図形の幅を統一し、アスペクト比を保ったまま高さを調整します。";
+            this.btnResizeToWidthKeepRatio.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnResizeToWidthKeepRatio_Click);
+
+            // 
+            // btnResizeToHeightKeepRatio
+            // 
+            this.btnResizeToHeightKeepRatio.Label = "高さを統一";
+            this.btnResizeToHeightKeepRatio.Name = "btnResizeToHeightKeepRatio";
+            this.btnResizeToHeightKeepRatio.OfficeImageId = "SizeToControlHeight";
+            this.btnResizeToHeightKeepRatio.ShowImage = true;
+            this.btnResizeToHeightKeepRatio.SuperTip = "選択した図形の高さを統一し、アスペクト比を保ったまま幅を調整します。";
+            this.btnResizeToHeightKeepRatio.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnResizeToHeightKeepRatio_Click);
+
+            // 
+            // btnResizeToMaximum
+            // 
+            this.btnResizeToMaximum.Label = "最大サイズに合わせる";
+            this.btnResizeToMaximum.Name = "btnResizeToMaximum";
+            this.btnResizeToMaximum.OfficeImageId = "SizeToControlHeightAndWidth";
+            this.btnResizeToMaximum.ShowImage = true;
+            this.btnResizeToMaximum.SuperTip = "選択した図形を最大サイズの図形に合わせてサイズを統一します。";
+            this.btnResizeToMaximum.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnResizeToMaximum_Click);
+
+            // 
+            // btnResizeToMinimum
+            // 
+            this.btnResizeToMinimum.Label = "最小サイズに合わせる";
+            this.btnResizeToMinimum.Name = "btnResizeToMinimum";
+            this.btnResizeToMinimum.OfficeImageId = "SizeToControlHeightAndWidth";
+            this.btnResizeToMinimum.ShowImage = true;
+            this.btnResizeToMinimum.SuperTip = "選択した図形を最小サイズの図形に合わせてサイズを統一します。";
+            this.btnResizeToMinimum.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnResizeToMinimum_Click);
+
+            // 
+            // btnResizeDialog
+            // 
+            this.btnResizeDialog.Label = "サイズ指定";
+            this.btnResizeDialog.Name = "btnResizeDialog";
+            this.btnResizeDialog.OfficeImageId = "SizeToFit";
+            this.btnResizeDialog.ShowImage = true;
+            this.btnResizeDialog.SuperTip = "パーセント指定での拡大縮小、または固定サイズ（mm/cm/pt）への調整をダイアログで設定します。";
+            this.btnResizeDialog.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnResizeDialog_Click);
+
+            // 
+            // group9
+            // 
+            this.group9.Items.Add(this.btnCircularArray);
+            this.group9.Items.Add(this.btnGridArray);
+            this.group9.Label = "配列複製";
+            this.group9.Name = "group9";
+
+            // 
+            // btnCircularArray
+            //
+            this.btnCircularArray.Label = "円形配列";
+            this.btnCircularArray.Name = "btnCircularArray";
+            this.btnCircularArray.OfficeImageId = "DiagramRadialInsertClassic";
+            this.btnCircularArray.ShowImage = true;
+            this.btnCircularArray.SuperTip = "選択した図形を指定した中心・半径・個数で円形に配列します。";
+            this.btnCircularArray.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnCircularArray_Click);
+
+            // 
+            // btnGridArray
+            // 
+            this.btnGridArray.Label = "グリッド配列";
+            this.btnGridArray.Name = "btnGridArray";
+            this.btnGridArray.OfficeImageId = "SmartAlign";
+            this.btnGridArray.ShowImage = true;
+            this.btnGridArray.SuperTip = "選択した図形を指定した行×列でグリッド状に配列します。";
+            this.btnGridArray.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnGridArray_Click);
+
+            // 
+            // CustomRibbon
+            //
             this.Name = "CustomRibbon";
             this.RibbonType = "Microsoft.PowerPoint.Presentation";
             this.Tabs.Add(this.tab1);
@@ -492,6 +626,22 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnSaveShapes;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnReplaceShapes;
         internal Microsoft.Office.Tools.Ribbon.RibbonLabel lblSavedCount;
+
+        // Group 8: サイズ調整（新規追加）
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup group8;
+        internal Microsoft.Office.Tools.Ribbon.RibbonMenu menuSizeUnify;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnResizeToReference;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnResizeToMaximum;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnResizeToMinimum;
+        internal Microsoft.Office.Tools.Ribbon.RibbonMenu menuKeepRatio;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnResizeToWidthKeepRatio;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnResizeToHeightKeepRatio;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnResizeDialog;
+
+        // Group 9: 配列複製（新規追加）
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup group9;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnCircularArray;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnGridArray;
     }
 
     partial class ThisRibbonCollection

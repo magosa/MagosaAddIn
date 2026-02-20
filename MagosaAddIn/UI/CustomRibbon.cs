@@ -1131,6 +1131,291 @@ namespace MagosaAddIn.UI
 
         #endregion
 
+        #region サイズ調整機能
+
+        /// <summary>
+        /// 基準サイズ適用ボタン
+        /// </summary>
+        private void btnResizeToReference_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var shapes = RibbonHelper.GetMultipleSelectedShapes();
+                if (RibbonHelper.ValidateShapeSelection(Constants.MIN_SHAPES_FOR_ALIGNMENT))
+                {
+                    var resizer = new ShapeResizer();
+                    resizer.ResizeToReference(shapes, ResizeMode.KeepCenter);
+                    ErrorHandler.ShowOperationSuccess("基準サイズ適用", 
+                        $"{shapes.Count}個の図形を基準図形のサイズに調整しました");
+                }
+                else
+                {
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_ALIGNMENT, "基準サイズ適用");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("基準サイズ適用", ex);
+            }
+        }
+
+        /// <summary>
+        /// 幅統一（比率保持）ボタン
+        /// </summary>
+        private void btnResizeToWidthKeepRatio_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var shapes = RibbonHelper.GetMultipleSelectedShapes();
+                if (RibbonHelper.ValidateShapeSelection(Constants.MIN_SHAPES_FOR_ALIGNMENT))
+                {
+                    var resizer = new ShapeResizer();
+                    resizer.ResizeToWidthKeepRatio(shapes);
+                    ErrorHandler.ShowOperationSuccess("幅統一・比率保持", 
+                        $"{shapes.Count}個の図形の幅を統一しました");
+                }
+                else
+                {
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_ALIGNMENT, "幅統一・比率保持");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("幅統一・比率保持", ex);
+            }
+        }
+
+        /// <summary>
+        /// 高さ統一（比率保持）ボタン
+        /// </summary>
+        private void btnResizeToHeightKeepRatio_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var shapes = RibbonHelper.GetMultipleSelectedShapes();
+                if (RibbonHelper.ValidateShapeSelection(Constants.MIN_SHAPES_FOR_ALIGNMENT))
+                {
+                    var resizer = new ShapeResizer();
+                    resizer.ResizeToHeightKeepRatio(shapes);
+                    ErrorHandler.ShowOperationSuccess("高さ統一・比率保持", 
+                        $"{shapes.Count}個の図形の高さを統一しました");
+                }
+                else
+                {
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_ALIGNMENT, "高さ統一・比率保持");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("高さ統一・比率保持", ex);
+            }
+        }
+
+        /// <summary>
+        /// 最大サイズ統一ボタン
+        /// </summary>
+        private void btnResizeToMaximum_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var shapes = RibbonHelper.GetMultipleSelectedShapes(Constants.MIN_SHAPES_FOR_RESIZE);
+                if (shapes != null && shapes.Count >= Constants.MIN_SHAPES_FOR_RESIZE)
+                {
+                    var resizer = new ShapeResizer();
+                    resizer.ResizeToMaximum(shapes, ResizeMode.KeepCenter);
+                    ErrorHandler.ShowOperationSuccess("最大サイズ統一", 
+                        $"{shapes.Count}個の図形を最大サイズに統一しました");
+                }
+                else
+                {
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_RESIZE, "最大サイズ統一");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("最大サイズ統一", ex);
+            }
+        }
+
+        /// <summary>
+        /// 最小サイズ統一ボタン
+        /// </summary>
+        private void btnResizeToMinimum_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var shapes = RibbonHelper.GetMultipleSelectedShapes(Constants.MIN_SHAPES_FOR_RESIZE);
+                if (shapes != null && shapes.Count >= Constants.MIN_SHAPES_FOR_RESIZE)
+                {
+                    var resizer = new ShapeResizer();
+                    resizer.ResizeToMinimum(shapes, ResizeMode.KeepCenter);
+                    ErrorHandler.ShowOperationSuccess("最小サイズ統一", 
+                        $"{shapes.Count}個の図形を最小サイズに統一しました");
+                }
+                else
+                {
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_RESIZE, "最小サイズ統一");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("最小サイズ統一", ex);
+            }
+        }
+
+        /// <summary>
+        /// 拡大縮小・固定サイズボタン（ダイアログ表示）
+        /// </summary>
+        private void btnResizeDialog_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var shapes = RibbonHelper.GetMultipleSelectedShapes(Constants.MIN_SHAPES_FOR_RESIZE);
+                if (shapes != null && shapes.Count >= Constants.MIN_SHAPES_FOR_RESIZE)
+                {
+                    ShowResizeDialog(shapes);
+                }
+                else
+                {
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_RESIZE, "サイズ調整");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("サイズ調整", ex);
+            }
+        }
+
+        private void ShowResizeDialog(List<PowerPoint.Shape> shapes)
+        {
+            try
+            {
+                using (var dialog = new ShapeResizeDialog())
+                {
+                    if (dialog.ShowDialog() == DialogResult.OK)
+                    {
+                        var resizer = new ShapeResizer();
+
+                        if (dialog.UsePercentage)
+                        {
+                            resizer.ResizeByPercentage(shapes, dialog.Percentage);
+                            ErrorHandler.ShowOperationSuccess("パーセント拡大縮小",
+                                $"{shapes.Count}個の図形を{dialog.Percentage:F1}%に調整しました");
+                        }
+                        else
+                        {
+                            resizer.ResizeToFixedSize(shapes, dialog.Width, dialog.Height, 
+                                dialog.Unit, dialog.KeepRatio, ResizeMode.KeepCenter);
+                            string unitText = dialog.Unit == SizeUnit.Point ? "pt" : 
+                                            dialog.Unit == SizeUnit.Millimeter ? "mm" : "cm";
+                            ErrorHandler.ShowOperationSuccess("固定サイズ設定",
+                                $"{shapes.Count}個の図形を{dialog.Width:F1}×{dialog.Height:F1}{unitText}に調整しました");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("サイズ調整", ex);
+            }
+        }
+
+        #endregion
+
+        #region 配列複製機能
+
+        /// <summary>
+        /// 円形配列ボタン
+        /// </summary>
+        private void btnCircularArray_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var shapes = RibbonHelper.GetMultipleSelectedShapes(Constants.MIN_SHAPES_FOR_ARRAY);
+                if (shapes != null && shapes.Count >= Constants.MIN_SHAPES_FOR_ARRAY)
+                {
+                    ShowCircularArrayDialog(shapes);
+                }
+                else
+                {
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_ARRAY, "円形配列");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("円形配列", ex);
+            }
+        }
+
+        private void ShowCircularArrayDialog(List<PowerPoint.Shape> shapes)
+        {
+            try
+            {
+                using (var dialog = new CircularArrayDialog())
+                {
+                    if (dialog.ShowDialog() == DialogResult.OK)
+                    {
+                        var arrayer = new ShapeArrayer();
+                        arrayer.CircularArray(shapes, dialog.Options);
+                        ErrorHandler.ShowOperationSuccess("円形配列",
+                            $"{shapes.Count}個の図形を{dialog.Options.Count}個に円形配列しました");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("円形配列", ex);
+            }
+        }
+
+        /// <summary>
+        /// グリッド配列ボタン
+        /// </summary>
+        private void btnGridArray_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var shapes = RibbonHelper.GetMultipleSelectedShapes(Constants.MIN_SHAPES_FOR_ARRAY);
+                if (shapes != null && shapes.Count >= Constants.MIN_SHAPES_FOR_ARRAY)
+                {
+                    ShowGridArrayDialog(shapes);
+                }
+                else
+                {
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_ARRAY, "グリッド配列");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("グリッド配列", ex);
+            }
+        }
+
+        private void ShowGridArrayDialog(List<PowerPoint.Shape> shapes)
+        {
+            try
+            {
+                using (var dialog = new GridArrayDialog())
+                {
+                    if (dialog.ShowDialog() == DialogResult.OK)
+                    {
+                        var arrayer = new ShapeArrayer();
+                        arrayer.GridArray(shapes, dialog.Options);
+                        int totalShapes = dialog.Options.Rows * dialog.Options.Columns;
+                        ErrorHandler.ShowOperationSuccess("グリッド配列",
+                            $"{shapes.Count}個の図形を{dialog.Options.Rows}×{dialog.Options.Columns}グリッドに配列しました");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("グリッド配列", ex);
+            }
+        }
+
+
+        #endregion
+
         #region 図形置き換え機能
 
         /// <summary>

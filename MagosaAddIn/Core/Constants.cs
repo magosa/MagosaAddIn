@@ -333,5 +333,113 @@
         public const float DEFAULT_NUMBER_FONT_SIZE = 18.0f;
 
         #endregion
+
+        #region サイズ調整関連
+
+        /// <summary>
+        /// サイズ調整に必要な最小図形数
+        /// </summary>
+        public const int MIN_SHAPES_FOR_RESIZE = 1;
+
+        /// <summary>
+        /// パーセントの最小値（%）
+        /// </summary>
+        public const float MIN_PERCENTAGE = 10.0f;
+
+        /// <summary>
+        /// パーセントの最大値（%）
+        /// </summary>
+        public const float MAX_PERCENTAGE = 500.0f;
+
+        /// <summary>
+        /// デフォルトパーセント（%）
+        /// </summary>
+        public const float DEFAULT_PERCENTAGE = 100.0f;
+
+        /// <summary>
+        /// cm→pt変換係数（1cm = 28.346456693pt）
+        /// </summary>
+        public const float CM_TO_PT = 28.346456693f;
+
+        /// <summary>
+        /// pt→cm変換係数
+        /// </summary>
+        public const float PT_TO_CM = 1.0f / CM_TO_PT;
+
+        /// <summary>
+        /// デフォルト固定幅（pt）
+        /// </summary>
+        public const float DEFAULT_FIXED_WIDTH = 100.0f;
+
+        /// <summary>
+        /// デフォルト固定高さ（pt）
+        /// </summary>
+        public const float DEFAULT_FIXED_HEIGHT = 100.0f;
+
+        #endregion
+
+        #region 配列複製関連
+
+        /// <summary>
+        /// 配列複製に必要な最小図形数
+        /// </summary>
+        public const int MIN_SHAPES_FOR_ARRAY = 1;
+
+        /// <summary>
+        /// 配列個数の最小値
+        /// </summary>
+        public const int MIN_ARRAY_COUNT = 2;
+
+        /// <summary>
+        /// 配列個数の最大値
+        /// </summary>
+        public const int MAX_ARRAY_COUNT = 100;
+
+        /// <summary>
+        /// デフォルト配列個数
+        /// </summary>
+        public const int DEFAULT_ARRAY_COUNT = 5;
+
+        /// <summary>
+        /// 配列間隔の最小値（pt）
+        /// </summary>
+        public const float MIN_ARRAY_SPACING = -200.0f;
+
+        /// <summary>
+        /// 配列間隔の最大値（pt）
+        /// </summary>
+        public const float MAX_ARRAY_SPACING = 500.0f;
+
+        /// <summary>
+        /// デフォルト配列間隔（pt）
+        /// </summary>
+        public const float DEFAULT_ARRAY_SPACING = 50.0f;
+
+        /// <summary>
+        /// 回転角度の最小値（度）
+        /// </summary>
+        public const float MIN_ROTATION_ANGLE = -360.0f;
+
+        /// <summary>
+        /// 回転角度の最大値（度）
+        /// </summary>
+        public const float MAX_ROTATION_ANGLE = 360.0f;
+
+        /// <summary>
+        /// デフォルト回転角度（度）
+        /// </summary>
+        public const float DEFAULT_ROTATION_ANGLE = 45.0f;
+
+        /// <summary>
+        /// デフォルト線形配列角度（度）
+        /// </summary>
+        public const float DEFAULT_LINEAR_ANGLE = 0.0f;
+
+        /// <summary>
+        /// デフォルト開始角度（度）
+        /// </summary>
+        public const float DEFAULT_START_ANGLE = 0.0f;
+
+        #endregion
     }
 }

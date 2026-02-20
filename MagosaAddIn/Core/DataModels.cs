@@ -39,6 +39,30 @@ namespace MagosaAddIn.Core
     }
 
     /// <summary>
+    /// サイズの単位
+    /// </summary>
+    public enum SizeUnit
+    {
+        /// <summary>ポイント（pt）</summary>
+        Point,
+        /// <summary>ミリメートル（mm）</summary>
+        Millimeter,
+        /// <summary>センチメートル（cm）</summary>
+        Centimeter
+    }
+
+    /// <summary>
+    /// リサイズモード
+    /// </summary>
+    public enum ResizeMode
+    {
+        /// <summary>中心位置保持</summary>
+        KeepCenter,
+        /// <summary>左上位置保持</summary>
+        KeepTopLeft
+    }
+
+    /// <summary>
     /// 図形情報を格納するクラス
     /// </summary>
     public class ShapeInfo
@@ -192,4 +216,127 @@ namespace MagosaAddIn.Core
             };
         }
     }
+
+    #region 配列複製オプションクラス群
+
+    /// <summary>
+    /// 線形配列のオプション
+    /// </summary>
+    public class LinearArrayOptions
+    {
+        /// <summary>配列方向（度）</summary>
+        public float Angle { get; set; }
+        /// <summary>個数</summary>
+        public int Count { get; set; }
+        /// <summary>間隔（pt）</summary>
+        public float Spacing { get; set; }
+    }
+
+    /// <summary>
+    /// 配列の角度モード
+    /// </summary>
+    public enum ArrayAngleMode
+    {
+        /// <summary>等分配置（360° ÷ 個数）</summary>
+        EqualDivision,
+        /// <summary>角度指定（指定角度 × インデックス）</summary>
+        AngleStep
+    }
+
+    /// <summary>
+    /// 回転中心の指定方法
+    /// </summary>
+    public enum CenterSource
+    {
+        /// <summary>カスタム座標</summary>
+        CustomCoordinate,
+        /// <summary>配列対象図形の中心</summary>
+        TargetShapeCenter
+    }
+
+    /// <summary>
+    /// 円形配列のオプション（回転コピー統合版）
+    /// </summary>
+    public class CircularArrayOptions
+    {
+        /// <summary>配列モード</summary>
+        public ArrayAngleMode AngleMode { get; set; }
+        
+        /// <summary>回転中心の指定方法</summary>
+        public CenterSource CenterSource { get; set; }
+        
+        /// <summary>中心X座標（カスタム座標または選択図形から取得）</summary>
+        public float CenterX { get; set; }
+        /// <summary>中心Y座標（カスタム座標または選択図形から取得）</summary>
+        public float CenterY { get; set; }
+        
+        /// <summary>半径（等分配置モード用）</summary>
+        public float Radius { get; set; }
+        
+        /// <summary>個数</summary>
+        public int Count { get; set; }
+        
+        /// <summary>開始角度</summary>
+        public float StartAngle { get; set; }
+        
+        /// <summary>角度ステップ（角度指定モード用）</summary>
+        public float AngleStep { get; set; }
+        
+        /// <summary>図形を回転させるか</summary>
+        public bool RotateShapes { get; set; }
+        
+        /// <summary>中心座標取得用の図形（内部使用）</summary>
+        public PowerPoint.Shape CenterReferenceShape { get; set; }
+    }
+
+    /// <summary>
+    /// グリッド配列のオプション（角度対応・線形配列統合版）
+    /// </summary>
+    public class GridArrayOptions
+    {
+        /// <summary>行数（1=横方向線形配列）</summary>
+        public int Rows { get; set; }
+        /// <summary>列数（1=縦方向線形配列）</summary>
+        public int Columns { get; set; }
+        /// <summary>水平間隔（pt）</summary>
+        public float HorizontalSpacing { get; set; }
+        /// <summary>垂直間隔（pt）</summary>
+        public float VerticalSpacing { get; set; }
+        /// <summary>グリッド全体の回転角度（度）0°=右, 90°=下</summary>
+        public float Angle { get; set; }
+    }
+
+    /// <summary>
+    /// パス配列のオプション
+    /// </summary>
+    public class PathArrayOptions
+    {
+        /// <summary>個数</summary>
+        public int Count { get; set; }
+        /// <summary>等間隔配置</summary>
+        public bool EqualSpacing { get; set; }
+        /// <summary>カスタム間隔</summary>
+        public float CustomSpacing { get; set; }
+        /// <summary>パスに沿って回転</summary>
+        public bool RotateAlongPath { get; set; }
+    }
+
+    /// <summary>
+    /// 回転コピーのオプション
+    /// </summary>
+    public class RotationCopyOptions
+    {
+        /// <summary>回転中心X</summary>
+        public float CenterX { get; set; }
+        /// <summary>回転中心Y</summary>
+        public float CenterY { get; set; }
+        /// <summary>回転角度（度）</summary>
+        public float Angle { get; set; }
+        /// <summary>個数</summary>
+        public int Count { get; set; }
+        /// <summary>図形中心を使用</summary>
+        public bool UseShapeCenter { get; set; }
+    }
+
+    #endregion
 }
