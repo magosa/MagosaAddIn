@@ -11,8 +11,8 @@ namespace MagosaAddIn.UI.Dialogs
     public partial class ShapeResizeDialog : BaseDialog
     {
         public float Percentage { get; private set; }
-        public float Width { get; private set; }
-        public float Height { get; private set; }
+        public float ShapeWidth { get; private set; }
+        public float ShapeHeight { get; private set; }
         public SizeUnit Unit { get; private set; }
         public bool KeepRatio { get; private set; }
         public bool UsePercentage { get; private set; }
@@ -38,8 +38,8 @@ namespace MagosaAddIn.UI.Dialogs
         private void SetDefaultValues()
         {
             Percentage = Constants.DEFAULT_PERCENTAGE;
-            Width = Constants.DEFAULT_FIXED_WIDTH;
-            Height = Constants.DEFAULT_FIXED_HEIGHT;
+            ShapeWidth = Constants.DEFAULT_FIXED_WIDTH;
+            ShapeHeight = Constants.DEFAULT_FIXED_HEIGHT;
             Unit = SizeUnit.Point;
             KeepRatio = false;
             UsePercentage = true;
@@ -142,8 +142,8 @@ namespace MagosaAddIn.UI.Dialogs
             }
             else
             {
-                Width = (float)numWidth.Value;
-                Height = (float)numHeight.Value;
+                ShapeWidth = (float)numWidth.Value;
+                ShapeHeight = (float)numHeight.Value;
                 Unit = (SizeUnit)cboUnit.SelectedIndex;
                 KeepRatio = chkKeepRatio.Checked;
             }

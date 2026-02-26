@@ -220,6 +220,7 @@
     <Compile Include="Core\ShapeReplacer.cs" />
     <Compile Include="Core\ShapeResizer.cs" />
     <Compile Include="Core\ShapeSelector.cs" />
+    <Compile Include="Core\ShapeStack.cs" />
     <Compile Include="Core\ShapeStyle.cs" />
     <Compile Include="Core\ThemeColorGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">

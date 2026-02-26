@@ -442,6 +442,20 @@
 
         #endregion
 
+        #region 選択スタック関連
+
+        /// <summary>
+        /// スタックに必要な最小図形数
+        /// </summary>
+        public const int MIN_SHAPES_FOR_STACK = 1;
+
+        /// <summary>
+        /// 最大スタック数
+        /// </summary>
+        public const int MAX_STACK_COUNT = 20;
+
+        #endregion
+
         #region テーマカラー生成関連
 
         /// <summary>

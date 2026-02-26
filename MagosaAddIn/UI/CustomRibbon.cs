@@ -14,11 +14,16 @@ namespace MagosaAddIn.UI
     public partial class CustomRibbon
     {
         private ShapeReplacer shapeReplacer;
+        private ShapeStack shapeStack;
 
         private void CustomRibbon_Load(object sender, RibbonUIEventArgs e)
         {
             ComExceptionHandler.LogDebug("Magosa Tools リボンが読み込まれました");
             shapeReplacer = new ShapeReplacer();
+            shapeStack = new ShapeStack();
+            UpdateStackCountLabel();
+            // 初期化時はメニュー更新をスキップ（空のメニューになる）
+            // メニューは btnPushStack_Click で更新される
         }
 
         #region 図形分割機能
@@ -1304,12 +1309,12 @@ namespace MagosaAddIn.UI
                         }
                         else
                         {
-                            resizer.ResizeToFixedSize(shapes, dialog.Width, dialog.Height, 
+                            resizer.ResizeToFixedSize(shapes, dialog.ShapeWidth, dialog.ShapeHeight, 
                                 dialog.Unit, dialog.KeepRatio, ResizeMode.KeepCenter);
                             string unitText = dialog.Unit == SizeUnit.Point ? "pt" : 
                                             dialog.Unit == SizeUnit.Millimeter ? "mm" : "cm";
                             ErrorHandler.ShowOperationSuccess("固定サイズ設定",
-                                $"{shapes.Count}個の図形を{dialog.Width:F1}×{dialog.Height:F1}{unitText}に調整しました");
+                                $"{shapes.Count}個の図形を{dialog.ShapeWidth:F1}×{dialog.ShapeHeight:F1}{unitText}に調整しました");
                         }
                     }
                 }
@@ -1649,6 +1654,206 @@ namespace MagosaAddIn.UI
             catch (Exception ex)
             {
                 ErrorHandler.ShowOperationError("テーマカラー生成", ex);
+            }
+        }
+
+        #endregion
+
+        #region 選択スタック機能
+
+        /// <summary>
+        /// スタックに追加ボタン
+        /// </summary>
+        private void btnPushStack_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var shapes = RibbonHelper.GetMultipleSelectedShapes(Constants.MIN_SHAPES_FOR_STACK);
+                if (shapes != null && shapes.Count >= Constants.MIN_SHAPES_FOR_STACK)
+                {
+                    int stackId = shapeStack.PushStack(shapes);
+                    UpdateStackCountLabel();
+                    UpdateRestoreStackMenu();
+
+                    ErrorHandler.ShowOperationSuccess("スタック追加",
+                        $"Stack {stackId}に{shapes.Count}個の図形を追加しました。");
+                }
+                else
+                {
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_STACK, "スタック追加");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("スタック追加", ex);
+            }
+        }
+
+        /// <summary>
+        /// スタック復元メニューの項目読み込み（動的メニュー用）
+        /// </summary>
+        private void menuRestoreStack_ItemsLoading(object sender, RibbonControlEventArgs e)
+        {
+            UpdateRestoreStackMenu();
+        }
+
+        /// <summary>
+        /// スタック復元メニューの動的更新
+        /// </summary>
+        private void UpdateRestoreStackMenu()
+        {
+            try
+            {
+                ComExceptionHandler.LogDebug("=== UpdateRestoreStackMenu: 開始 ===");
+                menuRestoreStack.Items.Clear();
+
+                var stackInfoList = shapeStack.GetStackInfoList();
+                ComExceptionHandler.LogDebug($"UpdateRestoreStackMenu: スタック数 = {stackInfoList.Count}");
+
+                if (stackInfoList.Count == 0)
+                {
+                    // スタックが空の場合
+                    var emptyItem = Factory.CreateRibbonButton();
+                    emptyItem.Label = "（スタックが空です）";
+                    emptyItem.Enabled = false;
+                    menuRestoreStack.Items.Add(emptyItem);
+                    ComExceptionHandler.LogDebug("UpdateRestoreStackMenu: 空のメニュー項目を追加");
+                }
+                else
+                {
+                    // 各スタックのボタンを作成
+                    foreach (var info in stackInfoList)
+                    {
+                        var btn = Factory.CreateRibbonButton();
+                        btn.Label = $"Stack {info.StackId}: {info.ShapeCount}個";
+                        btn.Tag = info.StackId;
+
+                        if (!info.IsValid)
+                        {
+                            btn.Label += " (無効)";
+                            btn.Enabled = false;
+                            ComExceptionHandler.LogDebug($"UpdateRestoreStackMenu: Stack {info.StackId} は無効");
+                        }
+                        else
+                        {
+                            btn.Click += RestoreStackButton_Click;
+                            ComExceptionHandler.LogDebug($"UpdateRestoreStackMenu: Stack {info.StackId} にクリックイベントを追加");
+                        }
+
+                        menuRestoreStack.Items.Add(btn);
+                    }
+
+                    // 区切り線
+                    menuRestoreStack.Items.Add(Factory.CreateRibbonSeparator());
+
+                    // 「すべてクリア」ボタン
+                    var clearBtn = Factory.CreateRibbonButton();
+                    clearBtn.Label = "すべてクリア";
+                    clearBtn.OfficeImageId = "Delete";
+                    clearBtn.ShowImage = true;
+                    clearBtn.Click += btnClearAllStacks_Click;
+                    menuRestoreStack.Items.Add(clearBtn);
+                }
+                ComExceptionHandler.LogDebug($"UpdateRestoreStackMenu: メニュー項目数 = {menuRestoreStack.Items.Count}");
+            }
+            catch (Exception ex)
+            {
+                ComExceptionHandler.LogError("スタックメニュー更新エラー", ex);
+            }
+        }
+
+        /// <summary>
+        /// スタック復元ボタンクリック（動的生成ボタン用）
+        /// </summary>
+        private void RestoreStackButton_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var btn = sender as Microsoft.Office.Tools.Ribbon.RibbonButton;
+                if (btn?.Tag is int stackId)
+                {
+                    if (shapeStack.RestoreStack(stackId))
+                    {
+                        var info = shapeStack.GetStackInfoList()
+                            .FirstOrDefault(s => s.StackId == stackId);
+
+                        ErrorHandler.ShowOperationSuccess("スタック復元",
+                            $"Stack {stackId}の{info?.ShapeCount ?? 0}個の図形を選択しました。");
+                    }
+                    else
+                    {
+                        MessageBox.Show(
+                            $"Stack {stackId}の図形が見つからないか、削除されています。",
+                            "スタック復元",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Warning);
+                        
+                        // メニューを更新して無効なスタックを表示
+                        UpdateRestoreStackMenu();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("スタック復元", ex);
+            }
+        }
+
+        /// <summary>
+        /// すべてクリアボタン
+        /// </summary>
+        private void btnClearAllStacks_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                int stackCount = shapeStack.GetTotalStackCount();
+                if (stackCount == 0)
+                {
+                    MessageBox.Show(
+                        "クリアするスタックがありません。",
+                        "スタッククリア",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                    return;
+                }
+
+                var result = MessageBox.Show(
+                    $"すべてのスタック（{stackCount}個）をクリアしますか？",
+                    "スタッククリア確認",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                if (result == DialogResult.Yes)
+                {
+                    shapeStack.ClearAllStacks();
+                    UpdateStackCountLabel();
+                    UpdateRestoreStackMenu();
+
+                    ErrorHandler.ShowOperationSuccess("スタッククリア",
+                        "すべてのスタックをクリアしました。");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("スタッククリア", ex);
+            }
+        }
+
+        /// <summary>
+        /// スタック数ラベルを更新
+        /// </summary>
+        private void UpdateStackCountLabel()
+        {
+            try
+            {
+                int stackCount = shapeStack.GetTotalStackCount();
+                int shapeCount = shapeStack.GetTotalShapeCount();
+                lblStackCount.Label = $"スタック: {stackCount}個 (計{shapeCount}図形)";
+            }
+            catch (Exception ex)
+            {
+                ComExceptionHandler.LogError("スタック数ラベル更新エラー", ex);
+                lblStackCount.Label = "スタック: エラー";
             }
         }
 

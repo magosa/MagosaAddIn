@@ -61,6 +61,9 @@
             this.btnArrangeInCircle = this.Factory.CreateRibbonButton();
             this.group5 = this.Factory.CreateRibbonGroup();
             this.btnSelectSameFormat = this.Factory.CreateRibbonButton();
+            this.btnPushStack = this.Factory.CreateRibbonButton();
+            this.menuRestoreStack = this.Factory.CreateRibbonMenu();
+            this.lblStackCount = this.Factory.CreateRibbonLabel();
             // 新規追加: ハンドル調整グループ
             this.group6 = this.Factory.CreateRibbonGroup();
             this.btnAdjustmentHandles = this.Factory.CreateRibbonButton();
@@ -359,6 +362,9 @@
             // group5
             // 
             this.group5.Items.Add(this.btnSelectSameFormat);
+            this.group5.Items.Add(this.btnPushStack);
+            this.group5.Items.Add(this.menuRestoreStack);
+            this.group5.Items.Add(this.lblStackCount);
             this.group5.Label = "選択補助";
             this.group5.Name = "group5";
 
@@ -371,6 +377,33 @@
             this.btnSelectSameFormat.ShowImage = true;
             this.btnSelectSameFormat.SuperTip = "選択中の図形を基準に、同じ書式を持つ図形を選択します。塗りつぶし色、枠線スタイル、またはその両方から選択条件を指定できます。";
             this.btnSelectSameFormat.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnSelectSameFormat_Click);
+
+            // 
+            // btnPushStack
+            // 
+            this.btnPushStack.Label = "スタックに追加";
+            this.btnPushStack.Name = "btnPushStack";
+            this.btnPushStack.OfficeImageId = "PushPin";
+            this.btnPushStack.ShowImage = true;
+            this.btnPushStack.SuperTip = "選択中の図形を新しいスタックに追加します。後で復元して再選択できます。";
+            this.btnPushStack.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnPushStack_Click);
+
+            // 
+            // menuRestoreStack
+            // 
+            this.menuRestoreStack.Dynamic = true;
+            this.menuRestoreStack.Label = "スタック復元";
+            this.menuRestoreStack.Name = "menuRestoreStack";
+            this.menuRestoreStack.OfficeImageId = "GoTo";
+            this.menuRestoreStack.ShowImage = true;
+            this.menuRestoreStack.SuperTip = "保存したスタックから図形を復元して選択します。";
+            this.menuRestoreStack.ItemsLoading += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.menuRestoreStack_ItemsLoading);
+
+            // 
+            // lblStackCount
+            // 
+            this.lblStackCount.Label = "スタック: 0個";
+            this.lblStackCount.Name = "lblStackCount";
 
             // 
             // group6
@@ -627,6 +660,9 @@
         // Group 5: 選択補助
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group5;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnSelectSameFormat;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnPushStack;
+        internal Microsoft.Office.Tools.Ribbon.RibbonMenu menuRestoreStack;
+        internal Microsoft.Office.Tools.Ribbon.RibbonLabel lblStackCount;
 
         // Group 6: ハンドル調整（新規追加）
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group6;
