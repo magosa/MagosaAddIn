@@ -361,10 +361,10 @@
             // 
             // group5
             // 
-            this.group5.Items.Add(this.btnSelectSameFormat);
             this.group5.Items.Add(this.btnPushStack);
             this.group5.Items.Add(this.menuRestoreStack);
             this.group5.Items.Add(this.lblStackCount);
+            this.group5.Items.Add(this.btnSelectSameFormat);
             this.group5.Label = "選択補助";
             this.group5.Name = "group5";
 
@@ -383,7 +383,7 @@
             // 
             this.btnPushStack.Label = "スタックに追加";
             this.btnPushStack.Name = "btnPushStack";
-            this.btnPushStack.OfficeImageId = "PushPin";
+            this.btnPushStack.OfficeImageId = "GroupLayers";
             this.btnPushStack.ShowImage = true;
             this.btnPushStack.SuperTip = "選択中の図形を新しいスタックに追加します。後で復元して再選択できます。";
             this.btnPushStack.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnPushStack_Click);
@@ -394,7 +394,7 @@
             this.menuRestoreStack.Dynamic = true;
             this.menuRestoreStack.Label = "スタック復元";
             this.menuRestoreStack.Name = "menuRestoreStack";
-            this.menuRestoreStack.OfficeImageId = "GoTo";
+            this.menuRestoreStack.OfficeImageId = "SparklinesUngroupSelected";
             this.menuRestoreStack.ShowImage = true;
             this.menuRestoreStack.SuperTip = "保存したスタックから図形を復元して選択します。";
             this.menuRestoreStack.ItemsLoading += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.menuRestoreStack_ItemsLoading);
