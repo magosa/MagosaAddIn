@@ -90,6 +90,19 @@ namespace MagosaAddIn.Core
                     ComExceptionHandler.LogDebug($"サイズモード: {options.SizeMode}");
                     ComExceptionHandler.LogDebug($"スタイル継承: {options.InheritStyle}");
                     ComExceptionHandler.LogDebug($"テキスト継承: {options.InheritText}");
+                    
+                    // 記憶された図形のスタイル情報を確認
+                    if (options.InheritStyle)
+                    {
+                        ComExceptionHandler.LogDebug($"--- 記憶図形のスタイル情報 ---");
+                        foreach (var shape in savedShapes)
+                        {
+                            ComExceptionHandler.LogDebug($"  [{shape.ShapeName}] " +
+                                $"Fill={shape.FillColor?.ToString("X6") ?? "なし"}, " +
+                                $"Line={shape.LineColor?.ToString("X6") ?? "なし"}, " +
+                                $"Shadow={shape.HasShadow}");
+                        }
+                    }
 
                     int successCount = 0;
                     var createdShapes = new List<PowerPoint.Shape>();
@@ -189,32 +202,63 @@ namespace MagosaAddIn.Core
                     info.CenterX = info.Left + (info.Width / 2);
                     info.CenterY = info.Top + (info.Height / 2);
 
-                    // スタイル情報を取得
+                    // スタイル情報を取得（個別にエラーハンドリング）
+                    // 塗りつぶし情報を取得
                     try
                     {
                         if (shape.Fill.Visible == Office.MsoTriState.msoTrue)
                         {
                             info.FillColor = shape.Fill.ForeColor.RGB;
                             info.FillTransparency = shape.Fill.Transparency;
+                            ComExceptionHandler.LogDebug($"  - 塗りつぶし取得成功: RGB={info.FillColor.Value:X6}, 透明度={info.FillTransparency}");
                         }
+                        else
+                        {
+                            ComExceptionHandler.LogDebug($"  - 塗りつぶし: なし");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        ComExceptionHandler.LogWarning($"図形 {info.ShapeName} の塗りつぶし情報取得に失敗: {ex.Message}");
+                    }
 
+                    // 枠線情報を取得
+                    try
+                    {
                         if (shape.Line.Visible == Office.MsoTriState.msoTrue)
                         {
                             info.LineColor = shape.Line.ForeColor.RGB;
                             info.LineWeight = shape.Line.Weight;
                             info.LineDashStyle = shape.Line.DashStyle;
+                            ComExceptionHandler.LogDebug($"  - 枠線取得成功: RGB={info.LineColor.Value:X6}, 太さ={info.LineWeight}, スタイル={info.LineDashStyle}");
                         }
+                        else
+                        {
+                            ComExceptionHandler.LogDebug($"  - 枠線: なし");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        ComExceptionHandler.LogWarning($"図形 {info.ShapeName} の枠線情報取得に失敗: {ex.Message}");
+                    }
 
+                    // 影情報を取得
+                    try
+                    {
                         if (shape.Shadow.Visible == Office.MsoTriState.msoTrue)
                         {
                             info.HasShadow = true;
                             info.ShadowColor = shape.Shadow.ForeColor.RGB;
+                            ComExceptionHandler.LogDebug($"  - 影取得成功: RGB={info.ShadowColor:X6}");
+                        }
+                        else
+                        {
+                            ComExceptionHandler.LogDebug($"  - 影: なし");
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // スタイル取得失敗時はデフォルト値を使用
-                        ComExceptionHandler.LogWarning($"図形 {info.ShapeName} のスタイル情報取得に失敗");
+                        ComExceptionHandler.LogWarning($"図形 {info.ShapeName} の影情報取得に失敗: {ex.Message}");
                     }
 
                     // テキスト情報を取得
@@ -285,6 +329,8 @@ namespace MagosaAddIn.Core
         /// </summary>
         private void ApplyShapeStyle(PowerPoint.Shape newShape, ShapeInfo savedShape)
         {
+            ComExceptionHandler.LogDebug($"  スタイル適用開始: {savedShape.ShapeName}");
+            
             // 塗りつぶしを適用
             if (savedShape.FillColor.HasValue)
             {
@@ -294,9 +340,14 @@ namespace MagosaAddIn.Core
                         newShape.Fill.Visible = Office.MsoTriState.msoTrue;
                         newShape.Fill.ForeColor.RGB = savedShape.FillColor.Value;
                         newShape.Fill.Transparency = savedShape.FillTransparency;
+                        ComExceptionHandler.LogDebug($"    ✓ 塗りつぶし適用: RGB={savedShape.FillColor.Value:X6}");
                     },
                     "塗りつぶし適用",
                     suppressErrors: true);
+            }
+            else
+            {
+                ComExceptionHandler.LogDebug($"    - 塗りつぶし: スキップ（情報なし）");
             }
 
             // 枠線を適用
@@ -309,9 +360,14 @@ namespace MagosaAddIn.Core
                         newShape.Line.ForeColor.RGB = savedShape.LineColor.Value;
                         newShape.Line.Weight = savedShape.LineWeight;
                         newShape.Line.DashStyle = savedShape.LineDashStyle;
+                        ComExceptionHandler.LogDebug($"    ✓ 枠線適用: RGB={savedShape.LineColor.Value:X6}");
                     },
                     "枠線適用",
                     suppressErrors: true);
+            }
+            else
+            {
+                ComExceptionHandler.LogDebug($"    - 枠線: スキップ（情報なし）");
             }
 
             // 影を適用
@@ -322,9 +378,14 @@ namespace MagosaAddIn.Core
                     {
                         newShape.Shadow.Visible = Office.MsoTriState.msoTrue;
                         newShape.Shadow.ForeColor.RGB = savedShape.ShadowColor;
+                        ComExceptionHandler.LogDebug($"    ✓ 影適用: RGB={savedShape.ShadowColor:X6}");
                     },
                     "影適用",
                     suppressErrors: true);
+            }
+            else
+            {
+                ComExceptionHandler.LogDebug($"    - 影: スキップ（情報なし）");
             }
         }
 

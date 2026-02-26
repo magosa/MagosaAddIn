@@ -69,11 +69,13 @@ namespace MagosaAddIn.UI.Dialogs
             // スタイル・テキスト継承設定グループ
             var groupInherit = CreateGroupBox("継承設定", new Point(DefaultMargin, currentY), new Size(groupWidth, groupInheritHeight));
 
-            chkInheritStyle = CreateCheckBox("スタイルを継承（塗りつぶし・枠線・影）",
-                new Point(groupInnerMargin, radioSpacing), new Size(330, 20));
-
             chkInheritText = CreateCheckBox("テキストを継承",
+                new Point(groupInnerMargin, radioSpacing), new Size(330, 20));
+            chkInheritText.AutoCheck = true;
+
+            chkInheritStyle = CreateCheckBox("スタイルを継承（塗りつぶし・枠線・影）",
                 new Point(groupInnerMargin, radioSpacing + 30), new Size(330, 20));
+            chkInheritStyle.AutoCheck = true;
 
             var lblInheritNote = new Label
             {
