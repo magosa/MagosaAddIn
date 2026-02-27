@@ -1570,6 +1570,36 @@ namespace MagosaAddIn.UI
 
         #endregion
 
+        #region テキスト一括編集機能
+
+        /// <summary>
+        /// テキスト一括編集ボタン
+        /// </summary>
+        private void btnTextBulkEdit_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var shapes = RibbonHelper.GetMultipleSelectedShapes(1);
+                if (shapes != null && shapes.Count >= 1)
+                {
+                    using (var dialog = new TextBulkEditDialog(shapes))
+                    {
+                        dialog.ShowDialog();
+                    }
+                }
+                else
+                {
+                    ErrorHandler.ShowSelectionError(1, "テキスト一括編集");
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("テキスト一括編集", ex);
+            }
+        }
+
+        #endregion
+
         #region テーマカラー生成機能
 
         /// <summary>

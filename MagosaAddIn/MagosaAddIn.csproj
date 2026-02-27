@@ -206,6 +206,7 @@
   -->
   <ItemGroup>
     <Compile Include="Core\ShapeHandleAdjuster.cs" />
+    <Compile Include="Core\ShapeTextEditor.cs" />
     <Compile Include="Core\ComExceptionHandler.cs" />
     <Compile Include="Core\ColorConverter.cs" />
     <Compile Include="Core\ColorPaletteArranger.cs" />
@@ -284,6 +285,9 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UI\Dialogs\ShapeSelectionDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Dialogs\TextBulkEditDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UI\Dialogs\ThemeColorDialog.cs">

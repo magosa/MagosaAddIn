@@ -40,6 +40,7 @@
             this.btnLayerAdjustment = this.Factory.CreateRibbonButton();
             this.btnAutoNumbering = this.Factory.CreateRibbonButton();
             this.btnThemeColorGenerator = this.Factory.CreateRibbonButton();
+            this.btnTextBulkEdit = this.Factory.CreateRibbonButton();
             this.group2 = this.Factory.CreateRibbonGroup();
             this.btnAlignToLeft = this.Factory.CreateRibbonButton();
             this.btnAlignToRight = this.Factory.CreateRibbonButton();
@@ -121,6 +122,7 @@
             this.group1.Items.Add(this.btnLayerAdjustment);
             this.group1.Items.Add(this.btnAutoNumbering);
             this.group1.Items.Add(this.btnThemeColorGenerator);
+            this.group1.Items.Add(this.btnTextBulkEdit);
             this.group1.Label = "図形操作";
             this.group1.Name = "group1";
 
@@ -163,6 +165,16 @@
             this.btnThemeColorGenerator.ShowImage = true;
             this.btnThemeColorGenerator.SuperTip = "配色理論に基づいて17種類のカラーパレットを生成します。図形への適用やスライド枠外への配置が可能です。";
             this.btnThemeColorGenerator.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnThemeColorGenerator_Click);
+
+            // 
+            // btnTextBulkEdit
+            // 
+            this.btnTextBulkEdit.Label = "テキスト一括編集";
+            this.btnTextBulkEdit.Name = "btnTextBulkEdit";
+            this.btnTextBulkEdit.OfficeImageId = "FindAndReplaceDialog";
+            this.btnTextBulkEdit.ShowImage = true;
+            this.btnTextBulkEdit.SuperTip = "選択した図形のテキストを一覧表示して一括編集・検索置換・フォント書式統一・余白行間の調整を行います。";
+            this.btnTextBulkEdit.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnTextBulkEdit_Click);
 
             // 
             // group2
@@ -631,6 +643,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnLayerAdjustment;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnAutoNumbering;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnThemeColorGenerator;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnTextBulkEdit;
 
         // Group 2: 基準整列
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group2;
