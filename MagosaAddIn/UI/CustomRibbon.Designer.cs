@@ -41,6 +41,7 @@
             this.btnAutoNumbering = this.Factory.CreateRibbonButton();
             this.btnThemeColorGenerator = this.Factory.CreateRibbonButton();
             this.btnTextBulkEdit = this.Factory.CreateRibbonButton();
+            this.btnStyleLibrary = this.Factory.CreateRibbonButton();
             this.group2 = this.Factory.CreateRibbonGroup();
             this.btnAlignToLeft = this.Factory.CreateRibbonButton();
             this.btnAlignToRight = this.Factory.CreateRibbonButton();
@@ -123,6 +124,7 @@
             this.group1.Items.Add(this.btnAutoNumbering);
             this.group1.Items.Add(this.btnThemeColorGenerator);
             this.group1.Items.Add(this.btnTextBulkEdit);
+            this.group1.Items.Add(this.btnStyleLibrary);
             this.group1.Label = "図形操作";
             this.group1.Name = "group1";
 
@@ -171,10 +173,20 @@
             // 
             this.btnTextBulkEdit.Label = "テキスト一括編集";
             this.btnTextBulkEdit.Name = "btnTextBulkEdit";
-            this.btnTextBulkEdit.OfficeImageId = "FindAndReplaceDialog";
+            this.btnTextBulkEdit.OfficeImageId = "TextStylesGallery";
             this.btnTextBulkEdit.ShowImage = true;
             this.btnTextBulkEdit.SuperTip = "選択した図形のテキストを一覧表示して一括編集・検索置換・フォント書式統一・余白行間の調整を行います。";
             this.btnTextBulkEdit.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnTextBulkEdit_Click);
+
+            // 
+            // btnStyleLibrary
+            // 
+            this.btnStyleLibrary.Label = "スタイルライブラリ";
+            this.btnStyleLibrary.Name = "btnStyleLibrary";
+            this.btnStyleLibrary.OfficeImageId = "AddSelectionToContentLibrary";
+            this.btnStyleLibrary.ShowImage = true;
+            this.btnStyleLibrary.SuperTip = "図形スタイル（塗りつぶし・枠線・影・フォント）を名前付きで保存・管理・一括適用します。エクスポート/インポートでチーム間共有も可能です。";
+            this.btnStyleLibrary.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnStyleLibrary_Click);
 
             // 
             // group2
@@ -644,6 +656,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnAutoNumbering;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnThemeColorGenerator;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnTextBulkEdit;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnStyleLibrary;
 
         // Group 2: 基準整列
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group2;

@@ -34,8 +34,8 @@
     <PublishUrl>公開\</PublishUrl>
     <InstallUrl />
     <TargetCulture>ja</TargetCulture>
-    <ApplicationVersion>1.0.0.8</ApplicationVersion>
-    <AutoIncrementApplicationRevision>false</AutoIncrementApplicationRevision>
+    <ApplicationVersion>1.0.0.9</ApplicationVersion>
+    <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
     <UpdateIntervalUnits>days</UpdateIntervalUnits>
@@ -132,6 +132,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
@@ -207,6 +208,7 @@
   <ItemGroup>
     <Compile Include="Core\ShapeHandleAdjuster.cs" />
     <Compile Include="Core\ShapeTextEditor.cs" />
+    <Compile Include="Core\ShapeStyleLibrary.cs" />
     <Compile Include="Core\ComExceptionHandler.cs" />
     <Compile Include="Core\ColorConverter.cs" />
     <Compile Include="Core\ColorPaletteArranger.cs" />
@@ -285,6 +287,9 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UI\Dialogs\ShapeSelectionDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Dialogs\StyleLibraryDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UI\Dialogs\TextBulkEditDialog.cs">

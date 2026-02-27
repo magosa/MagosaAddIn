@@ -1570,6 +1570,36 @@ namespace MagosaAddIn.UI
 
         #endregion
 
+        #region スタイルライブラリ機能
+
+        private ShapeStyleLibrary styleLibrary;
+
+        /// <summary>
+        /// スタイルライブラリボタン
+        /// </summary>
+        private void btnStyleLibrary_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                // シングルトンで保持
+                if (styleLibrary == null) styleLibrary = new ShapeStyleLibrary();
+
+                // 現在の選択図形を取得（0個でも開ける）
+                var shapes = RibbonHelper.GetMultipleSelectedShapes(0) ?? new System.Collections.Generic.List<PowerPoint.Shape>();
+
+                using (var dialog = new StyleLibraryDialog(styleLibrary, shapes))
+                {
+                    dialog.ShowDialog();
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("スタイルライブラリ", ex);
+            }
+        }
+
+        #endregion
+
         #region テキスト一括編集機能
 
         /// <summary>
