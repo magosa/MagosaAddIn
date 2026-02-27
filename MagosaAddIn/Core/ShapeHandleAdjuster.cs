@@ -199,13 +199,16 @@ namespace MagosaAddIn.Core
                     // 図形のサイズを取得
                     float shapeWidth = shape.Width;
                     float shapeHeight = shape.Height;
-                    float maxDimension = Math.Max(shapeWidth, shapeHeight);
+                    
+                    // 角丸ハンドルの基準寸法: 幅と高さの小さい方の半分
+                    // これにより、アスペクト比が異なる図形でも同じmm値で同じ見た目の丸角になる
+                    float baseDimension = Math.Min(shapeWidth, shapeHeight) / 2.0f;
 
                     // mm→pt変換
                     float ptValue = mmValue * Constants.MM_TO_PT;
 
-                    // 図形サイズに対する比率として正規化
-                    float normalizedValue = ptValue / maxDimension;
+                    // 基準寸法に対する比率として正規化
+                    float normalizedValue = ptValue / baseDimension;
 
                     // 0.0-1.0の範囲にクランプ
                     return Math.Max(0.0f, Math.Min(1.0f, normalizedValue));
@@ -229,10 +232,13 @@ namespace MagosaAddIn.Core
                     // 図形のサイズを取得
                     float shapeWidth = shape.Width;
                     float shapeHeight = shape.Height;
-                    float maxDimension = Math.Max(shapeWidth, shapeHeight);
+                    
+                    // 角丸ハンドルの基準寸法: 幅と高さの小さい方の半分
+                    // これにより、アスペクト比が異なる図形でも同じ正規化値で同じmm値が得られる
+                    float baseDimension = Math.Min(shapeWidth, shapeHeight) / 2.0f;
 
                     // 正規化値→pt変換
-                    float ptValue = normalizedValue * maxDimension;
+                    float ptValue = normalizedValue * baseDimension;
 
                     // pt→mm変換
                     return ptValue * Constants.PT_TO_MM;
