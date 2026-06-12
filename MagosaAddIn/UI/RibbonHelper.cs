@@ -312,6 +312,38 @@ namespace MagosaAddIn.UI
         {
             ComExceptionHandler.LogError($"RibbonHelper: {message}", ex);
         }
+
+        /// <summary>
+        /// アクティブスライド内の画像オブジェクト（msoPicture）一覧を取得する
+        /// </summary>
+        /// <returns>画像オブジェクトのリスト、取得失敗時はnull</returns>
+        public static List<PowerPoint.Shape> GetImageShapesFromSlide()
+        {
+            return ComExceptionHandler.ExecuteComOperation(
+                () => {
+                    var app = Globals.ThisAddIn.Application;
+                    if (app?.ActivePresentation?.Slides == null)
+                        return null;
+
+                    int slideIndex = (int)app.ActiveWindow.Selection.SlideRange[1].SlideIndex;
+                    var shapes = app.ActivePresentation.Slides[slideIndex].Shapes;
+
+                    var imageShapes = new List<PowerPoint.Shape>();
+                    for (int i = 1; i <= shapes.Count; i++)
+                    {
+                        if (shapes[i].Type == Microsoft.Office.Core.MsoShapeType.msoPicture)
+                        {
+                            imageShapes.Add(shapes[i]);
+                        }
+                    }
+
+                    ComExceptionHandler.LogDebug($"GetImageShapesFromSlide: {imageShapes.Count}個の画像を検出");
+                    return imageShapes;
+                },
+                "スライドから画像オブジェクト取得",
+                defaultValue: null,
+                suppressErrors: true);
+        }
     }
 
     /// <summary>

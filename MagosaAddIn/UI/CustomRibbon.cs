@@ -1918,5 +1918,36 @@ namespace MagosaAddIn.UI
         }
 
         #endregion
+
+        #region 画像倍率同期機能
+
+        private void btnImageScaleSync_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var imageShapes = RibbonHelper.GetImageShapesFromSlide();
+                if (imageShapes == null || imageShapes.Count < 2)
+                {
+                    MessageBox.Show(
+                        "スライドに2個以上の画像オブジェクトが必要です。\n" +
+                        "PowerPointのスライドに画像を2つ以上貼り付けてから実行してください。",
+                        "Magosa Tools - 画像倍率同期",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+
+                using (var dialog = new ImageScaleSyncDialog(imageShapes))
+                {
+                    dialog.ShowDialog();
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("画像倍率同期", ex);
+            }
+        }
+
+        #endregion
     }
 }
