@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Office = Microsoft.Office.Core;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 
@@ -440,6 +441,73 @@ namespace MagosaAddIn.Core
 
         /// <summary>スライドとの間隔（pt）</summary>
         public float Margin { get; set; } = 20f;
+    }
+
+    #endregion
+
+    #region 画像倍率同期関連
+
+    /// <summary>
+    /// 測定方向の列挙
+    /// </summary>
+    public enum MeasurementMode
+    {
+        /// <summary>自由：2点間の直線距離</summary>
+        Free,
+        /// <summary>水平のみ：X軸差分</summary>
+        HorizontalOnly,
+        /// <summary>垂直のみ：Y軸差分</summary>
+        VerticalOnly
+    }
+
+    /// <summary>
+    /// 画像オブジェクトの情報を保持するクラス
+    /// </summary>
+    public class ImageInfo
+    {
+        /// <summary>PowerPoint内の画像オブジェクト</summary>
+        public PowerPoint.Shape ShapeObject { get; set; }
+
+        /// <summary>画像の幅（pt）</summary>
+        public float ImageWidth { get; set; }
+
+        /// <summary>画像の高さ（pt）</summary>
+        public float ImageHeight { get; set; }
+
+        /// <summary>
+        /// 2点間の距離を計算（ピクセル）
+        /// </summary>
+        public float GetDistance(float x1, float y1, float x2, float y2,
+            MeasurementMode mode = MeasurementMode.Free)
+        {
+            switch (mode)
+            {
+                case MeasurementMode.HorizontalOnly:
+                    return Math.Abs(x2 - x1);
+                case MeasurementMode.VerticalOnly:
+                    return Math.Abs(y2 - y1);
+                default:
+                    float dx = x2 - x1;
+                    float dy = y2 - y1;
+                    return (float)Math.Sqrt(dx * dx + dy * dy);
+            }
+        }
+
+        /// <summary>
+        /// スケーリング後のサイズを計算
+        /// </summary>
+        public (float NewWidth, float NewHeight) GetScaledSize(float scaleFactor)
+        {
+            return (ImageWidth * scaleFactor, ImageHeight * scaleFactor);
+        }
+
+        /// <summary>
+        /// ドロップダウン表示用の文字列表現
+        /// </summary>
+        public override string ToString()
+        {
+            return $"{ShapeObject?.Name ?? "(不明)"} ({ImageWidth:F0}×{ImageHeight:F0} pt)";
+        }
     }
 
     #endregion
