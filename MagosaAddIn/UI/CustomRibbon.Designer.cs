@@ -166,7 +166,7 @@
             // 
             this.btnSelectionOrder.Label = "選択順序変更";
             this.btnSelectionOrder.Name = "btnSelectionOrder";
-            this.btnSelectionOrder.OfficeImageId = "ReorderItems";
+            this.btnSelectionOrder.OfficeImageId = "LayerDialog";
             this.btnSelectionOrder.ShowImage = true;
             this.btnSelectionOrder.SuperTip = "選択中の図形の処理順序を変更します。レイヤー適用やスタック保存時の順序を指定できます。";
             this.btnSelectionOrder.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnSelectionOrder_Click);
@@ -426,9 +426,9 @@
             // 
             // btnImageColorEdit
             // 
-            this.btnImageColorEdit.Label = "画像色編集";
+            this.btnImageColorEdit.Label = "色調編集";
             this.btnImageColorEdit.Name = "btnImageColorEdit";
-            this.btnImageColorEdit.OfficeImageId = "PictureColorFormat";
+            this.btnImageColorEdit.OfficeImageId = "PictureColorTempertatureGallery";
             this.btnImageColorEdit.ShowImage = true;
             this.btnImageColorEdit.SuperTip = "選択した画像の明るさ・コントラスト・色相・彩度・カラーライズ等を編集します。";
             this.btnImageColorEdit.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnImageColorEdit_Click);
