@@ -203,7 +203,7 @@ namespace MagosaAddIn.Core
 
         // ─── Magick.NET パイプライン ────────────────────────────────────────────────
 
-        private void ProcessImage(string inputPath, string outputPath, ImageColorSettings settings)
+        internal void ProcessImage(string inputPath, string outputPath, ImageColorSettings settings)
         {
             using (var image = new MagickImage(inputPath))
             {

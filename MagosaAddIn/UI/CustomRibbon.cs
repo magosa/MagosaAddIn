@@ -1980,8 +1980,8 @@ namespace MagosaAddIn.UI
                     return;
                 }
 
-                // ── ②  ダイアログを開く（initialShape は渡さない）───────────────
-                using (var dialog = new ImageColorEditDialog())
+                // ── ②  ダイアログを開く（先頭画像をプレビューソースとして渡す）────
+                using (var dialog = new ImageColorEditDialog(preCheck[0]))
                 {
                     if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
                         return;
