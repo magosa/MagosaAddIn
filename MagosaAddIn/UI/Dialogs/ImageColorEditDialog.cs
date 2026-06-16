@@ -40,6 +40,7 @@ namespace MagosaAddIn.UI.Dialogs
         private Panel         _pnlColorPreview;
         private Button        _btnColorSelect;
         private RadioButton   _rbNone, _rbGrayscale, _rbSepia, _rbBlackWhite;
+        private GradientBar   _gbThreshold;
         private NumericUpDown _nudThreshold;
 
         // ─────────────────────────────────────────────────────────────
@@ -163,7 +164,7 @@ namespace MagosaAddIn.UI.Dialogs
             y += colGrpH + SectionGap;
 
             // ── 色調変換 グループ ─────────────────────────────────────
-            const int toneGrpH = 78;
+            const int toneGrpH = 82;
             var grpTone = CreateGroupBox("色調変換（排他）", new Point(GrpX, y), new Size(LeftW, toneGrpH));
             _rbNone       = CreateRadioButton("なし",          new Point(10,  22), new Size(55,  20), true);
             _rbGrayscale  = CreateRadioButton("グレースケール", new Point(70,  22), new Size(120, 20), false);
@@ -171,15 +172,24 @@ namespace MagosaAddIn.UI.Dialogs
             _rbBlackWhite = CreateRadioButton("白黒",           new Point(10,  48), new Size(60,  20), false);
             var lblThr = new Label { Text = "閾値:", Location = new Point(75, 50),
                 Size = new Size(36, 16), TextAlign = ContentAlignment.MiddleLeft };
+            _gbThreshold = MakeGradientBar(0, 100, 50);
+            _gbThreshold.DrawGradient = DrawThresholdGrad;
+            _gbThreshold.Location = new Point(116, 48);
+            _gbThreshold.Size     = new Size(240, 28);
+            _gbThreshold.Enabled  = false;
             _nudThreshold = MakeNud(0, 100, 50);
-            _nudThreshold.Location = new Point(114, 48);
+            _nudThreshold.Location = new Point(361, 51);
             _nudThreshold.Enabled  = false;
             _rbNone.CheckedChanged       += UpdateThresholdState;
             _rbGrayscale.CheckedChanged  += UpdateThresholdState;
             _rbSepia.CheckedChanged      += UpdateThresholdState;
             _rbBlackWhite.CheckedChanged += UpdateThresholdState;
+            // ToneMode が None 以外を選択したらカラーライズを自動解除する
+            _rbGrayscale.CheckedChanged  += (s, e) => { if (_rbGrayscale.Checked)  _chkColorize.Checked = false; };
+            _rbSepia.CheckedChanged      += (s, e) => { if (_rbSepia.Checked)      _chkColorize.Checked = false; };
+            _rbBlackWhite.CheckedChanged += (s, e) => { if (_rbBlackWhite.Checked) _chkColorize.Checked = false; };
             grpTone.Controls.AddRange(new Control[] {
-                _rbNone, _rbGrayscale, _rbSepia, _rbBlackWhite, lblThr, _nudThreshold });
+                _rbNone, _rbGrayscale, _rbSepia, _rbBlackWhite, lblThr, _gbThreshold, _nudThreshold });
             Controls.Add(grpTone);
             y += toneGrpH + SectionGap;
 
@@ -281,7 +291,8 @@ namespace MagosaAddIn.UI.Dialogs
             WirePreviewTrigger(_gbHue,              _nudHue);
             WirePreviewTrigger(_gbSaturation,       _nudSaturation);
             WirePreviewTrigger(_gbColorizeIntensity,_nudColorizeIntensity);
-            _nudThreshold.ValueChanged   += (s, e) => SchedulePreview();
+            WireSync(_gbThreshold, _nudThreshold);
+            WirePreviewTrigger(_gbThreshold, _nudThreshold);
             _chkColorize.CheckedChanged  += (s, e) => SchedulePreview();
             _rbNone.CheckedChanged       += (s, e) => SchedulePreview();
             _rbGrayscale.CheckedChanged  += (s, e) => SchedulePreview();
@@ -399,6 +410,14 @@ namespace MagosaAddIn.UI.Dialogs
                 g.FillRectangle(lgb, r);
         }
 
+        private void DrawThresholdGrad(Graphics g, Rectangle r)
+        {
+            if (r.Width <= 1) return;
+            using (var lgb = new LinearGradientBrush(
+                new Point(r.X, r.Y), new Point(r.Right, r.Y), Color.Black, Color.White))
+                g.FillRectangle(lgb, r);
+        }
+
         private void DrawColorizeGrad(Graphics g, Rectangle r)
         {
             if (r.Width <= 1) return;
@@ -512,7 +531,9 @@ namespace MagosaAddIn.UI.Dialogs
 
         private void UpdateThresholdState(object sender, EventArgs e)
         {
-            _nudThreshold.Enabled = _rbBlackWhite.Checked;
+            bool bw = _rbBlackWhite.Checked;
+            _gbThreshold.Enabled  = bw;
+            _nudThreshold.Enabled = bw;
         }
 
         private void BtnColorSelect_Click(object sender, EventArgs e)

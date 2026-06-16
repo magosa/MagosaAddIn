@@ -248,10 +248,9 @@ namespace MagosaAddIn.Core
                         new Percentage(settings.Hue + 180));
 
                 // Step 5: カラーライズ（Photoshop「色彩の統一」相当）
-                // 各ピクセルの H と S を指定色で統一し、L（輝度）は元画像を保持する。
-                // ImageMagick の Colorize() は RGB ブレンドなので Photoshop と挙動が異なるため、
-                // HLS カラースペース上でチャンネルを直接置換する方式を採用する。
-                if (settings.ColorizeEnabled)
+                // ToneMode が指定されている場合はカラーライズをスキップする。
+                // （白黒→カラーライズ のように ToneMode が上書きされるのを防ぐ）
+                if (settings.ColorizeEnabled && settings.ToneMode == ColorToneMode.None)
                 {
                     int r = settings.ColorizeRgb & 0xFF;
                     int g = (settings.ColorizeRgb >> 8)  & 0xFF;
