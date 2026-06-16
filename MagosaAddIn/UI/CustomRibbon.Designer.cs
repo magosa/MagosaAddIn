@@ -40,6 +40,7 @@
             this.menuRestoreStack = this.Factory.CreateRibbonMenu();
             this.lblStackCount = this.Factory.CreateRibbonLabel();
             this.btnSelectSameFormat = this.Factory.CreateRibbonButton();
+            this.btnSelectionOrder = this.Factory.CreateRibbonButton();
             this.group1 = this.Factory.CreateRibbonGroup();
             this.btnDivideShape = this.Factory.CreateRibbonButton();
             this.btnLayerAdjustment = this.Factory.CreateRibbonButton();
@@ -69,6 +70,7 @@
             this.btnGridArray = this.Factory.CreateRibbonButton();
             this.group10 = this.Factory.CreateRibbonGroup();
             this.btnImageScaleSync = this.Factory.CreateRibbonButton();
+            this.btnImageColorEdit = this.Factory.CreateRibbonButton();
             this.group2 = this.Factory.CreateRibbonGroup();
             this.btnAlignToLeft = this.Factory.CreateRibbonButton();
             this.btnAlignToRight = this.Factory.CreateRibbonButton();
@@ -123,6 +125,7 @@
             this.group5.Items.Add(this.menuRestoreStack);
             this.group5.Items.Add(this.lblStackCount);
             this.group5.Items.Add(this.btnSelectSameFormat);
+            this.group5.Items.Add(this.btnSelectionOrder);
             this.group5.Label = "選択補助";
             this.group5.Name = "group5";
             // 
@@ -158,6 +161,15 @@
             this.btnSelectSameFormat.ShowImage = true;
             this.btnSelectSameFormat.SuperTip = "選択中の図形を基準に、同じ書式を持つ図形を選択します。塗りつぶし色、枠線スタイル、またはその両方から選択条件を指定できます。";
             this.btnSelectSameFormat.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnSelectSameFormat_Click);
+            // 
+            // btnSelectionOrder
+            // 
+            this.btnSelectionOrder.Label = "選択順序変更";
+            this.btnSelectionOrder.Name = "btnSelectionOrder";
+            this.btnSelectionOrder.OfficeImageId = "ReorderItems";
+            this.btnSelectionOrder.ShowImage = true;
+            this.btnSelectionOrder.SuperTip = "選択中の図形の処理順序を変更します。レイヤー適用やスタック保存時の順序を指定できます。";
+            this.btnSelectionOrder.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnSelectionOrder_Click);
             // 
             // group1
             // 
@@ -399,6 +411,7 @@
             // group10
             // 
             this.group10.Items.Add(this.btnImageScaleSync);
+            this.group10.Items.Add(this.btnImageColorEdit);
             this.group10.Label = "画像操作";
             this.group10.Name = "group10";
             // 
@@ -410,6 +423,15 @@
             this.btnImageScaleSync.ShowImage = true;
             this.btnImageScaleSync.SuperTip = "2つの画像の倍率を同期します。実寸法を基準にスケール係数を計算し、画像②を自動でリサイズします。";
             this.btnImageScaleSync.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnImageScaleSync_Click);
+            // 
+            // btnImageColorEdit
+            // 
+            this.btnImageColorEdit.Label = "画像色編集";
+            this.btnImageColorEdit.Name = "btnImageColorEdit";
+            this.btnImageColorEdit.OfficeImageId = "PictureColorFormat";
+            this.btnImageColorEdit.ShowImage = true;
+            this.btnImageColorEdit.SuperTip = "選択した画像の明るさ・コントラスト・色相・彩度・カラーライズ等を編集します。";
+            this.btnImageColorEdit.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnImageColorEdit_Click);
             // 
             // group2
             // 
@@ -662,6 +684,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnPushStack;
         internal Microsoft.Office.Tools.Ribbon.RibbonMenu menuRestoreStack;
         internal Microsoft.Office.Tools.Ribbon.RibbonLabel lblStackCount;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnSelectionOrder;
 
         // Group 6: ハンドル調整（新規追加）
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group6;
@@ -694,6 +717,7 @@
         // Group 10: 画像操作（新規追加）
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group10;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnImageScaleSync;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnImageColorEdit;
     }
 
     partial class ThisRibbonCollection
