@@ -34,7 +34,7 @@
     <PublishUrl>公開\</PublishUrl>
     <InstallUrl />
     <TargetCulture>ja</TargetCulture>
-    <ApplicationVersion>1.1.0.0</ApplicationVersion>
+    <ApplicationVersion>1.1.1.0</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
@@ -123,6 +123,12 @@
     This section specifies references for the project.
   -->
   <ItemGroup>
+    <Reference Include="Magick.NET-Q16-AnyCPU">
+      <HintPath>..\packages\Magick.NET-Q16-AnyCPU.14.14.0\lib\netstandard20\Magick.NET-Q16-AnyCPU.dll</HintPath>
+    </Reference>
+    <Reference Include="Magick.NET.Core">
+      <HintPath>..\packages\Magick.NET.Core.14.14.0\lib\netstandard20\Magick.NET.Core.dll</HintPath>
+    </Reference>
     <Reference Include="Accessibility" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -220,6 +226,9 @@
     <Compile Include="Core\ShapeArrayer.cs" />
     <Compile Include="Core\ShapeDivider.cs" />
     <Compile Include="Core\ShapeLayerManager.cs" />
+    <Compile Include="Core\ShapeOrderManager.cs" />
+    <Compile Include="Core\ImageColorSettings.cs" />
+    <Compile Include="Core\ImageColorEditor.cs" />
     <Compile Include="Core\ShapeNumbering.cs" />
     <Compile Include="Core\ShapeReplacer.cs" />
     <Compile Include="Core\ShapeResizer.cs" />
@@ -290,6 +299,18 @@
     <Compile Include="UI\Dialogs\ShapeResizeDialog.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="UI\Dialogs\SelectionOrderDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Dialogs\GradientBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="UI\Dialogs\ColorPickerDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Dialogs\ImageColorEditDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="UI\Dialogs\ShapeSelectionDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -350,6 +371,8 @@
   </PropertyGroup>
   <!-- Include the build rules for a C# project. -->
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- Magick.NET ネイティブ DLL を出力ディレクトリにコピー -->
+  <Import Project="..\packages\Magick.NET-Q16-AnyCPU.14.14.0\build\netstandard20\Magick.NET-Q16-AnyCPU.targets" Condition="Exists('..\packages\Magick.NET-Q16-AnyCPU.14.14.0\build\netstandard20\Magick.NET-Q16-AnyCPU.targets')" />
   <!-- Include additional build rules for an Office application add-in. -->
   <Import Project="$(VSToolsPath)\OfficeTools\Microsoft.VisualStudio.Tools.Office.targets" Condition="'$(VSToolsPath)' != ''" />
   <!-- This section defines VSTO properties that describe the host-changeable project properties. -->
