@@ -816,6 +816,53 @@ namespace MagosaAddIn.UI
             }
         }
 
+        private void btnSelectionOrder_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var shapes = RibbonHelper.GetMultipleSelectedShapes(Constants.MIN_SHAPES_FOR_LAYER);
+                if (shapes == null || shapes.Count < Constants.MIN_SHAPES_FOR_LAYER)
+                {
+                    ErrorHandler.ShowSelectionError(Constants.MIN_SHAPES_FOR_LAYER, "選択順序変更");
+                    return;
+                }
+
+                using (var dialog = new SelectionOrderDialog(shapes))
+                {
+                    if (dialog.ShowDialog() != DialogResult.OK)
+                        return;
+
+                    var manager = new ShapeOrderManager();
+
+                    // OK を押したら常に指定順で選び直す（Z順・体裁は変更しない）
+                    // Selection.ShapeRange のクリック順が更新されるため、
+                    // 後続のナンバリング等の操作が指定順で実行される
+                    manager.ReSelectInOrder(dialog.OrderedShapes);
+
+                    switch (dialog.SelectedAction)
+                    {
+                        case SelectionOrderDialog.PostAction.ReSelectAndSaveToStack:
+                            int stackId = manager.SaveToStack(dialog.OrderedShapes, shapeStack);
+                            UpdateStackCountLabel();
+                            ErrorHandler.ShowOperationSuccess("選択順序変更",
+                                $"{dialog.OrderedShapes.Count}個の図形を指定順で選び直し、スタック {stackId} に保存しました。");
+                            break;
+
+                        case SelectionOrderDialog.PostAction.ReSelectOnly:
+                        default:
+                            ErrorHandler.ShowOperationSuccess("選択順序変更",
+                                $"{dialog.OrderedShapes.Count}個の図形を指定順で選び直しました。\n" +
+                                "ナンバリング等の後続操作はこの順序で実行されます。");
+                            break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("選択順序変更", ex);
+            }
+        }
+
         #endregion
 
         #region ハンドル調整機能
@@ -1914,6 +1961,153 @@ namespace MagosaAddIn.UI
             {
                 ComExceptionHandler.LogError("スタック数ラベル更新エラー", ex);
                 lblStackCount.Label = "スタック: エラー";
+            }
+        }
+
+        #endregion
+
+        #region 画像色編集機能
+
+        private void btnImageColorEdit_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                // ── ①  ボタン押下時点で選択を確認（事前チェック用）────────────────
+                var preCheck = GetSelectedPictures();
+                if (preCheck == null || preCheck.Count == 0)
+                {
+                    ErrorHandler.ShowSelectionError(1, "画像色編集");
+                    return;
+                }
+
+                // ── ②  ダイアログを開く（先頭画像をプレビューソースとして渡す）────
+                using (var dialog = new ImageColorEditDialog(preCheck[0]))
+                {
+                    if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+                        return;
+
+                    // ── ③  ダイアログ閉じた直後に選択を再取得（毎回フレッシュ）──────
+                    var pictures = GetSelectedPictures();
+                    if (pictures == null || pictures.Count == 0)
+                    {
+                        ErrorHandler.ShowSelectionError(1, "画像色編集");
+                        return;
+                    }
+
+                    var editor = new Core.ImageColorEditor();
+                    var app = Globals.ThisAddIn.Application;
+
+                    // UndoRecord は _Application インターフェイスに存在しないため
+                    // COM IDispatch 経由で呼び出す (dynamic は C# バインダーで失敗する)
+                    ComExceptionHandler.LogDebug($"[UndoRecord] IsComObject={System.Runtime.InteropServices.Marshal.IsComObject(app)}, Type={app.GetType().FullName}");
+                    object undoRecord = null;
+                    try
+                    {
+                        undoRecord = app.GetType().InvokeMember(
+                            "UndoRecord",
+                            System.Reflection.BindingFlags.GetProperty,
+                            null, app, null);
+                        undoRecord?.GetType().InvokeMember(
+                            "StartCustomRecord",
+                            System.Reflection.BindingFlags.InvokeMethod,
+                            null, undoRecord, new object[] { "画像色編集" });
+                        ComExceptionHandler.LogDebug("[UndoRecord] StartCustomRecord: 成功");
+                    }
+                    catch (Exception exUr)
+                    {
+                        ComExceptionHandler.LogDebug($"[UndoRecord] StartCustomRecord: 失敗 [{exUr.GetType().Name}] {exUr.Message}");
+                        undoRecord = null;
+                    }
+
+                    try
+                    {
+                        foreach (var pic in pictures)
+                            editor.Apply(pic, dialog.Settings);
+                    }
+                    finally
+                    {
+                        if (undoRecord != null)
+                        {
+                            try
+                            {
+                                undoRecord.GetType().InvokeMember(
+                                    "EndCustomRecord",
+                                    System.Reflection.BindingFlags.InvokeMethod,
+                                    null, undoRecord, null);
+                                ComExceptionHandler.LogDebug("[UndoRecord] EndCustomRecord: 成功");
+                            }
+                            catch (Exception exUr)
+                            {
+                                ComExceptionHandler.LogDebug($"[UndoRecord] EndCustomRecord: 失敗 [{exUr.GetType().Name}] {exUr.Message}");
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // デバッグ用：ステップ情報とログパスを含む詳細エラーを表示
+                string logPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "MagosaAddIn_debug.log");
+                string detail  = ex.InnerException != null
+                    ? $"{ex.Message}\n内部例外: {ex.InnerException.Message}"
+                    : ex.Message;
+                System.Windows.Forms.MessageBox.Show(
+                    $"画像色編集中にエラーが発生しました。\n\n{detail}\n\nデバッグログ:\n{logPath}",
+                    "Magosa Tools - デバッグエラー",
+                    System.Windows.Forms.MessageBoxButtons.OK,
+                    System.Windows.Forms.MessageBoxIcon.Error);
+            }
+        }
+
+        /// <summary>現在の選択から画像図形のみを取り出す</summary>
+        private System.Collections.Generic.List<PowerPoint.Shape> GetSelectedPictures()
+        {
+            return ComExceptionHandler.ExecuteComOperation(() =>
+            {
+                var selection = Globals.ThisAddIn.Application?.ActiveWindow?.Selection;
+                if (selection?.Type != PowerPoint.PpSelectionType.ppSelectionShapes)
+                    return null;
+
+                var result = new System.Collections.Generic.List<PowerPoint.Shape>();
+                for (int i = 1; i <= selection.ShapeRange.Count; i++)
+                {
+                    var s = selection.ShapeRange[i];
+                    if (s.Type == Microsoft.Office.Core.MsoShapeType.msoPicture ||
+                        s.Type == Microsoft.Office.Core.MsoShapeType.msoLinkedPicture)
+                        result.Add(s);
+                }
+                return result.Count > 0 ? result : null;
+            }, "画像選択取得", defaultValue: null, suppressErrors: true);
+        }
+
+        #endregion
+
+        #region 画像倍率同期機能
+
+        private void btnImageScaleSync_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                var imageShapes = RibbonHelper.GetImageShapesFromSlide();
+                if (imageShapes == null || imageShapes.Count < 2)
+                {
+                    MessageBox.Show(
+                        "スライドに2個以上の画像オブジェクトが必要です。\n" +
+                        "PowerPointのスライドに画像を2つ以上貼り付けてから実行してください。",
+                        "Magosa Tools - 画像倍率同期",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                    return;
+                }
+
+                using (var dialog = new ImageScaleSyncDialog(imageShapes))
+                {
+                    dialog.ShowDialog();
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("画像倍率同期", ex);
             }
         }
 
