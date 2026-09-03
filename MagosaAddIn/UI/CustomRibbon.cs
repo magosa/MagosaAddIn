@@ -1764,6 +1764,24 @@ namespace MagosaAddIn.UI
             }
         }
 
+        /// <summary>
+        /// 色置換ボタン
+        /// </summary>
+        private void btnColorReplace_Click(object sender, RibbonControlEventArgs e)
+        {
+            try
+            {
+                using (var dialog = new ColorReplaceDialog())
+                {
+                    dialog.ShowDialog();
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorHandler.ShowOperationError("色置換", ex);
+            }
+        }
+
         #endregion
 
         #region 選択スタック機能

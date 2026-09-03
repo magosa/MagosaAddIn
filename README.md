@@ -1,6 +1,6 @@
 # MagosaAddIn - PowerPoint図形操作補助アドイン
 
-PowerPointでの図形操作を効率化するVSTOアドインです。図形の整列・分割・配置・選択補助・ハンドル調整・レイヤー管理・ナンバリング・置き換え・サイズ調整・配列複製・テーマカラー生成・テキスト一括編集・スタイルライブラリ・画像倍率同期・画像色編集・選択順序変更機能を提供します。
+PowerPointでの図形操作を効率化するVSTOアドインです。図形の整列・分割・配置・選択補助・ハンドル調整・レイヤー管理・ナンバリング・置き換え・サイズ調整・配列複製・テーマカラー生成・カラー置換・テキスト一括編集・スタイルライブラリ・画像倍率同期・画像色編集・選択順序変更機能を提供します。
 
 ## 機能一覧
 
@@ -70,6 +70,16 @@ PowerPointでの図形操作を効率化するVSTOアドインです。図形の
 - 選択図形への順番またはランダム適用
 
 **使い方**: "図形操作" > カラー生成 → 基準色・配色パターン・色数を設定 → パレット生成または図形へ適用
+
+#### カラー置換
+
+スライド内シェイプ（塗り・線・フォント色）で使用されている色を一覧化し、置換色を設定して一括置換します。
+
+- 対象範囲を「現在のスライドのみ」「プレゼンテーション全体」から選択、グループ化図形も再帰的に走査
+- 一覧に置換前後の色スウォッチ・カラーコード・使用数を表示
+- 置換色リストを名前付きで保存・読込・削除（JSONで永続化、最大50件）
+
+**使い方**: "図形操作" > カラー置換 → 対象範囲を選択して「色を取得」→ 置換したい色を選択して「置換色を設定」→ 「適用」
 
 #### テキスト一括編集
 
@@ -189,7 +199,7 @@ Magick.NETを使用して選択画像の明るさ・コントラスト・色相�
 | フレームワーク | .NET Framework 4.7.2 |
 | 技術 | VSTO (Visual Studio Tools for Office) |
 | 配置方式 | ClickOnce |
-| バージョン | 1.1.1.0 |
+| バージョン | 1.1.2.0 |
 
 **対象アプリケーション**: Microsoft PowerPoint (Office 365 / 2019 / 2021)
 
@@ -220,6 +230,8 @@ MagosaAddIn/
 │   ├── ImageColorSettings.cs     # 色編集パラメータ DTO
 │   ├── ShapeOrderManager.cs      # 選択順序変更機能
 │   ├── ThemeColorGenerator.cs    # テーマカラー生成機能
+│   ├── ColorReplacer.cs          # 色置換（収集・一括適用）機能
+│   ├── ColorReplaceLibrary.cs    # 色置換リストのJSON永続化
 │   ├── ColorConverter.cs         # 色空間変換ユーティリティ
 │   ├── ColorPaletteArranger.cs   # カラーパレット配置機能
 │   ├── ShapeStyle.cs             # 図形スタイル管理
@@ -250,7 +262,8 @@ MagosaAddIn/
 │       ├── CircularArrayDialog.cs / GridArrayDialog.cs
 │       ├── LinearArrayDialog.cs / PathArrayDialog.cs
 │       ├── RotationCopyDialog.cs
-│       └── ThemeColorDialog.cs
+│       ├── ThemeColorDialog.cs
+│       └── ColorReplaceDialog.cs
 └── Properties/
 ```
 
@@ -270,6 +283,7 @@ MagosaAddIn/
 | 選択順序変更（最小図形数） | 2個以上 |
 | サイズ調整パーセント範囲 | 10%〜500% |
 | 配列個数範囲 | 2〜100個 |
+| 色置換リスト | 最大50件 |
 
 ---
 

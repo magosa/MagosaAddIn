@@ -34,7 +34,7 @@
     <PublishUrl>公開\</PublishUrl>
     <InstallUrl />
     <TargetCulture>ja</TargetCulture>
-    <ApplicationVersion>1.1.1.0</ApplicationVersion>
+    <ApplicationVersion>1.1.2.0</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
@@ -236,6 +236,8 @@
     <Compile Include="Core\ShapeStack.cs" />
     <Compile Include="Core\ShapeStyle.cs" />
     <Compile Include="Core\ThemeColorGenerator.cs" />
+    <Compile Include="Core\ColorReplacer.cs" />
+    <Compile Include="Core\ColorReplaceLibrary.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -321,6 +323,9 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UI\Dialogs\ThemeColorDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UI\Dialogs\ColorReplaceDialog.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="UI\RibbonHelper.cs" />

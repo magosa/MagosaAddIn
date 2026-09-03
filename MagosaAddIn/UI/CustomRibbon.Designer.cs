@@ -46,6 +46,7 @@
             this.btnLayerAdjustment = this.Factory.CreateRibbonButton();
             this.btnAutoNumbering = this.Factory.CreateRibbonButton();
             this.btnThemeColorGenerator = this.Factory.CreateRibbonButton();
+            this.btnColorReplace = this.Factory.CreateRibbonButton();
             this.btnTextBulkEdit = this.Factory.CreateRibbonButton();
             this.btnStyleLibrary = this.Factory.CreateRibbonButton();
             this.group7 = this.Factory.CreateRibbonGroup();
@@ -177,6 +178,7 @@
             this.group1.Items.Add(this.btnLayerAdjustment);
             this.group1.Items.Add(this.btnAutoNumbering);
             this.group1.Items.Add(this.btnThemeColorGenerator);
+            this.group1.Items.Add(this.btnColorReplace);
             this.group1.Items.Add(this.btnTextBulkEdit);
             this.group1.Items.Add(this.btnStyleLibrary);
             this.group1.Label = "図形操作";
@@ -204,7 +206,7 @@
             // 
             this.btnAutoNumbering.Label = "自動ナンバリング";
             this.btnAutoNumbering.Name = "btnAutoNumbering";
-            this.btnAutoNumbering.OfficeImageId = "NumberStyleGallery";
+            this.btnAutoNumbering.OfficeImageId = "FontColorMoreColorsDialog";
             this.btnAutoNumbering.ShowImage = true;
             this.btnAutoNumbering.SuperTip = "選択した図形に自動で番号を付けます。算用数字、丸数字、アルファベット、ローマ数字などから選択できます。";
             this.btnAutoNumbering.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnAutoNumbering_Click);
@@ -217,6 +219,15 @@
             this.btnThemeColorGenerator.ShowImage = true;
             this.btnThemeColorGenerator.SuperTip = "配色理論に基づいて17種類のカラーパレットを生成します。図形への適用やスライド枠外への配置が可能です。";
             this.btnThemeColorGenerator.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnThemeColorGenerator_Click);
+            // 
+            // btnColorReplace
+            // 
+            this.btnColorReplace.Label = "カラー置換";
+            this.btnColorReplace.Name = "btnColorReplace";
+            this.btnColorReplace.OfficeImageId = "ColorGrayscaleMenu";
+            this.btnColorReplace.ShowImage = true;
+            this.btnColorReplace.SuperTip = "スライド内シェイプで使用されている色を一覧化し、置換色を設定して一括置換します。塗りつぶし・線・フォント色が対象です。";
+            this.btnColorReplace.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnColorReplace_Click);
             // 
             // btnTextBulkEdit
             // 
@@ -650,6 +661,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnLayerAdjustment;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnAutoNumbering;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnThemeColorGenerator;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnColorReplace;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnTextBulkEdit;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnStyleLibrary;
 

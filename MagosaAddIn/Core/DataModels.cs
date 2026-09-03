@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using Office = Microsoft.Office.Core;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 
@@ -508,6 +510,62 @@ namespace MagosaAddIn.Core
         {
             return $"{ShapeObject?.Name ?? "(不明)"} ({ImageWidth:F0}×{ImageHeight:F0} pt)";
         }
+    }
+
+    #endregion
+
+    #region 色置換関連
+
+    /// <summary>
+    /// 色収集・置換の対象範囲
+    /// </summary>
+    public enum ColorReplaceScope
+    {
+        /// <summary>現在表示中のスライドのみ</summary>
+        CurrentSlide,
+        /// <summary>プレゼンテーション全体（全スライド）</summary>
+        AllSlides
+    }
+
+    /// <summary>
+    /// スライド内で使用されている1色分の集計情報
+    /// </summary>
+    public class ColorUsageInfo
+    {
+        /// <summary>PowerPoint RGB値（0xBBGGRR）</summary>
+        public int RgbColor { get; set; }
+
+        /// <summary>塗り・線・フォントを合わせた出現回数</summary>
+        public int UsageCount { get; set; }
+    }
+
+    /// <summary>
+    /// 色置換1件分のマッピング
+    /// </summary>
+    [DataContract]
+    public class ColorReplacementEntry
+    {
+        /// <summary>置換前のPowerPoint RGB値</summary>
+        [DataMember] public int OriginalColor { get; set; }
+
+        /// <summary>置換後のPowerPoint RGB値（null = 変更なし）</summary>
+        [DataMember] public int? ReplacementColor { get; set; }
+    }
+
+    /// <summary>
+    /// 名前付きで保存する置換色リスト（JSON永続化用）
+    /// </summary>
+    [DataContract]
+    public class ColorReplaceListEntry
+    {
+        /// <summary>リスト名</summary>
+        [DataMember] public string Name { get; set; }
+
+        /// <summary>登録日時（表示用文字列）</summary>
+        [DataMember] public string CreatedAt { get; set; }
+
+        /// <summary>置換マッピングの一覧</summary>
+        [DataMember] public List<ColorReplacementEntry> Entries { get; set; } = new List<ColorReplacementEntry>();
     }
 
     #endregion
