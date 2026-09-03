@@ -1,5 +1,28 @@
 # CHANGELOG
 
+## Version 1.1.2.0 (2026年9月3日)
+
+### 🎨 カラー置換機能の追加
+- **ColorReplacer.cs**: 色収集・一括置換のコアロジック（新規作成）
+  - `CollectUsedColors(ColorReplaceScope)`: 現在のスライド/プレゼンテーション全体を対象に、塗り（単色のみ）・線・フォント色（テキストRun単位）を収集
+  - `ApplyReplacements(ColorReplaceScope, Dictionary<int,int>)`: 収集ロジックを再利用し、対象色を一括置換
+  - グループ化図形は `GroupItems` を再帰的に走査
+  - 全COM操作を `ComExceptionHandler.ExecuteComOperation(suppressErrors:true)` でラップし、1図形の失敗で処理全体を止めない
+- **ColorReplaceLibrary.cs**: 置換色リストのJSON永続化（新規作成、`ShapeStyleLibrary.cs`と同一パターン）
+  - 保存先: `%APPDATA%\MagosaAddIn\ColorReplaceLibrary.json`（最大50件）
+- **ColorReplaceDialog.cs**: カラー置換ダイアログ（新規作成）
+  - 対象範囲（現在のスライドのみ/プレゼンテーション全体）を選択して色を取得
+  - ListViewで色（スウォッチ＋カラーコード）・使用数・置換後（スウォッチ＋カラーコード）を一覧表示
+  - 標準の `ColorDialog`（`FullOpen = true`）による置換色選択
+  - 置換色リストの名前付き保存・読込・削除
+- **CustomRibbon**: 「カラー置換」ボタンを図形操作グループに追加
+
+### 🔧 技術的変更
+- `MagosaAddIn.csproj` に新規ファイル3件を追加
+- `DataModels.cs` へ `ColorReplaceScope` 列挙型・`ColorUsageInfo`/`ColorReplacementEntry`/`ColorReplaceListEntry` クラスを追加
+
+---
+
 ## Version 1.1.1.0 (2026年6月16日)
 
 ### 🎨 画像色編集機能の追加
