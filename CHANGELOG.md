@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## Version 1.1.2.2 (2026年9月4日)
+
+### カラー置換機能の改善
+- **ColorReplacer.cs**: 表（Table）シェイプのセルの塗り色を色収集・一括置換の対象に追加
+  - `ForEachTableCell` で走査する各セルの `Shape.Fill`（単色塗りのみ）を収集・置換対象に追加（これまで文字色のみ対応）
+- **ColorReplaceLibrary.cs**: 置換色リストのエクスポート/インポート機能を追加
+  - `ExportList(name, filePath)`: 指定リストを単体のJSONファイルとして書き出し
+  - `ImportList(filePath, out overwritten)`: JSONファイルからリストを読み込み、同名リストは上書き
+- **ColorReplaceDialog.cs**: 「保存済みリスト」欄に「エクスポート」「インポート」ボタンを追加し、`SaveFileDialog`/`OpenFileDialog` でファイルを介したリスト共有に対応
+
 ## Version 1.1.2.1 (2026年9月4日)
 
 ### カラー置換機能の改善

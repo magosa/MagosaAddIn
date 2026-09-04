@@ -103,6 +103,49 @@ namespace MagosaAddIn.Core
         /// </summary>
         public bool ExistsName(string name) => _lists.Any(l => l.Name == name);
 
+        /// <summary>
+        /// 指定名のリストを単体のJSONファイルとして書き出す（他ユーザーとの共有用）
+        /// </summary>
+        public void ExportList(string name, string filePath)
+        {
+            var target = _lists.FirstOrDefault(l => l.Name == name);
+            if (target == null) throw new InvalidOperationException($"リスト「{name}」が見つかりません。");
+
+            string json = SerializeEntryToJson(target);
+            File.WriteAllText(filePath, json, Encoding.UTF8);
+            ComExceptionHandler.LogDebug($"色置換リストエクスポート: '{name}' → {filePath}");
+        }
+
+        /// <summary>
+        /// JSONファイルからリストを読み込み、ライブラリに追加する（同名が存在する場合は上書き）
+        /// </summary>
+        /// <param name="filePath">読み込むJSONファイルのパス</param>
+        /// <param name="overwritten">同名リストを上書きした場合true</param>
+        /// <returns>読み込んだリスト</returns>
+        public ColorReplaceListEntry ImportList(string filePath, out bool overwritten)
+        {
+            string json = File.ReadAllText(filePath, Encoding.UTF8);
+            var imported = DeserializeEntryFromJson(json);
+            if (imported == null || string.IsNullOrWhiteSpace(imported.Name))
+                throw new InvalidOperationException("ファイルの内容がリスト形式ではありません。");
+
+            var existing = _lists.FirstOrDefault(l => l.Name == imported.Name);
+            overwritten = existing != null;
+            if (existing != null)
+            {
+                _lists.Remove(existing);
+            }
+            else if (_lists.Count >= MaxListCount)
+            {
+                throw new InvalidOperationException($"保存できるリストの最大数({MaxListCount})に達しています。不要なリストを削除してください。");
+            }
+
+            _lists.Add(imported);
+            SaveToFile();
+            ComExceptionHandler.LogDebug($"色置換リストインポート: '{imported.Name}' ({imported.Entries.Count}件) ← {filePath}");
+            return imported;
+        }
+
         #endregion
 
         #region 永続化（JSON）
@@ -168,6 +211,25 @@ namespace MagosaAddIn.Core
             using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(json)))
             {
                 return (ColorReplaceLibraryData)serializer.ReadObject(ms);
+            }
+        }
+
+        private static string SerializeEntryToJson(ColorReplaceListEntry entry)
+        {
+            var serializer = new DataContractJsonSerializer(typeof(ColorReplaceListEntry));
+            using (var ms = new MemoryStream())
+            {
+                serializer.WriteObject(ms, entry);
+                return Encoding.UTF8.GetString(ms.ToArray());
+            }
+        }
+
+        private static ColorReplaceListEntry DeserializeEntryFromJson(string json)
+        {
+            var serializer = new DataContractJsonSerializer(typeof(ColorReplaceListEntry));
+            using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(json)))
+            {
+                return (ColorReplaceListEntry)serializer.ReadObject(ms);
             }
         }
 

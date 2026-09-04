@@ -158,6 +158,11 @@ namespace MagosaAddIn.Core
                 {
                     ForEachTableCell(shape.Table, cellShape =>
                     {
+                        if (cellShape.Fill.Visible == Office.MsoTriState.msoTrue &&
+                            cellShape.Fill.Type == Office.MsoFillType.msoFillSolid)
+                        {
+                            colors.Add(cellShape.Fill.ForeColor.RGB);
+                        }
                         if (cellShape.TextFrame.HasText == Office.MsoTriState.msoTrue)
                         {
                             colors.AddRange(ExtractTextFrameColors(cellShape.TextFrame));
@@ -167,7 +172,7 @@ namespace MagosaAddIn.Core
             }
             catch (Exception ex)
             {
-                ComExceptionHandler.LogWarning($"表セル文字色取得失敗 [{SafeShapeName(shape)}]: {ex.Message}");
+                ComExceptionHandler.LogWarning($"表セル色取得失敗 [{SafeShapeName(shape)}]: {ex.Message}");
             }
 
             return colors;
@@ -252,6 +257,16 @@ namespace MagosaAddIn.Core
                 {
                     ForEachTableCell(shape.Table, cellShape =>
                     {
+                        if (cellShape.Fill.Visible == Office.MsoTriState.msoTrue &&
+                            cellShape.Fill.Type == Office.MsoFillType.msoFillSolid)
+                        {
+                            int rgb = cellShape.Fill.ForeColor.RGB;
+                            if (replacementMap.TryGetValue(rgb, out int newRgb) && newRgb != rgb)
+                            {
+                                cellShape.Fill.ForeColor.RGB = newRgb;
+                                c++;
+                            }
+                        }
                         if (cellShape.TextFrame.HasText == Office.MsoTriState.msoTrue)
                         {
                             c += ApplyTextFrameReplacements(cellShape.TextFrame, replacementMap);
@@ -259,7 +274,7 @@ namespace MagosaAddIn.Core
                     });
                 }
                 return c;
-            }, $"表セル文字色置換: {SafeShapeName(shape)}", defaultValue: 0, suppressErrors: true);
+            }, $"表セル色置換: {SafeShapeName(shape)}", defaultValue: 0, suppressErrors: true);
 
             return changed;
         }
