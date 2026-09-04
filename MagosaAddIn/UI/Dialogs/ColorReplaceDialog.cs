@@ -29,6 +29,8 @@ namespace MagosaAddIn.UI.Dialogs
         private Button _btnLoadList;
         private Button _btnDeleteList;
         private Button _btnSaveList;
+        private Button _btnExportList;
+        private Button _btnImportList;
         private Label _lblStatus;
         private Button _btnApply;
         private Button _btnClose;
@@ -66,9 +68,9 @@ namespace MagosaAddIn.UI.Dialogs
 
         private void InitializeDialog()
         {
-            ConfigureForm("色置換", 680, 580);
+            ConfigureForm("色置換", 680, 610);
             this.FormBorderStyle = FormBorderStyle.Sizable;
-            this.MinimumSize = new Size(680, 480);
+            this.MinimumSize = new Size(680, 510);
             BuildUI();
         }
 
@@ -149,7 +151,7 @@ namespace MagosaAddIn.UI.Dialogs
             };
 
             // ===== 保存済みリスト =====
-            var grpSaved = CreateGroupBox("保存済みリスト", new Point(20, 407), new Size(640, 70));
+            var grpSaved = CreateGroupBox("保存済みリスト", new Point(20, 407), new Size(640, 100));
             grpSaved.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
             var lblSaved = CreateLabel("リスト名:", new Point(15, 27), 70);
@@ -161,12 +163,17 @@ namespace MagosaAddIn.UI.Dialogs
             _btnSaveList = new Button { Text = "名前を付けて保存...", Location = new Point(495, 23), Size = new Size(130, 28) };
             _btnSaveList.Click += BtnSaveList_Click;
 
-            grpSaved.Controls.AddRange(new Control[] { lblSaved, _cmbSavedLists, _btnLoadList, _btnDeleteList, _btnSaveList });
+            _btnExportList = new Button { Text = "エクスポート...", Location = new Point(340, 58), Size = new Size(140, 28) };
+            _btnExportList.Click += BtnExportList_Click;
+            _btnImportList = new Button { Text = "インポート...", Location = new Point(485, 58), Size = new Size(140, 28) };
+            _btnImportList.Click += BtnImportList_Click;
+
+            grpSaved.Controls.AddRange(new Control[] { lblSaved, _cmbSavedLists, _btnLoadList, _btnDeleteList, _btnSaveList, _btnExportList, _btnImportList });
 
             // ===== ステータス・適用・閉じる =====
             _lblStatus = new Label
             {
-                Location = new Point(20, 487),
+                Location = new Point(20, 517),
                 Size = new Size(440, 28),
                 ForeColor = Color.DimGray,
                 TextAlign = ContentAlignment.MiddleLeft,
@@ -175,7 +182,7 @@ namespace MagosaAddIn.UI.Dialogs
             _btnApply = new Button
             {
                 Text = "適用",
-                Location = new Point(470, 487),
+                Location = new Point(470, 517),
                 Size = new Size(90, 28),
                 Anchor = AnchorStyles.Bottom | AnchorStyles.Right
             };
@@ -183,7 +190,7 @@ namespace MagosaAddIn.UI.Dialogs
             _btnClose = new Button
             {
                 Text = "閉じる",
-                Location = new Point(570, 487),
+                Location = new Point(570, 517),
                 Size = new Size(90, 28),
                 Anchor = AnchorStyles.Bottom | AnchorStyles.Right
             };
@@ -414,6 +421,58 @@ namespace MagosaAddIn.UI.Dialogs
             _lblStatus.Text = $"リスト「{name}」を削除しました。";
         }
 
+        private void BtnExportList_Click(object sender, EventArgs e)
+        {
+            string name = _cmbSavedLists.SelectedItem as string;
+            if (string.IsNullOrEmpty(name)) return;
+
+            using (var saveDialog = new SaveFileDialog
+            {
+                Filter = "色置換リスト (*.json)|*.json",
+                FileName = name + ".json",
+                Title = "色置換リストのエクスポート"
+            })
+            {
+                if (saveDialog.ShowDialog() != DialogResult.OK) return;
+
+                try
+                {
+                    _library.ExportList(name, saveDialog.FileName);
+                    _lblStatus.Text = $"リスト「{name}」を書き出しました。他の担当者にファイルを共有できます。";
+                }
+                catch (Exception ex)
+                {
+                    ErrorHandler.ShowOperationError("色置換リストエクスポート", ex);
+                }
+            }
+        }
+
+        private void BtnImportList_Click(object sender, EventArgs e)
+        {
+            using (var openDialog = new OpenFileDialog
+            {
+                Filter = "色置換リスト (*.json)|*.json",
+                Title = "色置換リストのインポート"
+            })
+            {
+                if (openDialog.ShowDialog() != DialogResult.OK) return;
+
+                try
+                {
+                    var imported = _library.ImportList(openDialog.FileName, out bool overwritten);
+                    RefreshSavedListCombo();
+                    _cmbSavedLists.SelectedItem = imported.Name;
+                    _lblStatus.Text = overwritten
+                        ? $"リスト「{imported.Name}」を上書きインポートしました。"
+                        : $"リスト「{imported.Name}」をインポートしました。";
+                }
+                catch (Exception ex)
+                {
+                    ErrorHandler.ShowOperationError("色置換リストインポート", ex);
+                }
+            }
+        }
+
         #endregion
 
         #region 補助メソッド
@@ -467,6 +526,7 @@ namespace MagosaAddIn.UI.Dialogs
             bool hasLists = _cmbSavedLists.Items.Count > 0;
             _btnLoadList.Enabled = hasLists;
             _btnDeleteList.Enabled = hasLists;
+            _btnExportList.Enabled = hasLists;
             if (hasLists) _cmbSavedLists.SelectedIndex = 0;
         }
 
