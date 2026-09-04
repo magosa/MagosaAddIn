@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## Version 1.1.2.1 (2026年9月4日)
+
+### カラー置換機能の改善
+- **ColorReplacer.cs**: 表（Table）シェイプのセル内文字色を色収集・一括置換の対象に追加
+  - `HasTextFrame` が `false` となる表シェイプについて `HasTable`/`Table.Cell(r,c).Shape.TextFrame` を走査するよう対応
+  - 通常シェイプ・表セルで共通の色抽出/置換ロジックを `ExtractTextFrameColors`/`ApplyTextFrameReplacements` に共通化
+- **ColorReplaceDialog.cs**: 置換色をHEXコードで直接入力できる欄を追加（選択行の置換色にリアルタイム反映）
+- **ColorReplaceDialog.cs**: ダイアログ内ボタン・ラベルの中心線ズレを修正し、全ボタンの高さを28pxに統一
+
 ## Version 1.1.2.0 (2026年9月3日)
 
 ### 🎨 カラー置換機能の追加
