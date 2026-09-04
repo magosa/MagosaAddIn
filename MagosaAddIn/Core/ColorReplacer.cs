@@ -144,12 +144,7 @@ namespace MagosaAddIn.Core
                 if (shape.HasTextFrame == Office.MsoTriState.msoTrue &&
                     shape.TextFrame.HasText == Office.MsoTriState.msoTrue)
                 {
-                    var textRange = shape.TextFrame.TextRange;
-                    int runCount = textRange.Runs().Count;
-                    for (int i = 1; i <= runCount; i++)
-                    {
-                        colors.Add(textRange.Runs(i, 1).Font.Color.RGB);
-                    }
+                    colors.AddRange(ExtractTextFrameColors(shape.TextFrame));
                 }
             }
             catch (Exception ex)
@@ -157,7 +152,50 @@ namespace MagosaAddIn.Core
                 ComExceptionHandler.LogWarning($"フォント色取得失敗 [{SafeShapeName(shape)}]: {ex.Message}");
             }
 
+            try
+            {
+                if (shape.HasTable == Office.MsoTriState.msoTrue)
+                {
+                    ForEachTableCell(shape.Table, cellShape =>
+                    {
+                        if (cellShape.TextFrame.HasText == Office.MsoTriState.msoTrue)
+                        {
+                            colors.AddRange(ExtractTextFrameColors(cellShape.TextFrame));
+                        }
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                ComExceptionHandler.LogWarning($"表セル文字色取得失敗 [{SafeShapeName(shape)}]: {ex.Message}");
+            }
+
             return colors;
+        }
+
+        /// <summary>テキストフレーム内のRun単位のフォント色をすべて列挙する</summary>
+        private static IEnumerable<int> ExtractTextFrameColors(PowerPoint.TextFrame textFrame)
+        {
+            var colors = new List<int>();
+            var textRange = textFrame.TextRange;
+            int runCount = textRange.Runs().Count;
+            for (int i = 1; i <= runCount; i++)
+            {
+                colors.Add(textRange.Runs(i, 1).Font.Color.RGB);
+            }
+            return colors;
+        }
+
+        /// <summary>表の全セルのシェイプに対してactionを実行する</summary>
+        private static void ForEachTableCell(PowerPoint.Table table, Action<PowerPoint.Shape> action)
+        {
+            for (int r = 1; r <= table.Rows.Count; r++)
+            {
+                for (int c = 1; c <= table.Columns.Count; c++)
+                {
+                    action(table.Cell(r, c).Shape);
+                }
+            }
         }
 
         /// <summary>replacementMapに一致する色を置換し、変更したプロパティ数を返す</summary>
@@ -202,23 +240,47 @@ namespace MagosaAddIn.Core
                 if (shape.HasTextFrame == Office.MsoTriState.msoTrue &&
                     shape.TextFrame.HasText == Office.MsoTriState.msoTrue)
                 {
-                    var textRange = shape.TextFrame.TextRange;
-                    int runCount = textRange.Runs().Count;
-                    for (int i = 1; i <= runCount; i++)
-                    {
-                        var run = textRange.Runs(i, 1);
-                        int rgb = run.Font.Color.RGB;
-                        if (replacementMap.TryGetValue(rgb, out int newRgb) && newRgb != rgb)
-                        {
-                            run.Font.Color.RGB = newRgb;
-                            c++;
-                        }
-                    }
+                    c += ApplyTextFrameReplacements(shape.TextFrame, replacementMap);
                 }
                 return c;
             }, $"フォント色置換: {SafeShapeName(shape)}", defaultValue: 0, suppressErrors: true);
 
+            changed += ComExceptionHandler.ExecuteComOperation(() =>
+            {
+                int c = 0;
+                if (shape.HasTable == Office.MsoTriState.msoTrue)
+                {
+                    ForEachTableCell(shape.Table, cellShape =>
+                    {
+                        if (cellShape.TextFrame.HasText == Office.MsoTriState.msoTrue)
+                        {
+                            c += ApplyTextFrameReplacements(cellShape.TextFrame, replacementMap);
+                        }
+                    });
+                }
+                return c;
+            }, $"表セル文字色置換: {SafeShapeName(shape)}", defaultValue: 0, suppressErrors: true);
+
             return changed;
+        }
+
+        /// <summary>replacementMapに一致するテキストフレーム内のRunフォント色を置換し、変更数を返す</summary>
+        private static int ApplyTextFrameReplacements(PowerPoint.TextFrame textFrame, Dictionary<int, int> replacementMap)
+        {
+            int c = 0;
+            var textRange = textFrame.TextRange;
+            int runCount = textRange.Runs().Count;
+            for (int i = 1; i <= runCount; i++)
+            {
+                var run = textRange.Runs(i, 1);
+                int rgb = run.Font.Color.RGB;
+                if (replacementMap.TryGetValue(rgb, out int newRgb) && newRgb != rgb)
+                {
+                    run.Font.Color.RGB = newRgb;
+                    c++;
+                }
+            }
+            return c;
         }
 
         private static string SafeShapeName(PowerPoint.Shape shape)

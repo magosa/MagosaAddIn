@@ -24,6 +24,7 @@ namespace MagosaAddIn.UI.Dialogs
         private ListView _lvColors;
         private Button _btnSetReplacement;
         private Button _btnClearReplacement;
+        private TextBox _txtHexReplacement;
         private ComboBox _cmbSavedLists;
         private Button _btnLoadList;
         private Button _btnDeleteList;
@@ -77,8 +78,8 @@ namespace MagosaAddIn.UI.Dialogs
             var grpScope = CreateGroupBox("対象範囲", new Point(20, 20), new Size(640, 55));
             grpScope.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 
-            _rbCurrentSlide = CreateRadioButton("現在のスライドのみ", new Point(15, 22), new Size(160, 20), isChecked: true);
-            _rbAllSlides = CreateRadioButton("プレゼンテーション全体", new Point(185, 22), new Size(190, 20));
+            _rbCurrentSlide = CreateRadioButton("現在のスライドのみ", new Point(15, 18), new Size(160, 20), isChecked: true);
+            _rbAllSlides = CreateRadioButton("プレゼンテーション全体", new Point(185, 18), new Size(190, 20));
             _btnCollect = new Button { Text = "色を取得", Location = new Point(500, 14), Size = new Size(120, 28) };
             _btnCollect.Click += BtnCollect_Click;
 
@@ -127,6 +128,18 @@ namespace MagosaAddIn.UI.Dialogs
             };
             _btnClearReplacement.Click += BtnClearReplacement_Click;
 
+            var lblHex = CreateLabel("HEX指定:", new Point(375, 361), 60);
+            lblHex.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+            _txtHexReplacement = new TextBox
+            {
+                Location = new Point(440, 360),
+                Size = new Size(90, 22),
+                MaxLength = 7,
+                Anchor = AnchorStyles.Bottom | AnchorStyles.Left
+            };
+            _txtHexReplacement.KeyDown += TxtHexReplacement_KeyDown;
+            _txtHexReplacement.Leave += (s, e) => ApplyHexReplacement();
+
             var separator = new Label
             {
                 BorderStyle = BorderStyle.Fixed3D,
@@ -139,13 +152,13 @@ namespace MagosaAddIn.UI.Dialogs
             var grpSaved = CreateGroupBox("保存済みリスト", new Point(20, 407), new Size(640, 70));
             grpSaved.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
 
-            var lblSaved = CreateLabel("リスト名:", new Point(15, 28), 70);
-            _cmbSavedLists = CreateComboBox(new Point(90, 25), new Size(240, 22));
-            _btnLoadList = new Button { Text = "読込", Location = new Point(340, 24), Size = new Size(70, 26) };
+            var lblSaved = CreateLabel("リスト名:", new Point(15, 27), 70);
+            _cmbSavedLists = CreateComboBox(new Point(90, 26), new Size(240, 22));
+            _btnLoadList = new Button { Text = "読込", Location = new Point(340, 23), Size = new Size(70, 28) };
             _btnLoadList.Click += BtnLoadList_Click;
-            _btnDeleteList = new Button { Text = "削除", Location = new Point(415, 24), Size = new Size(70, 26) };
+            _btnDeleteList = new Button { Text = "削除", Location = new Point(415, 23), Size = new Size(70, 28) };
             _btnDeleteList.Click += BtnDeleteList_Click;
-            _btnSaveList = new Button { Text = "名前を付けて保存...", Location = new Point(495, 24), Size = new Size(130, 26) };
+            _btnSaveList = new Button { Text = "名前を付けて保存...", Location = new Point(495, 23), Size = new Size(130, 28) };
             _btnSaveList.Click += BtnSaveList_Click;
 
             grpSaved.Controls.AddRange(new Control[] { lblSaved, _cmbSavedLists, _btnLoadList, _btnDeleteList, _btnSaveList });
@@ -153,7 +166,7 @@ namespace MagosaAddIn.UI.Dialogs
             // ===== ステータス・適用・閉じる =====
             _lblStatus = new Label
             {
-                Location = new Point(20, 489),
+                Location = new Point(20, 487),
                 Size = new Size(440, 28),
                 ForeColor = Color.DimGray,
                 TextAlign = ContentAlignment.MiddleLeft,
@@ -162,23 +175,23 @@ namespace MagosaAddIn.UI.Dialogs
             _btnApply = new Button
             {
                 Text = "適用",
-                Location = new Point(470, 486),
-                Size = new Size(90, 30),
+                Location = new Point(470, 487),
+                Size = new Size(90, 28),
                 Anchor = AnchorStyles.Bottom | AnchorStyles.Right
             };
             _btnApply.Click += BtnApply_Click;
             _btnClose = new Button
             {
                 Text = "閉じる",
-                Location = new Point(570, 486),
-                Size = new Size(90, 30),
+                Location = new Point(570, 487),
+                Size = new Size(90, 28),
                 Anchor = AnchorStyles.Bottom | AnchorStyles.Right
             };
             _btnClose.Click += (s, e) => this.Close();
 
             this.Controls.AddRange(new Control[]
             {
-                grpScope, _lvColors, _btnSetReplacement, _btnClearReplacement, separator,
+                grpScope, _lvColors, _btnSetReplacement, _btnClearReplacement, lblHex, _txtHexReplacement, separator,
                 grpSaved, _lblStatus, _btnApply, _btnClose
             });
 
@@ -255,14 +268,49 @@ namespace MagosaAddIn.UI.Dialogs
 
                 if (colorDialog.ShowDialog() != DialogResult.OK) return;
 
-                int newColor = ColorConv.ColorToRgb(colorDialog.Color);
-                foreach (ListViewItem item in _lvColors.SelectedItems)
-                {
-                    ((ColorReplaceRow)item.Tag).ReplacementColor = newColor;
-                    item.SubItems[4].Text = ColorConv.RgbToHex(newColor);
-                }
+                ApplyReplacementColor(ColorConv.ColorToRgb(colorDialog.Color));
+            }
+        }
+
+        private void TxtHexReplacement_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.SuppressKeyPress = true;
+                ApplyHexReplacement();
+            }
+        }
+
+        /// <summary>HEXテキストボックスの入力を選択中の行の置換色に反映する</summary>
+        private void ApplyHexReplacement()
+        {
+            string hex = _txtHexReplacement.Text.Trim();
+            if (hex.Length == 0) return;
+            if (!hex.StartsWith("#")) hex = "#" + hex;
+
+            if (_lvColors.SelectedItems.Count == 0 || hex.Length != 7) return;
+
+            try
+            {
+                int newColor = ColorConv.HexToRgb(hex);
+                ApplyReplacementColor(newColor);
+            }
+            catch
+            {
+                // 無効なHEX入力は無視
+            }
+        }
+
+        /// <summary>選択中の行すべての置換色を指定色に設定する</summary>
+        private void ApplyReplacementColor(int newColor)
+        {
+            foreach (ListViewItem item in _lvColors.SelectedItems)
+            {
+                ((ColorReplaceRow)item.Tag).ReplacementColor = newColor;
+                item.SubItems[4].Text = ColorConv.RgbToHex(newColor);
             }
 
+            _txtHexReplacement.Text = ColorConv.RgbToHex(newColor);
             _lvColors.Invalidate();
             _lvColors.Update();
         }
@@ -427,6 +475,12 @@ namespace MagosaAddIn.UI.Dialogs
             bool hasSelection = _lvColors.SelectedItems.Count > 0;
             _btnSetReplacement.Enabled = hasSelection;
             _btnClearReplacement.Enabled = hasSelection;
+            _txtHexReplacement.Enabled = hasSelection;
+
+            _txtHexReplacement.Text = hasSelection
+                ? ColorConv.RgbToHex(((ColorReplaceRow)_lvColors.SelectedItems[0].Tag).ReplacementColor
+                    ?? ((ColorReplaceRow)_lvColors.SelectedItems[0].Tag).OriginalColor)
+                : string.Empty;
 
             bool hasRows = _lvColors.Items.Count > 0;
             _btnApply.Enabled = hasRows;
